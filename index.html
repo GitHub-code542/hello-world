@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Goal-based Target-return Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="top">
+            <div class="brand">Goal-based Target-return Calculator</div>
+            <div class="spacer"></div>
+            <!-- <div class="toggle" id="themeToggle">Light / Dark</div> -->
+        </div>
+
+        <!-- Auto-calculation Summary (Hidden for now as it might not be in the left panel of reference) -->
+        <!-- 
+        <div class="summary">
+            <div class="tile">
+                <div class="k">Gross Monthly Income</div>
+                <div class="v" id="t_gmi">$0</div>
+                <div class="note">Salary + (annual incomes/12)</div>
+            </div>
+            ...
+        </div> 
+        -->
+
+        <div class="accordion">
+
+            <!-- 1) GENERAL QUESTIONS -->
+            <details class="card" open>
+                <summary><span class="badge">1</span><strong>General Questions</strong></summary>
+                <div class="content">
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Current Age in years <span class="hint">ⓘ</span></div>
+                            <div class="stepper">
+                                <button type="button" data-step="age" data-delta="-1">−</button>
+                                <button type="button" data-step="age" data-delta="1">+</button>
+                            </div>
+                            <div class="pillInput"><span class="prefix">yrs</span><input id="age" type="number"
+                                    value="42" /></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Retirement Age</div>
+                            <div class="stepper">
+                                <button type="button" data-step="retire_age" data-delta="-1">−</button>
+                                <button type="button" data-step="retire_age" data-delta="1">+</button>
+                            </div>
+                            <div class="pillInput"><span class="prefix">yrs</span><input id="retire_age" type="number"
+                                    value="60" /></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Current Fin. Investments <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="invest_now" type="text"
+                                    value="500,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_invest_now" min="0" max="20000000" step="10000" value="500000">
+                            <div class="ticks">
+                                <span>0</span><span>5M</span><span>10M</span><span>15M</span><span>20M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Net Savings p.a.</div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="save_pa" type="text"
+                                    value="100,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_save_pa" min="0" max="1000000" step="5000" value="100000">
+                            <div class="ticks">
+                                <span>0</span><span>250K</span><span>500K</span><span>750K</span><span>1M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Annual Increase in Net Savings <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">%</span><input id="save_g" type="number"
+                                    value="5" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_save_g" min="0" max="25" step="0.5" value="5">
+                            <div class="ticks">
+                                <span>0</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span><span>25%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Annual Retirement Expenses <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="ret_exp" type="text"
+                                    value="100,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_ret_exp" min="0" max="1000000" step="5000" value="100000">
+                            <div class="ticks">
+                                <span>0</span><span>250K</span><span>500K</span><span>750K</span><span>1M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Inflation Rate</div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">%</span><input id="infl" type="number"
+                                    value="4" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_infl" min="0" max="15" step="0.1" value="4">
+                            <div class="ticks"><span>0</span><span>5%</span><span>10%</span><span>15%</span></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="grid three">
+                            <div class="pillInput"><span class="prefix">Gender</span><select id="gender">
+                                    <option value="">Select</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                    <option>Prefer not to say</option>
+                                </select></div>
+                            <div class="pillInput"><span class="prefix">Marital</span><select id="marital">
+                                    <option value="">Select</option>
+                                    <option>Single</option>
+                                    <option>Married</option>
+                                    <option>Divorced</option>
+                                    <option>Widowed</option>
+                                </select></div>
+                            <div class="pillInput"><span class="prefix">Dependents</span><input id="dependents"
+                                    type="number" value="0" min="0" /></div>
+                        </div>
+                    </div>
+
+                    <div class="section" style="border-bottom:0">
+                        <div class="row">
+                            <div class="label">Legacy at Death</div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="legacy" type="text"
+                                    value="1,000,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_legacy" min="0" max="20000000" step="10000" value="1000000">
+                            <div class="ticks"><span>0</span><span>10M</span><span>20M</span></div>
+                        </div>
+                    </div>
+
+                </div>
+            </details>
+
+            <!-- 2) HOME RENT EXPENSES -->
+            <details class="card" id="rent" open>
+                <summary><span class="badge">2</span><strong>Home Rent Expenses</strong></summary>
+                <div class="content">
+                    <div class="section" style="border-bottom:0">
+                        <div class="row">
+                            <div class="label">Rent p.a <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="rent_pa" type="text"
+                                    value="36,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_rent_pa" min="0" max="200000" step="1000" value="36000">
+                            <div class="ticks">
+                                <span>0</span><span>50K</span><span>100K</span><span>150K</span><span>200K</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 3) HOME EMI EXPENSES -->
+            <details class="card" id="emi" open>
+                <summary><span class="badge">3</span><strong>Home EMI Expenses</strong></summary>
+                <div class="content">
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">House Purchase (Years from today) <span class="hint">ⓘ</span></div>
+                            <div class="stepper">
+                                <button type="button" data-step="hp_years" data-delta="-1">−</button>
+                                <button type="button" data-step="hp_years" data-delta="1">+</button>
+                            </div>
+                            <div class="pillInput"><span class="prefix">yrs</span><input id="hp_years" type="number"
+                                    value="5" /></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Loan Tenure (Years) <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">yrs</span><input id="loan_tenure" type="number"
+                                    value="10" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_loan_tenure" min="0" max="45" step="1" value="10">
+                            <div class="ticks"><span>0</span><span>15</span><span>30</span><span>45</span></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Proposed Down Payment <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="downpay" type="text"
+                                    value="100,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_downpay" min="0" max="2000000" step="10000" value="100000">
+                            <div class="ticks">
+                                <span>0</span><span>500K</span><span>1M</span><span>1.5M</span><span>2M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section" style="border-bottom:0">
+                        <div class="row">
+                            <div class="label">EMI p.a <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="emi_pa" type="text"
+                                    value="30,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_emi_pa" min="0" max="200000" step="1000" value="30000">
+                            <div class="ticks">
+                                <span>0</span><span>50K</span><span>100K</span><span>150K</span><span>200K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </details>
+
+            <!-- 4) CHILDREN'S UNIVERSITY EXPENSES -->
+            <details class="card" id="edu" open>
+                <summary><span class="badge">4</span><strong>Children’s University Expenses</strong></summary>
+                <div class="content">
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Number of Children</div>
+                            <div class="stepper">
+                                <button type="button" data-step="kids_n" data-delta="-1">−</button>
+                                <button type="button" data-step="kids_n" data-delta="1">+</button>
+                            </div>
+                            <div class="pillInput"><span class="prefix">#</span><input id="kids_n" type="number"
+                                    value="0" min="0" /></div>
+                        </div>
+                    </div>
+                    <div class="section" style="border-bottom:0">
+                        <div class="row">
+                            <div class="label">Cost of Education p.a. <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="edu_cost_pa" type="text"
+                                    value="0" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_edu_cost_pa" min="0" max="1000000" step="5000" value="0">
+                            <div class="ticks">
+                                <span>0</span><span>200K</span><span>400K</span><span>600K</span><span>800K</span><span>1M</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 5) INCOME DETAILS -->
+            <details class="card" id="income" open>
+                <summary><span class="badge">5</span><strong>Income Details</strong></summary>
+                <div class="content">
+                    <div class="grid two">
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="inc_takehome"
+                                type="number" placeholder="Monthly Take Home salary" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_bonus" type="number"
+                                placeholder="Expected Annual bonus" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_rent" type="number"
+                                placeholder="Rental income" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_business"
+                                type="number" placeholder="Business income" /></div>
+                        <div class="pillInput"><span class="prefix">% / yr</span><input id="inc_rise" type="number"
+                                placeholder="Expected annual income rise" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_invest" type="number"
+                                placeholder="Investment income (dividends, interest)" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_other" type="number"
+                                placeholder="Any income from other sources" /></div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 6) EXPENSES DETAILS -->
+            <details class="card" id="expenses" open>
+                <summary><span class="badge">6</span><strong>Expenses Details</strong></summary>
+                <div class="content">
+                    <div class="grid two">
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_rent" type="number"
+                                placeholder="Monthly - House Rent" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_school" type="number"
+                                placeholder="Monthly - School Fee details by Kid" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_household"
+                                type="number"
+                                placeholder="Monthly - Total Household expenses (Bills & Groceries etc)" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_vac" type="number"
+                                placeholder="Annual - Vacation" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_disc" type="number"
+                                placeholder="Annual - Discretionary Purchases (Clothing, Mobile, Whitegoods)" />
+                        </div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_life" type="number"
+                                placeholder="Annual - Life Insurance Premiums" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_health" type="number"
+                                placeholder="Annual - Health Insurance Premiums" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_maint" type="number"
+                                placeholder="Annual - Maintenances (Appliances, Vehicle, Property)" />
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 7) INVESTMENTS -->
+            <details class="card" id="investments" open>
+                <summary><span class="badge">7</span><strong>Investments</strong></summary>
+                <div class="content">
+                    <div class="grid two">
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_mf" type="number"
+                                placeholder="Mutual Funds" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_stocks" type="number"
+                                placeholder="Stocks" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_bonds_fd" type="number"
+                                placeholder="Bonds & Fixed Deposits" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_ppf_epf_nps" type="number"
+                                placeholder="PPF, EPF, NPS" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_savings_bank" type="number"
+                                placeholder="Saving Bank Balances" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_realestate" type="number"
+                                placeholder="Real Estate (Value)" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_gold" type="number"
+                                placeholder="Gold Equivalents / Jewelry" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_other" type="number"
+                                placeholder="Other investments (PMS, AIF, SIF)" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_any_other_5lac"
+                                type="number" placeholder="Any other Assets (>5Lac)" /></div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 8) LOANS -->
+            <details class="card" id="loans" open>
+                <summary><span class="badge">8</span><strong>Loans</strong></summary>
+                <div class="content">
+                    <div class="grid two">
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_home_out" type="number"
+                                placeholder="Outstanding Home loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_home_emi"
+                                type="number" placeholder="Home Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_home_close" type="date"
+                                placeholder="Home Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_car_out" type="number"
+                                placeholder="Outstanding Car loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_car_emi"
+                                type="number" placeholder="Car Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_car_close" type="date"
+                                placeholder="Car Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_personal_out"
+                                type="number" placeholder="Outstanding Personal loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_personal_emi"
+                                type="number" placeholder="Personal Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_personal_close"
+                                type="date" placeholder="Personal Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_edu_out" type="number"
+                                placeholder="Outstanding Education loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_edu_emi"
+                                type="number" placeholder="Education loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_edu_close" type="date"
+                                placeholder="Education Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_biz_out" type="number"
+                                placeholder="Outstanding Business loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_biz_emi"
+                                type="number" placeholder="Business Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_biz_close" type="date"
+                                placeholder="Business Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_other_out" type="number"
+                                placeholder="Outstanding - Other loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_other_emi"
+                                type="number" placeholder="Other Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_other_close" type="date"
+                                placeholder="Other Loan Closure Date" /></div>
+                    </div>
+                </div>
+            </details>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
