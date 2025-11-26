@@ -31,11 +31,20 @@
         </div> 
         -->
 
-        <div class="accordion">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div class="step-indicator" id="stepIndicator">Step 1 of 8</div>
+
+        <div class="wizard" id="wizard">
 
             <!-- 1) GENERAL QUESTIONS -->
-            <details class="card" open>
-                <summary><span class="badge">1</span><strong>General Questions</strong></summary>
+            <div class="step active" data-step="1">
+                <div class="step-header">
+                    <span class="step-icon">👤</span>
+                    <h2>Let's start with the basics</h2>
+                </div>
                 <div class="content">
 
                     <div class="section">
@@ -170,11 +179,17 @@
                     </div>
 
                 </div>
-            </details>
+                <div class="nav-buttons">
+                    <button class="btn-next" onclick="nextStep(1)">Next Step →</button>
+                </div>
+            </div>
 
             <!-- 2) HOME RENT EXPENSES -->
-            <details class="card" id="rent" open>
-                <summary><span class="badge">2</span><strong>Home Rent Expenses</strong></summary>
+            <div class="step" data-step="2">
+                <div class="step-header">
+                    <span class="step-icon">🏠</span>
+                    <h2>Home Rent Expenses</h2>
+                </div>
                 <div class="content">
                     <div class="section" style="border-bottom:0">
                         <div class="row">
@@ -191,11 +206,18 @@
                         </div>
                     </div>
                 </div>
-            </details>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(2)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(2)">Next Step →</button>
+                </div>
+            </div>
 
             <!-- 3) HOME EMI EXPENSES -->
-            <details class="card" id="emi" open>
-                <summary><span class="badge">3</span><strong>Home EMI Expenses</strong></summary>
+            <div class="step" data-step="3">
+                <div class="step-header">
+                    <span class="step-icon">🏦</span>
+                    <h2>Home EMI Expenses</h2>
+                </div>
                 <div class="content">
 
                     <div class="section">
@@ -254,11 +276,18 @@
                     </div>
 
                 </div>
-            </details>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(3)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(3)">Next Step →</button>
+                </div>
+            </div>
 
             <!-- 4) CHILDREN'S UNIVERSITY EXPENSES -->
-            <details class="card" id="edu" open>
-                <summary><span class="badge">4</span><strong>Children’s University Expenses</strong></summary>
+            <div class="step" data-step="4">
+                <div class="step-header">
+                    <span class="step-icon">🎓</span>
+                    <h2>Children’s University Expenses</h2>
+                </div>
                 <div class="content">
                     <div class="section">
                         <div class="row">
@@ -286,11 +315,18 @@
                         </div>
                     </div>
                 </div>
-            </details>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(4)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(4)">Next Step →</button>
+                </div>
+            </div>
 
             <!-- 5) INCOME DETAILS -->
-            <details class="card" id="income" open>
-                <summary><span class="badge">5</span><strong>Income Details</strong></summary>
+            <div class="step" data-step="5">
+                <div class="step-header">
+                    <span class="step-icon">💰</span>
+                    <h2>Income Details</h2>
+                </div>
                 <div class="content">
                     <div class="grid two">
                         <div class="pillInput"><span class="prefix">INR / mo</span><input id="inc_takehome"
@@ -309,11 +345,18 @@
                                 placeholder="Any income from other sources" /></div>
                     </div>
                 </div>
-            </details>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(5)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(5)">Next Step →</button>
+                </div>
+            </div>
 
             <!-- 6) EXPENSES DETAILS -->
-            <details class="card" id="expenses" open>
-                <summary><span class="badge">6</span><strong>Expenses Details</strong></summary>
+            <div class="step" data-step="6">
+                <div class="step-header">
+                    <span class="step-icon">💸</span>
+                    <h2>Expenses Details</h2>
+                </div>
                 <div class="content">
                     <div class="grid two">
                         <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_rent" type="number"
@@ -337,11 +380,18 @@
                         </div>
                     </div>
                 </div>
-            </details>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(6)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(6)">Next Step →</button>
+                </div>
+            </div>
 
             <!-- 7) INVESTMENTS -->
-            <details class="card" id="investments" open>
-                <summary><span class="badge">7</span><strong>Investments</strong></summary>
+            <div class="step" data-step="7">
+                <div class="step-header">
+                    <span class="step-icon">📈</span>
+                    <h2>Investments</h2>
+                </div>
                 <div class="content">
                     <div class="grid two">
                         <div class="pillInput"><span class="prefix">INR</span><input id="inv_mf" type="number"
@@ -364,11 +414,18 @@
                                 type="number" placeholder="Any other Assets (>5Lac)" /></div>
                     </div>
                 </div>
-            </details>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(7)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(7)">Next Step →</button>
+                </div>
+            </div>
 
             <!-- 8) LOANS -->
-            <details class="card" id="loans" open>
-                <summary><span class="badge">8</span><strong>Loans</strong></summary>
+            <div class="step" data-step="8">
+                <div class="step-header">
+                    <span class="step-icon">💳</span>
+                    <h2>Loans</h2>
+                </div>
                 <div class="content">
                     <div class="grid two">
                         <div class="pillInput"><span class="prefix">INR</span><input id="loan_home_out" type="number"
@@ -414,7 +471,11 @@
                                 placeholder="Other Loan Closure Date" /></div>
                     </div>
                 </div>
-            </details>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(8)">← Back</button>
+                    <button class="btn-finish" onclick="finishWizard()">Finish & Calculate 🎉</button>
+                </div>
+            </div>
 
         </div>
     </div>

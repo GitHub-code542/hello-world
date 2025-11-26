@@ -18,6 +18,82 @@ bindPair('downpay', 's_downpay', true);
 bindPair('emi_pa', 's_emi_pa', true);
 bindPair('edu_cost_pa', 's_edu_cost_pa', true);
 
+// ===== Wizard Logic =====
+const totalSteps = 8;
+let currentStep = 1;
+
+function updateProgress() {
+    const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+    const bar = document.getElementById('progressBar');
+    const indicator = document.getElementById('stepIndicator');
+    if (bar) bar.style.width = `${progress}%`;
+    if (indicator) indicator.textContent = `Step ${currentStep} of ${totalSteps}`;
+}
+
+function showStep(step) {
+    document.querySelectorAll('.step').forEach(el => {
+        el.classList.remove('active');
+        if (el.getAttribute('data-step') == step) {
+            el.classList.add('active');
+        }
+    });
+    currentStep = step;
+    updateProgress();
+    // Scroll to top of wizard
+    const wizard = document.getElementById('wizard');
+    if (wizard) wizard.scrollIntoView({ behavior: 'smooth' });
+}
+
+window.nextStep = function (step) {
+    if (step < totalSteps) {
+        showStep(step + 1);
+    }
+};
+
+window.prevStep = function (step) {
+    if (step > 1) {
+        showStep(step - 1);
+    }
+};
+
+window.finishWizard = function () {
+    // Trigger confetti or success message
+    confetti();
+    alert("Congratulations! Your financial plan is ready.");
+    // In a real app, this would submit data or show a results page
+};
+
+// Simple Confetti Effect
+function confetti() {
+    const colors = ['#007bff', '#00d4ff', '#10b981', '#f59e0b'];
+    for (let i = 0; i < 100; i++) {
+        const el = document.createElement('div');
+        el.style.position = 'fixed';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.top = '-10px';
+        el.style.width = '10px';
+        el.style.height = '10px';
+        el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        el.style.borderRadius = '50%';
+        el.style.zIndex = '9999';
+        el.style.transition = 'top 2s ease-in, opacity 2s ease-out';
+        document.body.appendChild(el);
+
+        setTimeout(() => {
+            el.style.top = '110vh';
+            el.style.opacity = '0';
+        }, 100);
+
+        setTimeout(() => {
+            el.remove();
+        }, 2000);
+    }
+}
+
+// Initialize
+updateProgress();
+
+
 // ===== Auto-calculation logic (INR) =====
 (function () {
     const $ = (s) => document.querySelector(s);
