@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Kristal_Goals_Clone_v5_Plus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js"></script>
+  <style>
+    :root{
+      --bg:#ffffff; --panel:#ffffff; --text:#0b1220; --muted:#5b6672;
+      --line:#e7edf3; --primary:#0d6efd; --accent:#22b8cf;
+      --chip:#f5f9ff; --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.08);
+      --radius:16px;
+    }
+    html[data-theme="dark"]{
+      --bg:#0b1020; --panel:#0f172a; --text:#e6eef9; --muted:#9aa7c1;
+      --line:rgba(255,255,255,.12); --primary:#78c2ff; --accent:#7c81ff;
+      --chip:rgba(255,255,255,.06); --shadow:0 8px 28px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 'Inter',system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:1040px;margin:0 auto;padding:28px 18px}
+    .top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .brand{font-weight:700;letter-spacing:.2px}
+    .spacer{flex:1}
+    .toggle{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);cursor:pointer}
+    .accordion{display:grid;gap:12px;margin-top:18px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    summary{list-style:none;cursor:pointer;padding:16px 16px;display:flex;align-items:center;gap:10px}
+    summary::-webkit-details-marker{display:none}
+    .badge{display:inline-block;background:var(--chip);color:var(--primary);border:1px solid var(--line);padding:4px 8px;border-radius:999px;font-size:12px}
+    .content{padding:4px 16px 16px 16px;border-top:1px solid var(--line)}
+    .row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin:10px 0}
+    .label{font-weight:600}
+    .stepper{display:inline-flex;align-items:center;gap:8px}
+    .stepper button{width:36px;height:36px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:700;color:#444;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+    .pillInput{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;align-items:center}
+    .pillInput .prefix{font-size:12px;color:var(--muted);background:var(--line);padding:8px 10px}
+    .pillInput input, .pillInput select{border:0;padding:8px 12px;min-width:160px;background:transparent;color:var(--text)}
+    .grid{display:grid;gap:12px}
+    @media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:1fr 1fr 1fr}}
+    .hint{font-size:12px;color:var(--muted);margin-left:8px}
+    .section{padding:8px 0 16px 0;border-bottom:1px dashed var(--line)}
+
+/* === Auto-calc summary tiles === */
+.summary{display:grid;gap:12px;grid-template-columns:repeat(4,minmax(0,1fr));margin:8px 0 18px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow)}
+.tile .k{color:var(--muted);font-size:12px}
+.tile .v{font-weight:700;font-size:18px}
+.tile .note{font-size:12px;color:var(--muted)}
+
+/* === Timeline Chart Styles - GAMIFIED === */
+#timelineChartContainer{position:relative;height:600px;margin:16px 0;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#f0f7ff 0%,#e6f2ff 100%);box-shadow:inset 0 2px 8px rgba(0,0,0,.05)}
+html[data-theme="dark"] #timelineChartContainer{background:linear-gradient(180deg,#0a1628 0%,#0f1e35 100%)}
+
+.timeline-controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.timeline-btn{padding:10px 18px;border:2px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);cursor:pointer;font-size:14px;font-weight:600;transition:all .3s ease;position:relative;overflow:hidden}
+.timeline-btn:before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(13,110,253,.2);transform:translate(-50%,-50%);transition:width .3s,height .3s}
+.timeline-btn:hover:before{width:200px;height:200px}
+.timeline-btn:hover{background:var(--chip);border-color:var(--primary);transform:translateY(-2px);box-shadow:0 4px 12px rgba(13,110,253,.2)}
+.timeline-btn.active{background:linear-gradient(135deg,#0d6efd 0%,#0a58ca 100%);color:#fff;border-color:var(--primary);box-shadow:0 4px 16px rgba(13,110,253,.4)}
+
+.goal-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:20px;padding:16px;background:var(--panel);border-radius:12px;border:1px solid var(--line)}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px;border-radius:6px;transition:all .2s;cursor:pointer}
+.legend-item:hover{background:var(--chip);transform:translateX(4px)}
+.legend-color{width:20px;height:20px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:all .3s}
+.legend-item:hover .legend-color{transform:scale(1.2) rotate(5deg)}
+
+/* Life stages background */
+.life-stage-container{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0}
+.life-stage{position:absolute;top:0;bottom:50px;opacity:.15;transition:opacity .3s}
+.stage-childhood{background:linear-gradient(90deg,#ffeb3b55,#ffc10755)}
+.stage-youngadult{background:linear-gradient(90deg,#4caf5055,#8bc34a55)}
+.stage-middleage{background:linear-gradient(90deg,#2196f355,#03a9f455)}
+.stage-retirement{background:linear-gradient(90deg,#9c27b055,#e91e6355)}
+
+/* Animated character avatar */
+.timeline-avatar{position:absolute;bottom:60px;width:50px;height:50px;transition:left .8s cubic-bezier(.34,1.56,.64,1);z-index:100;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.avatar-person{width:100%;height:100%;position:relative}
+.avatar-head{width:20px;height:20px;background:#ffb74d;border-radius:50%;position:absolute;top:0;left:50%;transform:translateX(-50%);border:2px solid #ff9800;animation:bobHead 2s ease-in-out infinite}
+.avatar-body{width:16px;height:24px;background:#42a5f5;border-radius:8px;position:absolute;top:22px;left:50%;transform:translateX(-50%);border:2px solid #1976d2}
+.avatar-legs{width:20px;height:10px;background:#666;position:absolute;bottom:0;left:50%;transform:translateX(-50%);border-radius:4px;animation:walkLegs 1s ease-in-out infinite}
+
+@keyframes bobHead{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+@keyframes walkLegs{0%,100%{transform:translateX(-50%) scaleX(1)}50%{transform:translateX(-50%) scaleX(1.2)}}
+
+/* Goal markers with pulse */
+.goal-marker{position:absolute;width:40px;height:40px;border-radius:50%;cursor:grab;transition:all .3s;animation:goalPulse 2s ease-in-out infinite;z-index:10}
+.goal-marker:hover{transform:scale(1.3);animation:none;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.goal-marker:active{cursor:grabbing}
+.goal-marker.dragging{opacity:.8;cursor:grabbing;z-index:1000;box-shadow:0 12px 32px rgba(0,0,0,.4);transform:scale(1.2)}
+@keyframes goalPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.7)}50%{box-shadow:0 0 0 8px rgba(255,255,255,0)}}
+
+/* Canvas cursor states */
+#timelineChart{cursor:default}
+#timelineChart.dragging{cursor:grabbing!important}
+
+/* Achievement badges */
+.achievement-badge{position:absolute;top:-30px;left:50%;transform:translateX(-50%) scale(0);background:#ffd700;color:#000;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;box-shadow:0 4px 12px rgba(255,215,0,.5);z-index:200;animation:achievementPop .6s ease-out forwards}
+@keyframes achievementPop{0%{transform:translateX(-50%) scale(0) rotate(-180deg)}50%{transform:translateX(-50%) scale(1.2) rotate(10deg)}100%{transform:translateX(-50%) scale(1) rotate(0)}}
+
+/* Confetti particles */
+.confetti{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:300;animation:confettiFall 2s ease-out forwards}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(300px) rotate(720deg);opacity:0}}
+
+/* Progress bar */
+.timeline-progress{position:absolute;bottom:10px;left:20px;right:20px;height:8px;background:rgba(255,255,255,.3);border-radius:10px;overflow:hidden;z-index:5}
+.progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#8bc34a);border-radius:10px;transition:width 1s ease;box-shadow:0 0 10px #4caf50}
+
+.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);align-items:center;justify-content:center}
+.modal.show{display:flex;animation:modalFadeIn .3s ease-out}
+@keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
+.modal-content{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;max-width:520px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:modalSlideUp .3s ease-out;position:relative;overflow:hidden}
+@keyframes modalSlideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-content:before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(13,110,253,.1) 0%,transparent 70%);animation:modalGlow 3s ease-in-out infinite}
+@keyframes modalGlow{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,-20px)}}
+.modal-header{font-weight:700;font-size:20px;margin-bottom:20px;color:var(--primary);position:relative;z-index:1}
+.modal-body{display:grid;gap:14px;position:relative;z-index:1}
+.modal-footer{display:flex;gap:12px;margin-top:20px;justify-content:flex-end;position:relative;z-index:1}
+.btn{padding:10px 20px;border:2px solid var(--line);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:all .3s;position:relative;overflow:hidden}
+.btn:before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,.2);border-radius:50%;transform:translate(-50%,-50%);transition:width .3s,height .3s}
+.btn:hover:before{width:200px;height:200px}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:linear-gradient(135deg,#0d6efd 0%,#0a58ca 100%);color:#fff;border-color:var(--primary);box-shadow:0 4px 16px rgba(13,110,253,.3)}
+.btn-primary:hover{box-shadow:0 6px 20px rgba(13,110,253,.5)}
+.btn-secondary{background:var(--panel);color:var(--text)}
+.btn-secondary:hover{background:var(--chip);border-color:var(--primary)}
+
+/* Rich tooltip */
+.rich-tooltip{position:absolute;background:var(--panel);border:2px solid var(--primary);border-radius:12px;padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:500;pointer-events:none;opacity:0;transform:translateY(10px);transition:all .3s;min-width:200px}
+.rich-tooltip.show{opacity:1;transform:translateY(0)}
+.rich-tooltip:before{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--primary)}
+.tooltip-title{font-weight:700;font-size:14px;margin-bottom:6px;color:var(--primary)}
+.tooltip-details{font-size:12px;color:var(--muted);line-height:1.5}
+
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">Kristal Goals Clone — v5 Plus (with Income, Expenses, Investments, Loans, Goals, Insurances)</div>
+      <div class="spacer"></div>
+      <div class="toggle" id="themeToggle">Light / Dark</div>
+    </div>
+
+
+  <!-- === Auto-calculation Summary === -->
+  <div class="summary">
+    <div class="tile"><div class="k">Gross Monthly Income</div><div class="v" id="t_gmi">$0</div><div class="note">Salary + (annual incomes ÷ 12)</div></div>
+    <div class="tile"><div class="k">Total Monthly Expenses (ex-EMI)</div><div class="v" id="t_me">$0</div><div class="note">Monthly + (annual ÷ 12)</div></div>
+    <div class="tile"><div class="k">Monthly Debt Payments</div><div class="v" id="t_md">$0</div><div class="note">All EMIs + (EMI p.a ÷ 12)</div></div>
+    <div class="tile"><div class="k">Savings Rate</div><div class="v" id="t_sr">0%</div><div class="note">(GMI − Expenses − EMIs) ÷ GMI</div></div>
+    <div class="tile"><div class="k">Net Monthly Surplus</div><div class="v" id="t_nms">$0</div></div>
+    <div class="tile"><div class="k">Net Annual Surplus</div><div class="v" id="t_nas">$0</div></div>
+    <div class="tile"><div class="k">Debt-to-Income (DTI)</div><div class="v" id="t_dti">0%</div></div>
+    <div class="tile"><div class="k">Estimated Net Worth</div><div class="v" id="t_nw">$0</div><div class="note">(Assets − Liabilities)</div></div>
+  </div>
+
+
+    <div class="accordion">
+
+      <!-- 1) GENERAL QUESTIONS (v5 + added Gender, Marital, Dependents) -->
+      <details class="card" open>
+        <summary><span class="badge">1</span><strong>General Questions</strong></summary>
+        <div class="content">
+
+          <div class="section">
+            <div class="row">
+              <div class="label">Current Age in years <span class="hint">ⓘ</span></div>
+              <div class="stepper">
+                <button type="button" data-step="age" data-delta="-1">−</button>
+                <button type="button" data-step="age" data-delta="1">+</button>
+              </div>
+              <div class="pillInput"><span class="prefix">yrs</span><input id="age" type="number" value="42"/></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="row">
+              <div class="label">Retirement Age</div>
+              <div class="stepper">
+                <button type="button" data-step="retire_age" data-delta="-1">−</button>
+                <button type="button" data-step="retire_age" data-delta="1">+</button>
+              </div>
+              <div class="pillInput"><span class="prefix">yrs</span><input id="retire_age" type="number" value="60"/></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="row">
+              <div class="label">Current Fin. Investments</div>
+              <div></div>
+              <div class="pillInput"><span class="prefix">USD</span><input id="invest_now" type="text" value="0"/></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="row">
+              <div class="label">Net Savings p.a.</div>
+              <div></div>
+              <div class="pillInput"><span class="prefix">USD/yr</span><input id="save_pa" type="text" value="0"/></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="row">
+              <div class="label">Annual Increase in Net Savings</div>
+              <div></div>
+              <div class="pillInput"><span class="prefix">%</span><input id="save_g" type="number" value="5"/></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="row">
+              <div class="label">Annual Retirement Expenses</div>
+              <div></div>
+              <div class="pillInput"><span class="prefix">USD/yr</span><input id="ret_exp" type="text" value="0"/></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="row">
+              <div class="label">Inflation Rate</div>
+              <div></div>
+              <div class="pillInput"><span class="prefix">%</span><input id="infl" type="number" value="4"/></div>
+            </div>
+          </div>
+
+          <!-- Added fields -->
+          <div class="section" style="border-bottom:0">
+            <div class="grid three">
+              <div class="pillInput"><span class="prefix">Gender</span>
+                <select id="gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select>
+              </div>
+              <div class="pillInput"><span class="prefix">Marital</span>
+                <select id="marital"><option value="">Select</option><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option></select>
+              </div>
+              <div class="pillInput"><span class="prefix">Dependents</span><input id="dependents" type="number" value="0" min="0"/></div>
+            </div>
+          </div>
+
+        </div>
+      </details>
+
+      <!-- 2) HOME RENT EXPENSES (no change) -->
+      <details class="card" id="rent" open>
+        <summary><span class="badge">2</span><strong>Home Rent Expenses</strong></summary>
+        <div class="content">
+          <div class="section" style="border-bottom:0">
+            <div class="row">
+              <div class="label">Rent p.a <span class="hint">ⓘ</span></div>
+              <div></div>
+              <div class="pillInput"><span class="prefix">USD/yr</span><input id="rent_pa" type="text" value="0"/></div>
+            </div>
+            <div class="slider">
+              <input type="range" id="s_rent_pa" min="0" max="200000" step="1000" value="0">
+              <div class="ticks"><span>0</span><span>50K</span><span>100K</span><span>150K</span><span>200K</span></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 3) HOME EMI EXPENSES (no change) -->
+      <details class="card" id="emi" open>
+        <summary><span class="badge">3</span><strong>Home EMI Expenses</strong></summary>
+        <div class="content">
+          <div class="grid three">
+            <div class="pillInput"><span class="prefix">yrs</span><input id="hp_years" type="number" value="0"/></div>
+            <div class="pillInput"><span class="prefix">yrs</span><input id="loan_tenure" type="number" value="10"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="downpay" type="text" value="0"/></div>
+          </div>
+          <div class="section" style="border-bottom:0;margin-top:12px">
+            <div class="row">
+              <div class="label">EMI p.a <span class="hint">ⓘ</span></div>
+              <div></div>
+              <div class="pillInput"><span class="prefix">USD/yr</span><input id="emi_pa" type="text" value="0"/></div>
+            </div>
+            <div class="slider">
+              <input type="range" id="s_emi_pa" min="0" max="200000" step="1000" value="0">
+              <div class="ticks"><span>0</span><span>50K</span><span>100K</span><span>150K</span><span>200K</span></div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 4) CHILDREN'S UNIVERSITY EXPENSES (no change) -->
+      <details class="card" id="edu" open>
+        <summary><span class="badge">4</span><strong>Children's University Expenses</strong></summary>
+        <div class="content">
+          <div class="grid two">
+            <div class="pillInput"><span class="prefix">#</span><input id="kids_n" type="number" value="0" min="0"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="edu_cost_pa" type="text" value="0"/></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 5) INCOME DETAILS (new section) -->
+      <details class="card" id="income" open>
+        <summary><span class="badge">5</span><strong>Income Details</strong></summary>
+        <div class="content">
+          <div class="grid two">
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="inc_takehome" type="text" placeholder="Monthly Take Home salary"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="inc_bonus" type="text" placeholder="Expected Annual bonus"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="inc_rent" type="text" placeholder="Rental income"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="inc_business" type="text" placeholder="Business income"/></div>
+            <div class="pillInput"><span class="prefix">%/yr</span><input id="inc_rise" type="number" placeholder="Expected annual income rise"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="inc_invest" type="text" placeholder="Investment income (dividends, interest)"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="inc_other" type="text" placeholder="Any income from other sources"/></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 6) EXPENSES DETAILS (new section) -->
+      <details class="card" id="expenses" open>
+        <summary><span class="badge">6</span><strong>Expenses Details</strong></summary>
+        <div class="content">
+          <div class="grid two">
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="exp_rent" type="text" placeholder="Monthly - House Rent"/></div>
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="exp_school" type="text" placeholder="Monthly - School Fee details by Kid"/></div>
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="exp_household" type="text" placeholder="Monthly -Total Household expenses (Bills & Groceries etc)"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="exp_vac" type="text" placeholder="Annual - Vacation"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="exp_disc" type="text" placeholder="Annual - Discretionary Purchases (Clothings, Mobile, Whitegoods)"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="exp_life" type="text" placeholder="Annual - Life Insurance Premiums"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="exp_health" type="text" placeholder="Annual - Health Insurance Premiums"/></div>
+            <div class="pillInput"><span class="prefix">USD/yr</span><input id="exp_maint" type="text" placeholder="Annual - Maintenances (Appliances , Vehicle , Property)"/></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 7) INVESTMENTS (new section) -->
+      <details class="card" id="investments" open>
+        <summary><span class="badge">7</span><strong>Investments</strong></summary>
+        <div class="content">
+          <div class="grid two">
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_mf" type="text" placeholder="Mutual Funds"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_stocks" type="text" placeholder="Stocks"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_bonds_fd" type="text" placeholder="Bonds & Fixed Deposits"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_ppf_epf_nps" type="text" placeholder="PPF, EPF, NPS"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_savings_bank" type="text" placeholder="Saving Bank Balances"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_realestate" type="text" placeholder="Real Estate (Value)"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_gold" type="text" placeholder="Gold Equivalents/jewelry"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_other" type="text" placeholder="Other investments (PMS, AIF, SIF)"/></div>
+            <div class="pillInput"><span class="prefix">USD</span><input id="inv_any_other_5lac" type="text" placeholder="Any other Assets (>5Lac)"/></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 8) LOANS (new section) -->
+      <details class="card" id="loans" open>
+        <summary><span class="badge">8</span><strong>Loans</strong></summary>
+        <div class="content">
+          <div class="grid two">
+            <div class="pillInput"><span class="prefix">USD</span><input id="loan_home_out" type="text" placeholder="Outstanding Home loan"/></div>
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="loan_home_emi" type="text" placeholder="Home Loan EMI"/></div>
+            <div class="pillInput"><span class="prefix">Date</span><input id="loan_home_close" type="date" placeholder="Home Loan Closure Date"/></div>
+
+            <div class="pillInput"><span class="prefix">USD</span><input id="loan_car_out" type="text" placeholder="Outstanding Car loan"/></div>
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="loan_car_emi" type="text" placeholder="Car Loan EMI"/></div>
+            <div class="pillInput"><span class="prefix">Date</span><input id="loan_car_close" type="date" placeholder="Car Loan Closure Date"/></div>
+
+            <div class="pillInput"><span class="prefix">USD</span><input id="loan_personal_out" type="text" placeholder="Outstanding Personal loan"/></div>
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="loan_personal_emi" type="text" placeholder="Personal Loan EMI"/></div>
+            <div class="pillInput"><span class="prefix">Date</span><input id="loan_personal_close" type="date" placeholder="Personal Loan Closure Date"/></div>
+
+            <div class="pillInput"><span class="prefix">USD</span><input id="loan_edu_out" type="text" placeholder="Outstanding Education loan"/></div>
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="loan_edu_emi" type="text" placeholder="Education loan EMI"/></div>
+            <div class="pillInput"><span class="prefix">Date</span><input id="loan_edu_close" type="date" placeholder="Education Loan Closure Date"/></div>
+
+            <div class="pillInput"><span class="prefix">USD</span><input id="loan_biz_out" type="text" placeholder="Outstanding Business loan"/></div>
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="loan_biz_emi" type="text" placeholder="Business Loan EMI"/></div>
+            <div class="pillInput"><span class="prefix">Date</span><input id="loan_biz_close" type="date" placeholder="Business Loan Closure Date"/></div>
+
+            <div class="pillInput"><span class="prefix">USD</span><input id="loan_other_out" type="text" placeholder="Outstanding - other loan"/></div>
+            <div class="pillInput"><span class="prefix">USD/mo</span><input id="loan_other_emi" type="text" placeholder="Other Loan EMI"/></div>
+            <div class="pillInput"><span class="prefix">Date</span><input id="loan_other_close" type="date" placeholder="Other Loan Closure Date"/></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 9) GOALS (new section) -->
+      <details class="card" id="goals" open>
+        <summary><span class="badge">9</span><strong>Goals</strong></summary>
+        <div class="content">
+
+          <!-- a) Children's Education -->
+          <div class="section">
+            <div class="label">Children's Education</div>
+            <div class="grid two" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">Child Name</span><input id="g_ce_name" type="text" placeholder="e.g., Aarav"/></div>
+              <div class="pillInput"><span class="prefix">Target Date</span><input id="g_ce_date" type="date" placeholder="Target Date of Admission"/></div>
+              <div class="pillInput"><span class="prefix">Type</span>
+                <select id="g_ce_type">
+                  <option value="">Select</option>
+                  <option>Graduation</option>
+                  <option>Post-graduation</option>
+                  <option>Professional course</option>
+                </select>
+              </div>
+              <div class="pillInput"><span class="prefix">USD (today)</span><input id="g_ce_cost" type="number" placeholder="Current cost of education"/></div>
+            </div>
+          </div>
+
+          <!-- b) Children's Marriage -->
+          <div class="section">
+            <div class="label">Children's Marriage</div>
+            <div class="grid two" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">Child Name</span><input id="g_cm_name" type="text" placeholder="e.g., Aarav"/></div>
+              <div class="pillInput"><span class="prefix">Expected Age</span><input id="g_cm_age" type="number" placeholder="Expected age at marriage"/></div>
+              <div class="pillInput"><span class="prefix">USD (today)</span><input id="g_cm_cost" type="number" placeholder="Estimated cost in today's terms"/></div>
+            </div>
+          </div>
+
+          <!-- c) Retirement -->
+          <div class="section">
+            <div class="label">Retirement</div>
+            <div class="grid three" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">Husband Age</span><input id="g_ret_h_age" type="number" placeholder="Planned retirement age (Husband)"/></div>
+              <div class="pillInput"><span class="prefix">Wife Age</span><input id="g_ret_w_age" type="number" placeholder="Planned retirement age (Wife)"/></div>
+              <div class="pillInput"><span class="prefix">% of now</span><input id="g_ret_exp_pct" type="number" placeholder="Expected monthly expenses post-retirement (%)"/></div>
+            </div>
+          </div>
+
+          <!-- d) Vacation -->
+          <div class="section">
+            <div class="label">Vacation</div>
+            <div class="grid two" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">USD (today)</span><input id="g_vac_annual" type="number" placeholder="Annual Vacation Expenses - in today's terms"/></div>
+              <div class="pillInput"><span class="prefix">Until age</span><input id="g_vac_until_age" type="number" placeholder="Planned annual vacation until age (post-retirement)"/></div>
+            </div>
+          </div>
+
+          <!-- e) Home Purchase -->
+          <div class="section">
+            <div class="label">Home Purchase</div>
+            <div class="grid two" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">Target Date</span><input id="g_home_date" type="date" placeholder="Target Purchase Date"/></div>
+              <div class="pillInput"><span class="prefix">USD (today)</span><input id="g_home_cost" type="number" placeholder="Estimated cost in today's terms"/></div>
+            </div>
+          </div>
+
+          <!-- f) Car Purchase -->
+          <div class="section">
+            <div class="label">Car Purchase</div>
+            <div class="grid three" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">USD</span><input id="g_car_budget" type="number" placeholder="Car Purchase Budget"/></div>
+              <div class="pillInput"><span class="prefix">Freq (yrs)</span><input id="g_car_freq" type="number" placeholder="Frequency of car purchase in years"/></div>
+              <div class="pillInput"><span class="prefix">Until age</span><input id="g_car_until_age" type="number" placeholder="Planned car purchases until age (post-retirement)"/></div>
+            </div>
+          </div>
+
+          <!-- g) Other Goals -->
+          <div class="section" style="border-bottom:0">
+            <div class="label">Any Other Key Goals (Charity / Farm House / Business Investments etc.)</div>
+            <div class="grid three" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">Goal</span><input id="g_other_name" type="text" placeholder="Goal Name"/></div>
+              <div class="pillInput"><span class="prefix">USD (today)</span><input id="g_other_amt" type="number" placeholder="Goal Amount - in today's terms"/></div>
+              <div class="pillInput"><span class="prefix">Target Date</span><input id="g_other_date" type="date" placeholder="Target Goal Date"/></div>
+            </div>
+          </div>
+
+        </div>
+      </details>
+
+      <!-- 10) INSURANCES (new section) -->
+      <details class="card" id="insurances" open>
+        <summary><span class="badge">10</span><strong>Insurances</strong></summary>
+        <div class="content">
+
+          <div class="section">
+            <div class="label">Life Insurance</div>
+            <div class="grid three" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">Type</span>
+                <select id="ins_life_type">
+                  <option value="">Select</option>
+                  <option>Term</option>
+                  <option>Endowment</option>
+                  <option>ULIP</option>
+                  <option>Whole Life</option>
+                </select>
+              </div>
+              <div class="pillInput"><span class="prefix">USD</span><input id="ins_life_sum" type="number" placeholder="Life Coverage Amount - Sum Assured"/></div>
+              <div class="pillInput"><span class="prefix">Maturity Age</span><input id="ins_life_term" type="number" placeholder="Policy Term - Maturity Age"/></div>
+            </div>
+          </div>
+
+          <div class="section" style="border-bottom:0">
+            <div class="label">Health Insurance</div>
+            <div class="grid three" style="margin-top:8px">
+              <div class="pillInput"><span class="prefix">Type</span>
+                <select id="ins_health_type">
+                  <option value="">Select</option>
+                  <option>Individual</option>
+                  <option>Family Floater</option>
+                  <option>TopUp</option>
+                </select>
+              </div>
+              <div class="pillInput"><span class="prefix">USD</span><input id="ins_health_sum" type="number" placeholder="Coverage Amount"/></div>
+            </div>
+          </div>
+
+        </div>
+      </details>
+
+      <!-- 11) LIFE TIMELINE CHART - GAMIFIED (new section) -->
+      <details class="card" id="timeline" open>
+        <summary><span class="badge">11</span><strong>🎮 Interactive Life Timeline Journey</strong></summary>
+        <div class="content">
+          <div class="timeline-controls">
+            <button class="timeline-btn active" onclick="TimelineChart.setView('full')">🌍 Full Life (0-100)</button>
+            <button class="timeline-btn" onclick="TimelineChart.setView('working')">💼 Working Years</button>
+            <button class="timeline-btn" onclick="TimelineChart.setView('retirement')">🌴 Retirement Years</button>
+            <button class="timeline-btn" style="margin-left:auto" onclick="TimelineChart.addCustomGoal()">✨ + Add Custom Goal</button>
+          </div>
+          <div id="timelineChartContainer">
+            <!-- Life stages background -->
+            <div class="life-stage-container" id="lifeStages"></div>
+
+            <!-- Animated character avatar -->
+            <div class="timeline-avatar" id="avatarCharacter">
+              <div class="avatar-person">
+                <div class="avatar-head"></div>
+                <div class="avatar-body"></div>
+                <div class="avatar-legs"></div>
+              </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="timeline-progress">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <!-- Canvas for chart -->
+            <canvas id="timelineChart"></canvas>
+
+            <!-- Rich tooltip -->
+            <div class="rich-tooltip" id="richTooltip">
+              <div class="tooltip-title" id="tooltipTitle"></div>
+              <div class="tooltip-details" id="tooltipDetails"></div>
+            </div>
+          </div>
+          <div class="goal-legend">
+            <div class="legend-item" onclick="TimelineChart.filterCategory('currentAge')">
+              <div class="legend-color" style="background:#ff6384"></div><span>📍 Current Age</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('retirement')">
+              <div class="legend-color" style="background:#36a2eb"></div><span>🎯 Retirement</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('education')">
+              <div class="legend-color" style="background:#ffce56"></div><span>🎓 Education</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('marriage')">
+              <div class="legend-color" style="background:#4bc0c0"></div><span>💍 Marriage</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('home')">
+              <div class="legend-color" style="background:#9966ff"></div><span>🏠 Home Purchase</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('car')">
+              <div class="legend-color" style="background:#ff9f40"></div><span>🚗 Car Purchase</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('other')">
+              <div class="legend-color" style="background:#c9cbcf"></div><span>⭐ Other Goals</span>
+            </div>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+<!-- Modal for adding custom goals -->
+<div id="goalModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">✨ Create Your Dream Goal</div>
+    <div class="modal-body">
+      <div class="pillInput">
+        <span class="prefix">🎯 Goal Name</span>
+        <input id="modal_goal_name" type="text" placeholder="e.g., World Tour, Dream Car, Start Business">
+      </div>
+      <div class="pillInput">
+        <span class="prefix">📅 Target Age</span>
+        <input id="modal_goal_age" type="number" placeholder="Age when you want to achieve this" min="0" max="100">
+      </div>
+      <div class="pillInput">
+        <span class="prefix">💰 Amount (USD)</span>
+        <input id="modal_goal_amount" type="number" placeholder="Estimated cost in today's terms">
+      </div>
+      <div class="pillInput">
+        <span class="prefix">📂 Category</span>
+        <select id="modal_goal_category">
+          <option value="other">⭐ Other</option>
+          <option value="education">🎓 Education</option>
+          <option value="marriage">💍 Marriage</option>
+          <option value="home">🏠 Home Purchase</option>
+          <option value="car">🚗 Car Purchase</option>
+          <option value="vacation">🌴 Vacation</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="TimelineChart.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="TimelineChart.saveCustomGoal()">🎉 Add to Journey</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const KEY='kristalV5PlusTheme'; const saved=localStorage.getItem(KEY); if(saved) document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeToggle').addEventListener('click', ()=>{
+    const cur=document.documentElement.getAttribute('data-theme')||'light';
+    const next=cur==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(KEY,next);
+  });
+  // Simple steppers
+  document.querySelectorAll('[data-step]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id=btn.getAttribute('data-step'); const delta=Number(btn.getAttribute('data-delta'));
+      const el=document.getElementById(id); if(!el) return;
+      const v=Number(el.value||0)+delta; el.value=v<0?0:v;
+    });
+  });
+  // Mirror a few sliders from v5
+  const bindPair=(txtId, rangeId)=>{
+    const t=document.getElementById(txtId), r=document.getElementById(rangeId);
+    if(!t||!r) return;
+    const parse=(x)=>Number(String(x).replace(/[^0-9.\-]/g,''))||0;
+    const fmt=(n)=>{const x=Math.round(n);return (x<0?'-':'')+'$'+Math.abs(x).toLocaleString('en-US');};
+    t.addEventListener('input', ()=>{r.value=parse(t.value)});
+    r.addEventListener('input', ()=>{t.value=fmt(r.value)});
+    r.dispatchEvent(new Event('input'));
+  };
+  bindPair('rent_pa','s_rent_pa');
+  bindPair('emi_pa','s_emi_pa');
+</script>
+
+<script>
+// === Auto-calculation logic (USD) ===
+(function(){
+  const $ = (s)=>document.querySelector(s);
+  const parseNum = (s)=>Number(String(s||'').replace(/[^0-9.\-]/g,''))||0;
+  const fmtUSD = (n)=>{
+    const x = Math.round(n);
+    return (x<0?'-':'') + '$' + Math.abs(x).toLocaleString('en-US');
+  };
+  const v = (id)=>{ const el=document.getElementById(id); return el ? parseNum(el.value) : 0; };
+
+  function recalc(){
+    // Gross Monthly Income = monthly salary + (annual incomes)/12
+    const gmi = v('inc_takehome') + (v('inc_bonus') + v('inc_rent') + v('inc_business') + v('inc_invest') + v('inc_other'))/12;
+
+    // Monthly Expenses (exclude debt EMIs)
+    const monthlyFixed = v('exp_rent') + v('exp_school') + v('exp_household');
+    const monthlyAnnuals = (v('exp_vac') + v('exp_disc') + v('exp_life') + v('exp_health') + v('exp_maint'))/12;
+    const me = monthlyFixed + monthlyAnnuals;
+
+    // Monthly Debt = all EMIs + (EMI p.a ÷ 12)
+    const md = v('loan_home_emi') + v('loan_car_emi') + v('loan_personal_emi') + v('loan_edu_emi') + v('loan_biz_emi') + v('loan_other_emi') + (v('emi_pa')/12);
+
+    // Surplus, Savings Rate, DTI
+    const nms = gmi - me - md;
+    const nas = nms * 12;
+    const sr  = gmi > 0 ? (nms / gmi) * 100 : 0;
+    const dti = gmi > 0 ? (md / gmi) * 100 : 0;
+
+    // Net Worth = Assets - Liabilities
+    const assets = v('invest_now')
+      + v('inv_mf') + v('inv_stocks') + v('inv_bonds_fd')
+      + v('inv_ppf_epf_nps') + v('inv_savings_bank') + v('inv_realestate')
+      + v('inv_gold') + v('inv_other') + v('inv_any_other_5lac');
+    const liabilities = v('loan_home_out') + v('loan_car_out') + v('loan_personal_out')
+      + v('loan_edu_out') + v('loan_biz_out') + v('loan_other_out');
+
+    const nw = assets - liabilities;
+
+    // Update tiles
+    $('#t_gmi').textContent = fmtUSD(gmi);
+    $('#t_me').textContent  = fmtUSD(me);
+    $('#t_md').textContent  = fmtUSD(md);
+    $('#t_nms').textContent = fmtUSD(nms);
+    $('#t_nas').textContent = fmtUSD(nas);
+    $('#t_sr').textContent  = sr.toFixed(1) + '%';
+    $('#t_dti').textContent = dti.toFixed(1) + '%';
+    $('#t_nw').textContent  = fmtUSD(nw);
+  }
+
+  // Recalc on all inputs/selects
+  document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', recalc));
+  // Also recalc when sliders/steppers fire synthetic events
+  document.addEventListener('recalc', recalc);
+  // Initial calc
+  recalc();
+})();
+</script>
+
+<script>
+// === GAMIFIED Timeline Chart Logic ===
+const TimelineChart = (function(){
+  let chart = null;
+  let customGoals = JSON.parse(localStorage.getItem('customGoals') || '[]');
+  let currentView = 'full';
+  let categoryFilter = null;
+
+  const COLORS = {
+    currentAge: '#ff6384',
+    retirement: '#36a2eb',
+    education: '#ffce56',
+    marriage: '#4bc0c0',
+    home: '#9966ff',
+    car: '#ff9f40',
+    vacation: '#c9cbcf',
+    other: '#c9cbcf'
+  };
+
+  const EMOJI_MAP = {
+    currentAge: '📍',
+    retirement: '🎯',
+    education: '🎓',
+    marriage: '💍',
+    home: '🏠',
+    car: '🚗',
+    vacation: '🌴',
+    other: '⭐'
+  };
+
+  const parseNum = (s) => Number(String(s||'').replace(/[^0-9.\-]/g,'')) || 0;
+  const v = (id) => { const el = document.getElementById(id); return el ? (el.type === 'date' ? el.value : parseNum(el.value)) : 0; };
+  const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+
+  // Confetti animation
+  function createConfetti(x, y) {
+    const container = document.getElementById('timelineChartContainer');
+    const colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40'];
+
+    for (let i = 0; i < 15; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = x + 'px';
+      confetti.style.top = y + 'px';
+      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDelay = (i * 0.05) + 's';
+      container.appendChild(confetti);
+
+      setTimeout(() => confetti.remove(), 2000);
+    }
+  }
+
+  // Update life stages background
+  function updateLifeStages() {
+    const container = document.getElementById('lifeStages');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const range = getAgeRange();
+    const width = range.max - range.min;
+
+    const stages = [
+      { name: 'childhood', start: 0, end: 18, class: 'stage-childhood' },
+      { name: 'youngadult', start: 18, end: 35, class: 'stage-youngadult' },
+      { name: 'middleage', start: 35, end: 60, class: 'stage-middleage' },
+      { name: 'retirement', start: 60, end: 100, class: 'stage-retirement' }
+    ];
+
+    stages.forEach(stage => {
+      if (stage.end > range.min && stage.start < range.max) {
+        const stageDiv = document.createElement('div');
+        stageDiv.className = `life-stage ${stage.class}`;
+
+        const startPercent = Math.max(0, ((stage.start - range.min) / width) * 100);
+        const endPercent = Math.min(100, ((stage.end - range.min) / width) * 100);
+
+        stageDiv.style.left = startPercent + '%';
+        stageDiv.style.width = (endPercent - startPercent) + '%';
+
+        container.appendChild(stageDiv);
+      }
+    });
+  }
+
+  // Update avatar position
+  function updateAvatarPosition() {
+    const avatar = document.getElementById('avatarCharacter');
+    if (!avatar) return;
+
+    const currentAge = v('age') || 42;
+    const range = getAgeRange();
+    const percent = ((currentAge - range.min) / (range.max - range.min)) * 100;
+
+    avatar.style.left = `calc(${percent}% - 25px)`;
+  }
+
+  // Update progress bar
+  function updateProgressBar() {
+    const progressFill = document.getElementById('progressFill');
+    if (!progressFill) return;
+
+    const currentAge = v('age') || 42;
+    const lifeExpectancy = 85; // Average life expectancy
+    const percent = Math.min(100, (currentAge / lifeExpectancy) * 100);
+
+    progressFill.style.width = percent + '%';
+  }
+
+  // Show rich tooltip
+  function showRichTooltip(goal, x, y) {
+    const tooltip = document.getElementById('richTooltip');
+    const title = document.getElementById('tooltipTitle');
+    const details = document.getElementById('tooltipDetails');
+
+    if (!tooltip || !title || !details) return;
+
+    const emoji = EMOJI_MAP[goal.category] || '⭐';
+    title.textContent = `${emoji} ${goal.label}`;
+
+    let detailsHTML = `<strong>Target Age:</strong> ${goal.age}<br>`;
+    if (goal.amount > 0) {
+      detailsHTML += `<strong>Amount:</strong> $${goal.amount.toLocaleString()}<br>`;
+    }
+
+    const currentAge = v('age') || 42;
+    const yearsUntil = goal.age - currentAge;
+    if (yearsUntil > 0) {
+      detailsHTML += `<strong>Time Until:</strong> ${yearsUntil} years`;
+    } else if (yearsUntil === 0) {
+      detailsHTML += `<strong>Status:</strong> 🎉 Happening now!`;
+    } else {
+      detailsHTML += `<strong>Status:</strong> Completed ${Math.abs(yearsUntil)} years ago`;
+    }
+
+    details.innerHTML = detailsHTML;
+
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = (y - 80) + 'px';
+    tooltip.classList.add('show');
+  }
+
+  function hideRichTooltip() {
+    const tooltip = document.getElementById('richTooltip');
+    if (tooltip) {
+      tooltip.classList.remove('show');
+    }
+  }
+
+  function getGoalsFromForm() {
+    const goals = [];
+    const currentAge = v('age') || 42;
+    const retireAge = v('retire_age') || 60;
+
+    // Current Age marker
+    goals.push({
+      age: currentAge,
+      label: `You are here (${currentAge})`,
+      amount: 0,
+      category: 'currentAge',
+      color: COLORS.currentAge
+    });
+
+    // Retirement marker
+    goals.push({
+      age: retireAge,
+      label: `Retirement (${retireAge})`,
+      amount: 0,
+      category: 'retirement',
+      color: COLORS.retirement
+    });
+
+    // Children's Education
+    const ceDate = getVal('g_ce_date');
+    const ceCost = v('g_ce_cost');
+    const ceName = getVal('g_ce_name');
+    if (ceDate && ceCost > 0) {
+      const targetYear = new Date(ceDate).getFullYear();
+      const currentYear = new Date().getFullYear();
+      const yearsFromNow = targetYear - currentYear;
+      const targetAge = currentAge + yearsFromNow;
+      if (targetAge >= 0 && targetAge <= 100) {
+        goals.push({
+          age: targetAge,
+          label: `${ceName || 'Child'}'s Education`,
+          amount: ceCost,
+          category: 'education',
+          color: COLORS.education
+        });
+      }
+    }
+
+    // Children's Marriage
+    const cmAge = v('g_cm_age');
+    const cmCost = v('g_cm_cost');
+    const cmName = getVal('g_cm_name');
+    if (cmAge > 0 && cmCost > 0) {
+      const childBirthAge = 30;
+      const targetAge = currentAge + (cmAge - (currentAge - childBirthAge));
+      if (targetAge >= 0 && targetAge <= 100) {
+        goals.push({
+          age: Math.round(targetAge),
+          label: `${cmName || 'Child'}'s Marriage`,
+          amount: cmCost,
+          category: 'marriage',
+          color: COLORS.marriage
+        });
+      }
+    }
+
+    // Home Purchase
+    const homeDate = getVal('g_home_date');
+    const homeCost = v('g_home_cost');
+    if (homeDate && homeCost > 0) {
+      const targetYear = new Date(homeDate).getFullYear();
+      const currentYear = new Date().getFullYear();
+      const yearsFromNow = targetYear - currentYear;
+      const targetAge = currentAge + yearsFromNow;
+      if (targetAge >= 0 && targetAge <= 100) {
+        goals.push({
+          age: targetAge,
+          label: 'Home Purchase',
+          amount: homeCost,
+          category: 'home',
+          color: COLORS.home
+        });
+      }
+    }
+
+    // Car Purchase (recurring)
+    const carBudget = v('g_car_budget');
+    const carFreq = v('g_car_freq');
+    const carUntilAge = v('g_car_until_age');
+    if (carBudget > 0 && carFreq > 0) {
+      const untilAge = carUntilAge > 0 ? carUntilAge : retireAge;
+      for (let age = currentAge; age <= untilAge; age += carFreq) {
+        if (age <= 100) {
+          goals.push({
+            age: Math.round(age),
+            label: 'Car Purchase',
+            amount: carBudget,
+            category: 'car',
+            color: COLORS.car
+          });
+        }
+      }
+    }
+
+    // Other Goals
+    const otherName = getVal('g_other_name');
+    const otherAmt = v('g_other_amt');
+    const otherDate = getVal('g_other_date');
+    if (otherName && otherAmt > 0 && otherDate) {
+      const targetYear = new Date(otherDate).getFullYear();
+      const currentYear = new Date().getFullYear();
+      const yearsFromNow = targetYear - currentYear;
+      const targetAge = currentAge + yearsFromNow;
+      if (targetAge >= 0 && targetAge <= 100) {
+        goals.push({
+          age: targetAge,
+          label: otherName,
+          amount: otherAmt,
+          category: 'other',
+          color: COLORS.other
+        });
+      }
+    }
+
+    // Add custom goals
+    customGoals.forEach(g => {
+      goals.push({
+        age: g.age,
+        label: g.name,
+        amount: g.amount,
+        category: g.category || 'other',
+        color: COLORS[g.category] || COLORS.other,
+        isCustom: true
+      });
+    });
+
+    // Apply category filter
+    let filteredGoals = goals.sort((a, b) => a.age - b.age);
+    if (categoryFilter) {
+      filteredGoals = filteredGoals.filter(g => g.category === categoryFilter);
+    }
+
+    return filteredGoals;
+  }
+
+  function getAgeRange() {
+    const currentAge = v('age') || 42;
+    const retireAge = v('retire_age') || 60;
+
+    switch(currentView) {
+      case 'working':
+        return { min: Math.max(0, currentAge - 5), max: Math.min(100, retireAge + 5) };
+      case 'retirement':
+        return { min: Math.max(0, retireAge - 5), max: 100 };
+      case 'full':
+      default:
+        return { min: 0, max: 100 };
+    }
+  }
+
+  function initChart() {
+    const ctx = document.getElementById('timelineChart');
+    if (!ctx) return;
+
+    const goals = getGoalsFromForm();
+    const range = getAgeRange();
+
+    // Update supplementary visuals
+    updateLifeStages();
+    updateAvatarPosition();
+    updateProgressBar();
+
+    // Create datasets for the chart - NOW USING Y-AXIS FOR DOLLAR AMOUNTS!
+    const datasets = [];
+
+    // Filter goals for current view
+    const visibleGoals = goals.filter(g => g.age >= range.min && g.age <= range.max);
+
+    // Create scatter points - each goal as separate dataset for individual dragging
+    visibleGoals.forEach((goal, idx) => {
+      // For markers without amounts (current age, retirement), use small y value
+      const yValue = goal.amount || 50000; // Default $50k for markers
+
+      datasets.push({
+        label: goal.label,
+        data: [{
+          x: parseFloat(goal.age),
+          y: yValue,
+          goalData: goal,
+          goalIndex: idx
+        }],
+        backgroundColor: goal.color,
+        borderColor: goal.color,
+        borderWidth: 3,
+        pointRadius: goal.category === 'currentAge' || goal.category === 'retirement' ? 8 : 12,
+        pointHoverRadius: 18,
+        pointHoverBorderWidth: 4,
+        showLine: false,
+        // Enable dragging for this dataset
+        dragData: goal.category !== 'currentAge', // Don't allow dragging "You are here" marker
+        dragX: true,
+        dragY: goal.amount > 0 // Only drag Y if goal has an amount
+      });
+    });
+
+    if (chart) {
+      chart.destroy();
+    }
+
+    const chartInstance = chart = new Chart(ctx, {
+      type: 'scatter',
+      data: { datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 600,
+          easing: 'easeOutCubic'
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false // We use custom tooltip
+          },
+          dragData: {
+            round: 0,
+            showTooltip: true,
+            onDragStart: function(e, datasetIndex, index, value) {
+              // Visual feedback when starting drag
+              const canvas = e.target;
+              canvas.style.cursor = 'grabbing';
+              hideRichTooltip();
+
+              // Create a temporary indicator
+              const goal = datasets[datasetIndex].data[0].goalData;
+              console.log('Dragging:', goal.label);
+            },
+            onDrag: function(e, datasetIndex, index, value) {
+              // Constrain values while dragging
+              value.x = Math.max(range.min, Math.min(range.max, Math.round(value.x)));
+              value.y = Math.max(0, Math.min(2000000, Math.round(value.y / 10000) * 10000)); // Round to 10k
+
+              // Update tooltip position while dragging
+              const goal = datasets[datasetIndex].data[0].goalData;
+              const updatedGoal = {
+                ...goal,
+                age: value.x,
+                amount: value.y
+              };
+              showRichTooltip(updatedGoal, e.offsetX, e.offsetY);
+            },
+            onDragEnd: function(e, datasetIndex, index, value) {
+              // Finalize the drag
+              const canvas = e.target;
+              canvas.style.cursor = 'default';
+              hideRichTooltip();
+
+              const newAge = Math.round(value.x);
+              const newAmount = Math.round(value.y / 10000) * 10000; // Round to nearest 10k
+
+              const goal = datasets[datasetIndex].data[0].goalData;
+
+              // Update the goal data
+              updateGoalAfterDrag(goal, newAge, newAmount);
+
+              // Celebration!
+              createConfetti(e.offsetX, e.offsetY);
+
+              console.log('Updated:', goal.label, 'to age', newAge, 'amount $' + newAmount.toLocaleString());
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'bottom',
+            min: range.min,
+            max: range.max,
+            ticks: {
+              stepSize: 10,
+              font: { size: 12, weight: 'bold' },
+              color: '#666'
+            },
+            title: {
+              display: true,
+              text: '🎂 Age (Years) - Drag goals horizontally to change age!',
+              font: { size: 14, weight: 'bold' },
+              color: '#0d6efd'
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.08)',
+              lineWidth: 1
+            }
+          },
+          y: {
+            type: 'linear',
+            position: 'left',
+            min: 0,
+            max: 2000000,
+            ticks: {
+              stepSize: 250000,
+              font: { size: 11, weight: 'bold' },
+              color: '#666',
+              callback: function(value) {
+                return '$' + (value / 1000) + 'K';
+              }
+            },
+            title: {
+              display: true,
+              text: '💰 Goal Amount (USD) - Drag goals vertically to change amount!',
+              font: { size: 14, weight: 'bold' },
+              color: '#0d6efd'
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.06)',
+              lineWidth: 1
+            }
+          }
+        },
+        onHover: (event, elements) => {
+          const canvas = event.native.target;
+          if (elements.length > 0) {
+            canvas.style.cursor = 'grab';
+            const element = elements[0];
+            const goal = element.element.$context.raw.goalData;
+            showRichTooltip(goal, event.native.offsetX, event.native.offsetY);
+          } else {
+            canvas.style.cursor = 'default';
+            hideRichTooltip();
+          }
+        },
+        onClick: (event, elements) => {
+          if (elements.length === 0) {
+            // Clicked on empty area - add goal with Y position as amount
+            const canvasPosition = Chart.helpers.getRelativePosition(event, chartInstance);
+            const dataX = chartInstance.scales.x.getValueForPixel(canvasPosition.x);
+            const dataY = chartInstance.scales.y.getValueForPixel(canvasPosition.y);
+
+            const age = Math.round(dataX);
+            const amount = Math.max(0, Math.round(dataY / 10000) * 10000);
+
+            if (age >= 0 && age <= 100) {
+              document.getElementById('modal_goal_age').value = age;
+              document.getElementById('modal_goal_amount').value = amount;
+              createConfetti(event.native.offsetX, event.native.offsetY);
+              showModal();
+            }
+          } else {
+            // Clicked on a goal - show celebration
+            const element = elements[0];
+            createConfetti(element.element.x, element.element.y);
+          }
+        }
+      }
+    });
+  }
+
+  // Update goal data after dragging
+  function updateGoalAfterDrag(goal, newAge, newAmount) {
+    const currentAge = v('age') || 42;
+
+    // Update custom goals in localStorage
+    if (goal.isCustom) {
+      const goalIdx = customGoals.findIndex(g =>
+        g.name === goal.label && g.age === goal.age && g.amount === goal.amount
+      );
+      if (goalIdx !== -1) {
+        customGoals[goalIdx].age = newAge;
+        customGoals[goalIdx].amount = newAmount;
+        localStorage.setItem('customGoals', JSON.stringify(customGoals));
+      }
+    } else {
+      // Update form fields for predefined goals
+      const yearsFromNow = newAge - currentAge;
+      const targetYear = new Date().getFullYear() + yearsFromNow;
+
+      switch(goal.category) {
+        case 'education':
+          document.getElementById('g_ce_cost').value = newAmount;
+          document.getElementById('g_ce_date').value = targetYear + '-01-01';
+          break;
+        case 'marriage':
+          document.getElementById('g_cm_cost').value = newAmount;
+          // Marriage age is tricky - just update the cost for now
+          break;
+        case 'home':
+          document.getElementById('g_home_cost').value = newAmount;
+          document.getElementById('g_home_date').value = targetYear + '-01-01';
+          break;
+        case 'car':
+          document.getElementById('g_car_budget').value = newAmount;
+          break;
+        case 'retirement':
+          document.getElementById('retire_age').value = newAge;
+          break;
+        case 'other':
+          document.getElementById('g_other_amt').value = newAmount;
+          document.getElementById('g_other_date').value = targetYear + '-01-01';
+          break;
+      }
+    }
+
+    // Refresh the chart to reflect changes
+    setTimeout(() => initChart(), 100);
+  }
+
+  function setView(view) {
+    currentView = view;
+    initChart();
+  }
+
+  function filterCategory(category) {
+    if (categoryFilter === category) {
+      categoryFilter = null; // Toggle off
+    } else {
+      categoryFilter = category;
+    }
+    initChart();
+  }
+
+  function addCustomGoal() {
+    showModal();
+  }
+
+  function showModal() {
+    document.getElementById('goalModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('goalModal').classList.remove('show');
+    document.getElementById('modal_goal_name').value = '';
+    document.getElementById('modal_goal_age').value = '';
+    document.getElementById('modal_goal_amount').value = '';
+    document.getElementById('modal_goal_category').value = 'other';
+  }
+
+  function saveCustomGoal() {
+    const name = document.getElementById('modal_goal_name').value;
+    const age = parseNum(document.getElementById('modal_goal_age').value);
+    const amount = parseNum(document.getElementById('modal_goal_amount').value);
+    const category = document.getElementById('modal_goal_category').value;
+
+    if (!name || age < 0 || age > 100) {
+      alert('Please enter a valid goal name and age (0-100)');
+      return;
+    }
+
+    customGoals.push({ name, age, amount, category });
+    localStorage.setItem('customGoals', JSON.stringify(customGoals));
+
+    // Celebration!
+    const modal = document.querySelector('.modal-content');
+    const rect = modal.getBoundingClientRect();
+    createConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+    closeModal();
+    initChart();
+  }
+
+  // Initialize on load and re-render on input changes
+  window.addEventListener('load', () => {
+    setTimeout(initChart, 100);
+  });
+
+  // Re-render chart when form values change
+  let inputTimeout;
+  document.addEventListener('input', () => {
+    clearTimeout(inputTimeout);
+    inputTimeout = setTimeout(() => {
+      if (chart) {
+        initChart();
+      }
+    }, 400);
+  });
+
+  // Close modal when clicking outside
+  document.getElementById('goalModal').addEventListener('click', (e) => {
+    if (e.target.id === 'goalModal') {
+      closeModal();
+    }
+  });
+
+  return {
+    initChart,
+    setView,
+    filterCategory,
+    addCustomGoal,
+    closeModal,
+    saveCustomGoal
+  };
+})();
+</script>
+
+</body>
+</html>
