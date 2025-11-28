@@ -52,24 +52,84 @@
 .tile .v{font-weight:700;font-size:18px}
 .tile .note{font-size:12px;color:var(--muted)}
 
-/* === Timeline Chart Styles === */
-#timelineChartContainer{position:relative;height:400px;margin:16px 0}
-.timeline-controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-.timeline-btn{padding:8px 16px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);cursor:pointer;font-size:14px;font-weight:600;transition:all .2s}
-.timeline-btn:hover{background:var(--chip);border-color:var(--primary)}
-.timeline-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.goal-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:16px}
-.legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
-.legend-color{width:16px;height:16px;border-radius:4px}
-.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
-.modal.show{display:flex}
-.modal-content{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;max-width:500px;width:90%;box-shadow:var(--shadow)}
-.modal-header{font-weight:700;font-size:18px;margin-bottom:16px}
-.modal-body{display:grid;gap:12px}
-.modal-footer{display:flex;gap:12px;margin-top:16px;justify-content:flex-end}
-.btn{padding:8px 16px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
-.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* === Timeline Chart Styles - GAMIFIED === */
+#timelineChartContainer{position:relative;height:500px;margin:16px 0;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#f0f7ff 0%,#e6f2ff 100%);box-shadow:inset 0 2px 8px rgba(0,0,0,.05)}
+html[data-theme="dark"] #timelineChartContainer{background:linear-gradient(180deg,#0a1628 0%,#0f1e35 100%)}
+
+.timeline-controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.timeline-btn{padding:10px 18px;border:2px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);cursor:pointer;font-size:14px;font-weight:600;transition:all .3s ease;position:relative;overflow:hidden}
+.timeline-btn:before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(13,110,253,.2);transform:translate(-50%,-50%);transition:width .3s,height .3s}
+.timeline-btn:hover:before{width:200px;height:200px}
+.timeline-btn:hover{background:var(--chip);border-color:var(--primary);transform:translateY(-2px);box-shadow:0 4px 12px rgba(13,110,253,.2)}
+.timeline-btn.active{background:linear-gradient(135deg,#0d6efd 0%,#0a58ca 100%);color:#fff;border-color:var(--primary);box-shadow:0 4px 16px rgba(13,110,253,.4)}
+
+.goal-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:20px;padding:16px;background:var(--panel);border-radius:12px;border:1px solid var(--line)}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:13px;padding:6px;border-radius:6px;transition:all .2s;cursor:pointer}
+.legend-item:hover{background:var(--chip);transform:translateX(4px)}
+.legend-color{width:20px;height:20px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:all .3s}
+.legend-item:hover .legend-color{transform:scale(1.2) rotate(5deg)}
+
+/* Life stages background */
+.life-stage-container{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0}
+.life-stage{position:absolute;top:0;bottom:50px;opacity:.15;transition:opacity .3s}
+.stage-childhood{background:linear-gradient(90deg,#ffeb3b55,#ffc10755)}
+.stage-youngadult{background:linear-gradient(90deg,#4caf5055,#8bc34a55)}
+.stage-middleage{background:linear-gradient(90deg,#2196f355,#03a9f455)}
+.stage-retirement{background:linear-gradient(90deg,#9c27b055,#e91e6355)}
+
+/* Animated character avatar */
+.timeline-avatar{position:absolute;bottom:60px;width:50px;height:50px;transition:left .8s cubic-bezier(.34,1.56,.64,1);z-index:100;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.avatar-person{width:100%;height:100%;position:relative}
+.avatar-head{width:20px;height:20px;background:#ffb74d;border-radius:50%;position:absolute;top:0;left:50%;transform:translateX(-50%);border:2px solid #ff9800;animation:bobHead 2s ease-in-out infinite}
+.avatar-body{width:16px;height:24px;background:#42a5f5;border-radius:8px;position:absolute;top:22px;left:50%;transform:translateX(-50%);border:2px solid #1976d2}
+.avatar-legs{width:20px;height:10px;background:#666;position:absolute;bottom:0;left:50%;transform:translateX(-50%);border-radius:4px;animation:walkLegs 1s ease-in-out infinite}
+
+@keyframes bobHead{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-3px)}}
+@keyframes walkLegs{0%,100%{transform:translateX(-50%) scaleX(1)}50%{transform:translateX(-50%) scaleX(1.2)}}
+
+/* Goal markers with pulse */
+.goal-marker{position:absolute;width:40px;height:40px;border-radius:50%;cursor:pointer;transition:all .3s;animation:goalPulse 2s ease-in-out infinite;z-index:10}
+.goal-marker:hover{transform:scale(1.3);animation:none;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.goal-marker.dragging{opacity:.6;cursor:grabbing;z-index:1000}
+@keyframes goalPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.7)}50%{box-shadow:0 0 0 8px rgba(255,255,255,0)}}
+
+/* Achievement badges */
+.achievement-badge{position:absolute;top:-30px;left:50%;transform:translateX(-50%) scale(0);background:#ffd700;color:#000;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;box-shadow:0 4px 12px rgba(255,215,0,.5);z-index:200;animation:achievementPop .6s ease-out forwards}
+@keyframes achievementPop{0%{transform:translateX(-50%) scale(0) rotate(-180deg)}50%{transform:translateX(-50%) scale(1.2) rotate(10deg)}100%{transform:translateX(-50%) scale(1) rotate(0)}}
+
+/* Confetti particles */
+.confetti{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:300;animation:confettiFall 2s ease-out forwards}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(300px) rotate(720deg);opacity:0}}
+
+/* Progress bar */
+.timeline-progress{position:absolute;bottom:10px;left:20px;right:20px;height:8px;background:rgba(255,255,255,.3);border-radius:10px;overflow:hidden;z-index:5}
+.progress-fill{height:100%;background:linear-gradient(90deg,#4caf50,#8bc34a);border-radius:10px;transition:width 1s ease;box-shadow:0 0 10px #4caf50}
+
+.modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);align-items:center;justify-content:center}
+.modal.show{display:flex;animation:modalFadeIn .3s ease-out}
+@keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
+.modal-content{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;max-width:520px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:modalSlideUp .3s ease-out;position:relative;overflow:hidden}
+@keyframes modalSlideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-content:before{content:'';position:absolute;top:-50%;right:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(13,110,253,.1) 0%,transparent 70%);animation:modalGlow 3s ease-in-out infinite}
+@keyframes modalGlow{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,-20px)}}
+.modal-header{font-weight:700;font-size:20px;margin-bottom:20px;color:var(--primary);position:relative;z-index:1}
+.modal-body{display:grid;gap:14px;position:relative;z-index:1}
+.modal-footer{display:flex;gap:12px;margin-top:20px;justify-content:flex-end;position:relative;z-index:1}
+.btn{padding:10px 20px;border:2px solid var(--line);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;transition:all .3s;position:relative;overflow:hidden}
+.btn:before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,.2);border-radius:50%;transform:translate(-50%,-50%);transition:width .3s,height .3s}
+.btn:hover:before{width:200px;height:200px}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:linear-gradient(135deg,#0d6efd 0%,#0a58ca 100%);color:#fff;border-color:var(--primary);box-shadow:0 4px 16px rgba(13,110,253,.3)}
+.btn-primary:hover{box-shadow:0 6px 20px rgba(13,110,253,.5)}
 .btn-secondary{background:var(--panel);color:var(--text)}
+.btn-secondary:hover{background:var(--chip);border-color:var(--primary)}
+
+/* Rich tooltip */
+.rich-tooltip{position:absolute;background:var(--panel);border:2px solid var(--primary);border-radius:12px;padding:12px 16px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:500;pointer-events:none;opacity:0;transform:translateY(10px);transition:all .3s;min-width:200px}
+.rich-tooltip.show{opacity:1;transform:translateY(0)}
+.rich-tooltip:before{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid var(--primary)}
+.tooltip-title{font-weight:700;font-size:14px;margin-bottom:6px;color:var(--primary)}
+.tooltip-details{font-size:12px;color:var(--muted);line-height:1.5}
 
 </style>
 </head>
@@ -439,27 +499,65 @@
         </div>
       </details>
 
-      <!-- 11) LIFE TIMELINE CHART (new section) -->
+      <!-- 11) LIFE TIMELINE CHART - GAMIFIED (new section) -->
       <details class="card" id="timeline" open>
-        <summary><span class="badge">11</span><strong>Life Timeline Chart</strong></summary>
+        <summary><span class="badge">11</span><strong>🎮 Interactive Life Timeline Journey</strong></summary>
         <div class="content">
           <div class="timeline-controls">
-            <button class="timeline-btn active" onclick="TimelineChart.setView('full')">Full Life (0-100)</button>
-            <button class="timeline-btn" onclick="TimelineChart.setView('working')">Working Years</button>
-            <button class="timeline-btn" onclick="TimelineChart.setView('retirement')">Retirement Years</button>
-            <button class="timeline-btn" style="margin-left:auto" onclick="TimelineChart.addCustomGoal()">+ Add Custom Goal</button>
+            <button class="timeline-btn active" onclick="TimelineChart.setView('full')">🌍 Full Life (0-100)</button>
+            <button class="timeline-btn" onclick="TimelineChart.setView('working')">💼 Working Years</button>
+            <button class="timeline-btn" onclick="TimelineChart.setView('retirement')">🌴 Retirement Years</button>
+            <button class="timeline-btn" style="margin-left:auto" onclick="TimelineChart.addCustomGoal()">✨ + Add Custom Goal</button>
           </div>
           <div id="timelineChartContainer">
+            <!-- Life stages background -->
+            <div class="life-stage-container" id="lifeStages"></div>
+
+            <!-- Animated character avatar -->
+            <div class="timeline-avatar" id="avatarCharacter">
+              <div class="avatar-person">
+                <div class="avatar-head"></div>
+                <div class="avatar-body"></div>
+                <div class="avatar-legs"></div>
+              </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="timeline-progress">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <!-- Canvas for chart -->
             <canvas id="timelineChart"></canvas>
+
+            <!-- Rich tooltip -->
+            <div class="rich-tooltip" id="richTooltip">
+              <div class="tooltip-title" id="tooltipTitle"></div>
+              <div class="tooltip-details" id="tooltipDetails"></div>
+            </div>
           </div>
           <div class="goal-legend">
-            <div class="legend-item"><div class="legend-color" style="background:#ff6384"></div><span>Current Age</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#36a2eb"></div><span>Retirement</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#ffce56"></div><span>Education</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#4bc0c0"></div><span>Marriage</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#9966ff"></div><span>Home Purchase</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#ff9f40"></div><span>Car Purchase</span></div>
-            <div class="legend-item"><div class="legend-color" style="background:#c9cbcf"></div><span>Other Goals</span></div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('currentAge')">
+              <div class="legend-color" style="background:#ff6384"></div><span>📍 Current Age</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('retirement')">
+              <div class="legend-color" style="background:#36a2eb"></div><span>🎯 Retirement</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('education')">
+              <div class="legend-color" style="background:#ffce56"></div><span>🎓 Education</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('marriage')">
+              <div class="legend-color" style="background:#4bc0c0"></div><span>💍 Marriage</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('home')">
+              <div class="legend-color" style="background:#9966ff"></div><span>🏠 Home Purchase</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('car')">
+              <div class="legend-color" style="background:#ff9f40"></div><span>🚗 Car Purchase</span>
+            </div>
+            <div class="legend-item" onclick="TimelineChart.filterCategory('other')">
+              <div class="legend-color" style="background:#c9cbcf"></div><span>⭐ Other Goals</span>
+            </div>
           </div>
         </div>
       </details>
@@ -470,35 +568,35 @@
 <!-- Modal for adding custom goals -->
 <div id="goalModal" class="modal">
   <div class="modal-content">
-    <div class="modal-header">Add Custom Goal</div>
+    <div class="modal-header">✨ Create Your Dream Goal</div>
     <div class="modal-body">
       <div class="pillInput">
-        <span class="prefix">Goal Name</span>
-        <input id="modal_goal_name" type="text" placeholder="e.g., World Tour">
+        <span class="prefix">🎯 Goal Name</span>
+        <input id="modal_goal_name" type="text" placeholder="e.g., World Tour, Dream Car, Start Business">
       </div>
       <div class="pillInput">
-        <span class="prefix">Target Age</span>
+        <span class="prefix">📅 Target Age</span>
         <input id="modal_goal_age" type="number" placeholder="Age when you want to achieve this" min="0" max="100">
       </div>
       <div class="pillInput">
-        <span class="prefix">USD (today)</span>
-        <input id="modal_goal_amount" type="number" placeholder="Estimated cost">
+        <span class="prefix">💰 Amount (USD)</span>
+        <input id="modal_goal_amount" type="number" placeholder="Estimated cost in today's terms">
       </div>
       <div class="pillInput">
-        <span class="prefix">Category</span>
+        <span class="prefix">📂 Category</span>
         <select id="modal_goal_category">
-          <option value="other">Other</option>
-          <option value="education">Education</option>
-          <option value="marriage">Marriage</option>
-          <option value="home">Home Purchase</option>
-          <option value="car">Car Purchase</option>
-          <option value="vacation">Vacation</option>
+          <option value="other">⭐ Other</option>
+          <option value="education">🎓 Education</option>
+          <option value="marriage">💍 Marriage</option>
+          <option value="home">🏠 Home Purchase</option>
+          <option value="car">🚗 Car Purchase</option>
+          <option value="vacation">🌴 Vacation</option>
         </select>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="TimelineChart.closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="TimelineChart.saveCustomGoal()">Save Goal</button>
+      <button class="btn btn-primary" onclick="TimelineChart.saveCustomGoal()">🎉 Add to Journey</button>
     </div>
   </div>
 </div>
@@ -593,11 +691,12 @@
 </script>
 
 <script>
-// === Timeline Chart Logic ===
+// === GAMIFIED Timeline Chart Logic ===
 const TimelineChart = (function(){
   let chart = null;
   let customGoals = JSON.parse(localStorage.getItem('customGoals') || '[]');
   let currentView = 'full';
+  let categoryFilter = null;
 
   const COLORS = {
     currentAge: '#ff6384',
@@ -610,9 +709,134 @@ const TimelineChart = (function(){
     other: '#c9cbcf'
   };
 
+  const EMOJI_MAP = {
+    currentAge: '📍',
+    retirement: '🎯',
+    education: '🎓',
+    marriage: '💍',
+    home: '🏠',
+    car: '🚗',
+    vacation: '🌴',
+    other: '⭐'
+  };
+
   const parseNum = (s) => Number(String(s||'').replace(/[^0-9.\-]/g,'')) || 0;
   const v = (id) => { const el = document.getElementById(id); return el ? (el.type === 'date' ? el.value : parseNum(el.value)) : 0; };
   const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+
+  // Confetti animation
+  function createConfetti(x, y) {
+    const container = document.getElementById('timelineChartContainer');
+    const colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40'];
+
+    for (let i = 0; i < 15; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = x + 'px';
+      confetti.style.top = y + 'px';
+      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDelay = (i * 0.05) + 's';
+      container.appendChild(confetti);
+
+      setTimeout(() => confetti.remove(), 2000);
+    }
+  }
+
+  // Update life stages background
+  function updateLifeStages() {
+    const container = document.getElementById('lifeStages');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const range = getAgeRange();
+    const width = range.max - range.min;
+
+    const stages = [
+      { name: 'childhood', start: 0, end: 18, class: 'stage-childhood' },
+      { name: 'youngadult', start: 18, end: 35, class: 'stage-youngadult' },
+      { name: 'middleage', start: 35, end: 60, class: 'stage-middleage' },
+      { name: 'retirement', start: 60, end: 100, class: 'stage-retirement' }
+    ];
+
+    stages.forEach(stage => {
+      if (stage.end > range.min && stage.start < range.max) {
+        const stageDiv = document.createElement('div');
+        stageDiv.className = `life-stage ${stage.class}`;
+
+        const startPercent = Math.max(0, ((stage.start - range.min) / width) * 100);
+        const endPercent = Math.min(100, ((stage.end - range.min) / width) * 100);
+
+        stageDiv.style.left = startPercent + '%';
+        stageDiv.style.width = (endPercent - startPercent) + '%';
+
+        container.appendChild(stageDiv);
+      }
+    });
+  }
+
+  // Update avatar position
+  function updateAvatarPosition() {
+    const avatar = document.getElementById('avatarCharacter');
+    if (!avatar) return;
+
+    const currentAge = v('age') || 42;
+    const range = getAgeRange();
+    const percent = ((currentAge - range.min) / (range.max - range.min)) * 100;
+
+    avatar.style.left = `calc(${percent}% - 25px)`;
+  }
+
+  // Update progress bar
+  function updateProgressBar() {
+    const progressFill = document.getElementById('progressFill');
+    if (!progressFill) return;
+
+    const currentAge = v('age') || 42;
+    const lifeExpectancy = 85; // Average life expectancy
+    const percent = Math.min(100, (currentAge / lifeExpectancy) * 100);
+
+    progressFill.style.width = percent + '%';
+  }
+
+  // Show rich tooltip
+  function showRichTooltip(goal, x, y) {
+    const tooltip = document.getElementById('richTooltip');
+    const title = document.getElementById('tooltipTitle');
+    const details = document.getElementById('tooltipDetails');
+
+    if (!tooltip || !title || !details) return;
+
+    const emoji = EMOJI_MAP[goal.category] || '⭐';
+    title.textContent = `${emoji} ${goal.label}`;
+
+    let detailsHTML = `<strong>Target Age:</strong> ${goal.age}<br>`;
+    if (goal.amount > 0) {
+      detailsHTML += `<strong>Amount:</strong> $${goal.amount.toLocaleString()}<br>`;
+    }
+
+    const currentAge = v('age') || 42;
+    const yearsUntil = goal.age - currentAge;
+    if (yearsUntil > 0) {
+      detailsHTML += `<strong>Time Until:</strong> ${yearsUntil} years`;
+    } else if (yearsUntil === 0) {
+      detailsHTML += `<strong>Status:</strong> 🎉 Happening now!`;
+    } else {
+      detailsHTML += `<strong>Status:</strong> Completed ${Math.abs(yearsUntil)} years ago`;
+    }
+
+    details.innerHTML = detailsHTML;
+
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = (y - 80) + 'px';
+    tooltip.classList.add('show');
+  }
+
+  function hideRichTooltip() {
+    const tooltip = document.getElementById('richTooltip');
+    if (tooltip) {
+      tooltip.classList.remove('show');
+    }
+  }
 
   function getGoalsFromForm() {
     const goals = [];
@@ -662,7 +886,6 @@ const TimelineChart = (function(){
     const cmCost = v('g_cm_cost');
     const cmName = getVal('g_cm_name');
     if (cmAge > 0 && cmCost > 0) {
-      // Assuming child is born when parent is ~30, adjust as needed
       const childBirthAge = 30;
       const targetAge = currentAge + (cmAge - (currentAge - childBirthAge));
       if (targetAge >= 0 && targetAge <= 100) {
@@ -746,7 +969,13 @@ const TimelineChart = (function(){
       });
     });
 
-    return goals.sort((a, b) => a.age - b.age);
+    // Apply category filter
+    let filteredGoals = goals.sort((a, b) => a.age - b.age);
+    if (categoryFilter) {
+      filteredGoals = filteredGoals.filter(g => g.category === categoryFilter);
+    }
+
+    return filteredGoals;
   }
 
   function getAgeRange() {
@@ -771,14 +1000,13 @@ const TimelineChart = (function(){
     const goals = getGoalsFromForm();
     const range = getAgeRange();
 
+    // Update supplementary visuals
+    updateLifeStages();
+    updateAvatarPosition();
+    updateProgressBar();
+
     // Create datasets for the chart
     const datasets = [];
-
-    // Base timeline (invisible, just for structure)
-    const ages = [];
-    for (let i = range.min; i <= range.max; i += 5) {
-      ages.push(i);
-    }
 
     // Group goals by age for better visualization
     const goalsByAge = {};
@@ -799,13 +1027,15 @@ const TimelineChart = (function(){
             x: parseFloat(age),
             y: idx + 1,
             amount: goal.amount,
-            category: goal.category
+            category: goal.category,
+            goalData: goal
           }],
           backgroundColor: goal.color,
           borderColor: goal.color,
-          borderWidth: 2,
-          pointRadius: 8,
-          pointHoverRadius: 12,
+          borderWidth: 3,
+          pointRadius: 10,
+          pointHoverRadius: 16,
+          pointHoverBorderWidth: 4,
           showLine: false
         });
       });
@@ -815,25 +1045,22 @@ const TimelineChart = (function(){
       chart.destroy();
     }
 
-    chart = new Chart(ctx, {
+    const chartInstance = chart = new Chart(ctx, {
       type: 'scatter',
       data: { datasets },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+          duration: 800,
+          easing: 'easeOutBounce'
+        },
         plugins: {
           legend: {
             display: false
           },
           tooltip: {
-            callbacks: {
-              label: function(context) {
-                const point = context.raw;
-                const label = context.dataset.label || '';
-                const amount = point.amount > 0 ? `\n$${point.amount.toLocaleString()}` : '';
-                return `${label} (Age ${point.x})${amount}`;
-              }
-            }
+            enabled: false // We use custom tooltip
           }
         },
         scales: {
@@ -844,17 +1071,18 @@ const TimelineChart = (function(){
             max: range.max,
             ticks: {
               stepSize: 10,
-              callback: function(value) {
-                return value;
-              }
+              font: { size: 12, weight: 'bold' },
+              color: '#666'
             },
             title: {
               display: true,
-              text: 'Age (Years)',
-              font: { size: 14, weight: 'bold' }
+              text: '🎂 Age (Years)',
+              font: { size: 15, weight: 'bold' },
+              color: '#333'
             },
             grid: {
-              color: 'rgba(0, 0, 0, 0.05)'
+              color: 'rgba(0, 0, 0, 0.08)',
+              lineWidth: 1
             }
           },
           y: {
@@ -863,16 +1091,33 @@ const TimelineChart = (function(){
             max: Math.max(5, ...Object.values(goalsByAge).map(g => g.length)) + 1
           }
         },
-        onClick: (event, elements, chart) => {
+        onHover: (event, elements) => {
+          const canvas = event.native.target;
+          canvas.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+
+          if (elements.length > 0) {
+            const element = elements[0];
+            const goal = element.element.$context.raw.goalData;
+            showRichTooltip(goal, event.native.offsetX, event.native.offsetY);
+          } else {
+            hideRichTooltip();
+          }
+        },
+        onClick: (event, elements) => {
           if (elements.length === 0) {
-            // Clicked on empty area - could add goal at that age
-            const canvasPosition = Chart.helpers.getRelativePosition(event, chart);
-            const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+            // Clicked on empty area - add goal
+            const canvasPosition = Chart.helpers.getRelativePosition(event, chartInstance);
+            const dataX = chartInstance.scales.x.getValueForPixel(canvasPosition.x);
             const age = Math.round(dataX);
             if (age >= 0 && age <= 100) {
               document.getElementById('modal_goal_age').value = age;
+              createConfetti(event.native.offsetX, event.native.offsetY);
               showModal();
             }
+          } else {
+            // Clicked on a goal - show celebration
+            const element = elements[0];
+            createConfetti(element.element.x, element.element.y);
           }
         }
       }
@@ -881,13 +1126,15 @@ const TimelineChart = (function(){
 
   function setView(view) {
     currentView = view;
+    initChart();
+  }
 
-    // Update button states
-    document.querySelectorAll('.timeline-btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
-
+  function filterCategory(category) {
+    if (categoryFilter === category) {
+      categoryFilter = null; // Toggle off
+    } else {
+      categoryFilter = category;
+    }
     initChart();
   }
 
@@ -901,7 +1148,6 @@ const TimelineChart = (function(){
 
   function closeModal() {
     document.getElementById('goalModal').classList.remove('show');
-    // Clear form
     document.getElementById('modal_goal_name').value = '';
     document.getElementById('modal_goal_age').value = '';
     document.getElementById('modal_goal_amount').value = '';
@@ -922,6 +1168,11 @@ const TimelineChart = (function(){
     customGoals.push({ name, age, amount, category });
     localStorage.setItem('customGoals', JSON.stringify(customGoals));
 
+    // Celebration!
+    const modal = document.querySelector('.modal-content');
+    const rect = modal.getBoundingClientRect();
+    createConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
     closeModal();
     initChart();
   }
@@ -932,10 +1183,14 @@ const TimelineChart = (function(){
   });
 
   // Re-render chart when form values change
+  let inputTimeout;
   document.addEventListener('input', () => {
-    if (chart) {
-      setTimeout(initChart, 300);
-    }
+    clearTimeout(inputTimeout);
+    inputTimeout = setTimeout(() => {
+      if (chart) {
+        initChart();
+      }
+    }, 400);
   });
 
   // Close modal when clicking outside
@@ -948,6 +1203,7 @@ const TimelineChart = (function(){
   return {
     initChart,
     setView,
+    filterCategory,
     addCustomGoal,
     closeModal,
     saveCustomGoal
