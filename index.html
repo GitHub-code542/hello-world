@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js"></script>
   <style>
     :root{
       --bg:#ffffff; --panel:#ffffff; --text:#0b1220; --muted:#5b6672;
@@ -53,7 +54,7 @@
 .tile .note{font-size:12px;color:var(--muted)}
 
 /* === Timeline Chart Styles - GAMIFIED === */
-#timelineChartContainer{position:relative;height:500px;margin:16px 0;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#f0f7ff 0%,#e6f2ff 100%);box-shadow:inset 0 2px 8px rgba(0,0,0,.05)}
+#timelineChartContainer{position:relative;height:600px;margin:16px 0;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#f0f7ff 0%,#e6f2ff 100%);box-shadow:inset 0 2px 8px rgba(0,0,0,.05)}
 html[data-theme="dark"] #timelineChartContainer{background:linear-gradient(180deg,#0a1628 0%,#0f1e35 100%)}
 
 .timeline-controls{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
@@ -88,10 +89,15 @@ html[data-theme="dark"] #timelineChartContainer{background:linear-gradient(180de
 @keyframes walkLegs{0%,100%{transform:translateX(-50%) scaleX(1)}50%{transform:translateX(-50%) scaleX(1.2)}}
 
 /* Goal markers with pulse */
-.goal-marker{position:absolute;width:40px;height:40px;border-radius:50%;cursor:pointer;transition:all .3s;animation:goalPulse 2s ease-in-out infinite;z-index:10}
+.goal-marker{position:absolute;width:40px;height:40px;border-radius:50%;cursor:grab;transition:all .3s;animation:goalPulse 2s ease-in-out infinite;z-index:10}
 .goal-marker:hover{transform:scale(1.3);animation:none;box-shadow:0 8px 24px rgba(0,0,0,.3)}
-.goal-marker.dragging{opacity:.6;cursor:grabbing;z-index:1000}
+.goal-marker:active{cursor:grabbing}
+.goal-marker.dragging{opacity:.8;cursor:grabbing;z-index:1000;box-shadow:0 12px 32px rgba(0,0,0,.4);transform:scale(1.2)}
 @keyframes goalPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.7)}50%{box-shadow:0 0 0 8px rgba(255,255,255,0)}}
+
+/* Canvas cursor states */
+#timelineChart{cursor:default}
+#timelineChart.dragging{cursor:grabbing!important}
 
 /* Achievement badges */
 .achievement-badge{position:absolute;top:-30px;left:50%;transform:translateX(-50%) scale(0);background:#ffd700;color:#000;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;box-shadow:0 4px 12px rgba(255,215,0,.5);z-index:200;animation:achievementPop .6s ease-out forwards}
@@ -1005,39 +1011,36 @@ const TimelineChart = (function(){
     updateAvatarPosition();
     updateProgressBar();
 
-    // Create datasets for the chart
+    // Create datasets for the chart - NOW USING Y-AXIS FOR DOLLAR AMOUNTS!
     const datasets = [];
 
-    // Group goals by age for better visualization
-    const goalsByAge = {};
-    goals.forEach(g => {
-      if (g.age >= range.min && g.age <= range.max) {
-        if (!goalsByAge[g.age]) goalsByAge[g.age] = [];
-        goalsByAge[g.age].push(g);
-      }
-    });
+    // Filter goals for current view
+    const visibleGoals = goals.filter(g => g.age >= range.min && g.age <= range.max);
 
-    // Create scatter points for each goal
-    Object.keys(goalsByAge).forEach(age => {
-      const ageGoals = goalsByAge[age];
-      ageGoals.forEach((goal, idx) => {
-        datasets.push({
-          label: goal.label,
-          data: [{
-            x: parseFloat(age),
-            y: idx + 1,
-            amount: goal.amount,
-            category: goal.category,
-            goalData: goal
-          }],
-          backgroundColor: goal.color,
-          borderColor: goal.color,
-          borderWidth: 3,
-          pointRadius: 10,
-          pointHoverRadius: 16,
-          pointHoverBorderWidth: 4,
-          showLine: false
-        });
+    // Create scatter points - each goal as separate dataset for individual dragging
+    visibleGoals.forEach((goal, idx) => {
+      // For markers without amounts (current age, retirement), use small y value
+      const yValue = goal.amount || 50000; // Default $50k for markers
+
+      datasets.push({
+        label: goal.label,
+        data: [{
+          x: parseFloat(goal.age),
+          y: yValue,
+          goalData: goal,
+          goalIndex: idx
+        }],
+        backgroundColor: goal.color,
+        borderColor: goal.color,
+        borderWidth: 3,
+        pointRadius: goal.category === 'currentAge' || goal.category === 'retirement' ? 8 : 12,
+        pointHoverRadius: 18,
+        pointHoverBorderWidth: 4,
+        showLine: false,
+        // Enable dragging for this dataset
+        dragData: goal.category !== 'currentAge', // Don't allow dragging "You are here" marker
+        dragX: true,
+        dragY: goal.amount > 0 // Only drag Y if goal has an amount
       });
     });
 
@@ -1052,8 +1055,8 @@ const TimelineChart = (function(){
         responsive: true,
         maintainAspectRatio: false,
         animation: {
-          duration: 800,
-          easing: 'easeOutBounce'
+          duration: 600,
+          easing: 'easeOutCubic'
         },
         plugins: {
           legend: {
@@ -1061,6 +1064,53 @@ const TimelineChart = (function(){
           },
           tooltip: {
             enabled: false // We use custom tooltip
+          },
+          dragData: {
+            round: 0,
+            showTooltip: true,
+            onDragStart: function(e, datasetIndex, index, value) {
+              // Visual feedback when starting drag
+              const canvas = e.target;
+              canvas.style.cursor = 'grabbing';
+              hideRichTooltip();
+
+              // Create a temporary indicator
+              const goal = datasets[datasetIndex].data[0].goalData;
+              console.log('Dragging:', goal.label);
+            },
+            onDrag: function(e, datasetIndex, index, value) {
+              // Constrain values while dragging
+              value.x = Math.max(range.min, Math.min(range.max, Math.round(value.x)));
+              value.y = Math.max(0, Math.min(2000000, Math.round(value.y / 10000) * 10000)); // Round to 10k
+
+              // Update tooltip position while dragging
+              const goal = datasets[datasetIndex].data[0].goalData;
+              const updatedGoal = {
+                ...goal,
+                age: value.x,
+                amount: value.y
+              };
+              showRichTooltip(updatedGoal, e.offsetX, e.offsetY);
+            },
+            onDragEnd: function(e, datasetIndex, index, value) {
+              // Finalize the drag
+              const canvas = e.target;
+              canvas.style.cursor = 'default';
+              hideRichTooltip();
+
+              const newAge = Math.round(value.x);
+              const newAmount = Math.round(value.y / 10000) * 10000; // Round to nearest 10k
+
+              const goal = datasets[datasetIndex].data[0].goalData;
+
+              // Update the goal data
+              updateGoalAfterDrag(goal, newAge, newAmount);
+
+              // Celebration!
+              createConfetti(e.offsetX, e.offsetY);
+
+              console.log('Updated:', goal.label, 'to age', newAge, 'amount $' + newAmount.toLocaleString());
+            }
           }
         },
         scales: {
@@ -1076,9 +1126,9 @@ const TimelineChart = (function(){
             },
             title: {
               display: true,
-              text: '🎂 Age (Years)',
-              font: { size: 15, weight: 'bold' },
-              color: '#333'
+              text: '🎂 Age (Years) - Drag goals horizontally to change age!',
+              font: { size: 14, weight: 'bold' },
+              color: '#0d6efd'
             },
             grid: {
               color: 'rgba(0, 0, 0, 0.08)',
@@ -1086,31 +1136,55 @@ const TimelineChart = (function(){
             }
           },
           y: {
-            display: false,
+            type: 'linear',
+            position: 'left',
             min: 0,
-            max: Math.max(5, ...Object.values(goalsByAge).map(g => g.length)) + 1
+            max: 2000000,
+            ticks: {
+              stepSize: 250000,
+              font: { size: 11, weight: 'bold' },
+              color: '#666',
+              callback: function(value) {
+                return '$' + (value / 1000) + 'K';
+              }
+            },
+            title: {
+              display: true,
+              text: '💰 Goal Amount (USD) - Drag goals vertically to change amount!',
+              font: { size: 14, weight: 'bold' },
+              color: '#0d6efd'
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.06)',
+              lineWidth: 1
+            }
           }
         },
         onHover: (event, elements) => {
           const canvas = event.native.target;
-          canvas.style.cursor = elements.length > 0 ? 'pointer' : 'default';
-
           if (elements.length > 0) {
+            canvas.style.cursor = 'grab';
             const element = elements[0];
             const goal = element.element.$context.raw.goalData;
             showRichTooltip(goal, event.native.offsetX, event.native.offsetY);
           } else {
+            canvas.style.cursor = 'default';
             hideRichTooltip();
           }
         },
         onClick: (event, elements) => {
           if (elements.length === 0) {
-            // Clicked on empty area - add goal
+            // Clicked on empty area - add goal with Y position as amount
             const canvasPosition = Chart.helpers.getRelativePosition(event, chartInstance);
             const dataX = chartInstance.scales.x.getValueForPixel(canvasPosition.x);
+            const dataY = chartInstance.scales.y.getValueForPixel(canvasPosition.y);
+
             const age = Math.round(dataX);
+            const amount = Math.max(0, Math.round(dataY / 10000) * 10000);
+
             if (age >= 0 && age <= 100) {
               document.getElementById('modal_goal_age').value = age;
+              document.getElementById('modal_goal_amount').value = amount;
               createConfetti(event.native.offsetX, event.native.offsetY);
               showModal();
             }
@@ -1122,6 +1196,55 @@ const TimelineChart = (function(){
         }
       }
     });
+  }
+
+  // Update goal data after dragging
+  function updateGoalAfterDrag(goal, newAge, newAmount) {
+    const currentAge = v('age') || 42;
+
+    // Update custom goals in localStorage
+    if (goal.isCustom) {
+      const goalIdx = customGoals.findIndex(g =>
+        g.name === goal.label && g.age === goal.age && g.amount === goal.amount
+      );
+      if (goalIdx !== -1) {
+        customGoals[goalIdx].age = newAge;
+        customGoals[goalIdx].amount = newAmount;
+        localStorage.setItem('customGoals', JSON.stringify(customGoals));
+      }
+    } else {
+      // Update form fields for predefined goals
+      const yearsFromNow = newAge - currentAge;
+      const targetYear = new Date().getFullYear() + yearsFromNow;
+
+      switch(goal.category) {
+        case 'education':
+          document.getElementById('g_ce_cost').value = newAmount;
+          document.getElementById('g_ce_date').value = targetYear + '-01-01';
+          break;
+        case 'marriage':
+          document.getElementById('g_cm_cost').value = newAmount;
+          // Marriage age is tricky - just update the cost for now
+          break;
+        case 'home':
+          document.getElementById('g_home_cost').value = newAmount;
+          document.getElementById('g_home_date').value = targetYear + '-01-01';
+          break;
+        case 'car':
+          document.getElementById('g_car_budget').value = newAmount;
+          break;
+        case 'retirement':
+          document.getElementById('retire_age').value = newAge;
+          break;
+        case 'other':
+          document.getElementById('g_other_amt').value = newAmount;
+          document.getElementById('g_other_date').value = targetYear + '-01-01';
+          break;
+      }
+    }
+
+    // Refresh the chart to reflect changes
+    setTimeout(() => initChart(), 100);
   }
 
   function setView(view) {
