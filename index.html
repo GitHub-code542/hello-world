@@ -1017,10 +1017,19 @@ const TimelineChart = (function(){
     // Filter goals for current view
     const visibleGoals = goals.filter(g => g.age >= range.min && g.age <= range.max);
 
+    console.log('📊 Creating chart with', visibleGoals.length, 'goals');
+
     // Create scatter points - each goal as separate dataset for individual dragging
     visibleGoals.forEach((goal, idx) => {
       // For markers without amounts (current age, retirement), use small y value
       const yValue = goal.amount || 50000; // Default $50k for markers
+
+      // Determine if this goal should be draggable
+      // Car goals are NOT draggable because they're recurring (multiple instances)
+      const canDrag = goal.category !== 'currentAge' && goal.category !== 'car';
+      const canDragY = goal.amount > 0;
+
+      console.log(`Goal: ${goal.label}, Amount: $${goal.amount}, CanDrag: ${canDrag}, CanDragY: ${canDragY}, Category: ${goal.category}`);
 
       datasets.push({
         label: goal.label,
@@ -1037,16 +1046,22 @@ const TimelineChart = (function(){
         pointHoverRadius: 18,
         pointHoverBorderWidth: 4,
         showLine: false,
-        // Enable dragging for this dataset
-        dragData: goal.category !== 'currentAge', // Don't allow dragging "You are here" marker
-        dragX: true,
-        dragY: goal.amount > 0 // Only drag Y if goal has an amount
+        // PER-DATASET drag configuration (more reliable than global)
+        dragData: canDrag,
+        dragX: canDrag,
+        dragY: canDrag && canDragY
       });
     });
 
     if (chart) {
       chart.destroy();
     }
+
+    // Check if dragData plugin is available
+    const hasDragPlugin = typeof window.ChartJSdragDataPlugin !== 'undefined' ||
+                          (window.Chart && window.Chart.registry && window.Chart.registry.plugins && window.Chart.registry.plugins.get('dragdata'));
+
+    console.log('🔌 DragData plugin available:', hasDragPlugin);
 
     const chartInstance = chart = new Chart(ctx, {
       type: 'scatter',
@@ -1067,41 +1082,56 @@ const TimelineChart = (function(){
           },
           dragData: {
             round: 0,
-            showTooltip: true,
+            showTooltip: false,
             onDragStart: function(e, datasetIndex, index, value) {
-              // Visual feedback when starting drag
+              console.log('🎯 DRAG START - Dataset:', datasetIndex, 'Value:', value);
               const canvas = e.target;
               canvas.style.cursor = 'grabbing';
               hideRichTooltip();
 
-              // Create a temporary indicator
               const goal = datasets[datasetIndex].data[0].goalData;
-              console.log('Dragging:', goal.label);
+
+              // Check if this goal is draggable (based on per-dataset config)
+              if (goal.category === 'currentAge') {
+                console.log('❌ Cannot drag current age marker');
+                return false;
+              }
+
+              if (goal.category === 'car') {
+                console.log('❌ Cannot drag car goals (they are recurring)');
+                return false;
+              }
+
+              // Show indicator
+              showDragIndicator(e.offsetX, e.offsetY, Math.round(value.x), Math.round(value.y));
+              console.log('✅ Drag started for:', goal.label, '- Category:', goal.category);
+              return true;
             },
             onDrag: function(e, datasetIndex, index, value) {
               // Constrain values while dragging
+              const oldX = value.x;
+              const oldY = value.y;
+
               value.x = Math.max(range.min, Math.min(range.max, Math.round(value.x)));
               value.y = Math.max(0, Math.min(2000000, Math.round(value.y / 10000) * 10000)); // Round to 10k
 
-              // Update tooltip position while dragging
-              const goal = datasets[datasetIndex].data[0].goalData;
-              const updatedGoal = {
-                ...goal,
-                age: value.x,
-                amount: value.y
-              };
-              showRichTooltip(updatedGoal, e.offsetX, e.offsetY);
+              console.log(`📍 Dragging: Age ${Math.round(value.x)}, Amount $${Math.round(value.y).toLocaleString()}`);
+
+              showDragIndicator(e.offsetX, e.offsetY, Math.round(value.x), Math.round(value.y));
+              return true;
             },
             onDragEnd: function(e, datasetIndex, index, value) {
-              // Finalize the drag
+              console.log('🏁 DRAG END:', datasetIndex, value);
               const canvas = e.target;
               canvas.style.cursor = 'default';
-              hideRichTooltip();
+              hideDragIndicator();
 
               const newAge = Math.round(value.x);
               const newAmount = Math.round(value.y / 10000) * 10000; // Round to nearest 10k
 
               const goal = datasets[datasetIndex].data[0].goalData;
+
+              console.log('💾 Saving:', goal.label, 'Age:', newAge, 'Amount:', newAmount);
 
               // Update the goal data
               updateGoalAfterDrag(goal, newAge, newAmount);
@@ -1109,7 +1139,7 @@ const TimelineChart = (function(){
               // Celebration!
               createConfetti(e.offsetX, e.offsetY);
 
-              console.log('Updated:', goal.label, 'to age', newAge, 'amount $' + newAmount.toLocaleString());
+              return true;
             }
           }
         },
@@ -1196,11 +1226,49 @@ const TimelineChart = (function(){
         }
       }
     });
+
+    if (!hasDragPlugin) {
+      console.warn('⚠️ WARNING: Drag plugin not detected! Goals will not be draggable.');
+      console.warn('Please check if chartjs-plugin-dragdata.min.js loaded correctly.');
+    }
+  }
+
+  // Show drag indicator
+  function showDragIndicator(x, y, age, amount) {
+    let indicator = document.getElementById('dragIndicator');
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.id = 'dragIndicator';
+      indicator.style.cssText = 'position:absolute;background:rgba(13,110,253,0.95);color:white;padding:10px 15px;border-radius:10px;font-size:13px;font-weight:bold;z-index:1000;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.3);border:2px solid white;';
+      document.getElementById('timelineChartContainer').appendChild(indicator);
+    }
+
+    indicator.style.left = (x + 15) + 'px';
+    indicator.style.top = (y - 50) + 'px';
+    indicator.innerHTML = `<div style="text-align:center">🎯 Age: <strong>${age}</strong><br>💰 Amount: <strong>$${amount.toLocaleString()}</strong></div>`;
+    indicator.style.display = 'block';
+  }
+
+  function hideDragIndicator() {
+    const indicator = document.getElementById('dragIndicator');
+    if (indicator) {
+      indicator.style.display = 'none';
+    }
   }
 
   // Update goal data after dragging
   function updateGoalAfterDrag(goal, newAge, newAmount) {
     const currentAge = v('age') || 42;
+
+    console.log('💾 updateGoalAfterDrag called:', {
+      label: goal.label,
+      category: goal.category,
+      isCustom: goal.isCustom,
+      oldAge: goal.age,
+      newAge: newAge,
+      oldAmount: goal.amount,
+      newAmount: newAmount
+    });
 
     // Update custom goals in localStorage
     if (goal.isCustom) {
@@ -1211,40 +1279,58 @@ const TimelineChart = (function(){
         customGoals[goalIdx].age = newAge;
         customGoals[goalIdx].amount = newAmount;
         localStorage.setItem('customGoals', JSON.stringify(customGoals));
+        console.log('✅ Custom goal saved to localStorage');
+      } else {
+        console.error('❌ Could not find custom goal to update');
       }
     } else {
       // Update form fields for predefined goals
       const yearsFromNow = newAge - currentAge;
       const targetYear = new Date().getFullYear() + yearsFromNow;
 
+      console.log('📝 Updating form fields for', goal.category);
+
       switch(goal.category) {
         case 'education':
           document.getElementById('g_ce_cost').value = newAmount;
           document.getElementById('g_ce_date').value = targetYear + '-01-01';
+          console.log('✅ Updated education goal in form');
           break;
         case 'marriage':
           document.getElementById('g_cm_cost').value = newAmount;
-          // Marriage age is tricky - just update the cost for now
+          // Note: Marriage uses child's age at marriage, not a date, so we can't update the age easily
+          console.log('✅ Updated marriage cost (age update not supported yet)');
           break;
         case 'home':
           document.getElementById('g_home_cost').value = newAmount;
           document.getElementById('g_home_date').value = targetYear + '-01-01';
+          console.log('✅ Updated home goal in form');
           break;
         case 'car':
-          document.getElementById('g_car_budget').value = newAmount;
+          // Car goals are recurring, so dragging doesn't make sense
+          console.warn('⚠️ Car goals should not be draggable (recurring)');
           break;
         case 'retirement':
           document.getElementById('retire_age').value = newAge;
+          // Note: Retirement doesn't have an amount field in the form
+          console.log('✅ Updated retirement age (amount not stored in form)');
           break;
         case 'other':
           document.getElementById('g_other_amt').value = newAmount;
           document.getElementById('g_other_date').value = targetYear + '-01-01';
+          console.log('✅ Updated other goal in form');
           break;
+        default:
+          console.warn('⚠️ Unknown goal category:', goal.category);
       }
     }
 
-    // Refresh the chart to reflect changes
-    setTimeout(() => initChart(), 100);
+    // Refresh the chart to reflect changes after a brief delay to ensure form updates are processed
+    console.log('🔄 Refreshing chart in 150ms...');
+    setTimeout(() => {
+      console.log('🔄 Chart refresh initiated');
+      initChart();
+    }, 150);
   }
 
   function setView(view) {

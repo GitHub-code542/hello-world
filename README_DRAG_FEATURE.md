@@ -46,15 +46,16 @@ Once the plugin loads:
 5. **Release** → 🎉 Confetti! Form fields update automatically
 
 ## What You CAN Drag:
-- ✅ 🎓 Education goals
-- ✅ 💍 Marriage goals
-- ✅ 🏠 Home Purchase
-- ✅ 🚗 Car Purchase goals
-- ✅ 🎯 Retirement marker (age only)
-- ✅ ⭐ All custom goals
+- ✅ 🎓 Education goals (age + amount)
+- ✅ 💍 Marriage goals (amount only - age calculation is complex)
+- ✅ 🏠 Home Purchase (age + amount)
+- ✅ 🎯 Retirement marker (age only - no amount field in form)
+- ✅ ⭐ All custom goals (age + amount)
+- ✅ Other goals (age + amount)
 
 ## What You CANNOT Drag:
 - ❌ 📍 "You are here" marker (your current age - this is fixed)
+- ❌ 🚗 Car Purchase goals (these are recurring - multiple purchases at different ages)
 
 ## Alternative: Click to Create Goals
 
