@@ -8,11 +8,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Chart.js v4.4.0 - Try local first, fallback to CDN -->
-  <script src="./js/chart.umd.min.js" onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';"></script>
+  <!-- Chart.js v4.4.0 - Load from reliable CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <!-- chartjs-plugin-dragdata v2.2.5 - Try local first, fallback to CDN -->
-  <script src="./js/chartjs-plugin-dragdata.min.js" onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js';"></script>
+  <!-- chartjs-plugin-dragdata v2.2.5 - Load from reliable CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js"></script>
   <style>
     :root{
       --bg:#ffffff; --panel:#ffffff; --text:#0b1220; --muted:#5b6672;
@@ -519,6 +519,13 @@ html[data-theme="dark"] #timelineChartContainer{background:linear-gradient(180de
             <button class="timeline-btn" onclick="TimelineChart.setView('retirement')">🌴 Retirement Years</button>
             <button class="timeline-btn" style="margin-left:auto" onclick="TimelineChart.addCustomGoal()">✨ + Add Custom Goal</button>
           </div>
+
+          <!-- Interactive instructions -->
+          <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:16px;border-radius:12px;margin:16px 0;text-align:center;font-size:14px;box-shadow:0 4px 12px rgba(102,126,234,0.3);">
+            <strong>💡 Pro Tip:</strong> Click and drag any goal marker to adjust its <strong>age</strong> (left/right) and <strong>amount</strong> (up/down)!
+            Changes sync automatically with your forms. 🎯
+          </div>
+
           <div id="timelineChartContainer">
             <!-- Life stages background -->
             <div class="life-stage-container" id="lifeStages"></div>
@@ -862,11 +869,11 @@ const TimelineChart = (function(){
       color: COLORS.currentAge
     });
 
-    // Retirement marker
+    // Retirement marker (with default amount for dragging)
     goals.push({
       age: retireAge,
       label: `Retirement (${retireAge})`,
-      amount: 0,
+      amount: 500000, // Default retirement goal amount ($500k) - draggable on Y-axis
       category: 'retirement',
       color: COLORS.retirement
     });
@@ -1234,6 +1241,18 @@ const TimelineChart = (function(){
     if (!hasDragPlugin) {
       console.warn('⚠️ WARNING: Drag plugin not detected! Goals will not be draggable.');
       console.warn('Please check if chartjs-plugin-dragdata.min.js loaded correctly.');
+
+      // Show visual warning to user
+      const container = document.getElementById('timelineChartContainer');
+      let warning = document.getElementById('dragWarning');
+      if (!warning) {
+        warning = document.createElement('div');
+        warning.id = 'dragWarning';
+        warning.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#ff9800;color:white;padding:12px 20px;border-radius:8px;font-size:14px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+        warning.innerHTML = '⚠️ Drag plugin not loaded. Goals are view-only. Refresh page or check console.';
+        container.appendChild(warning);
+        setTimeout(() => { if (warning) warning.style.display = 'none'; }, 10000); // Hide after 10s
+      }
     }
   }
 
@@ -1391,8 +1410,13 @@ const TimelineChart = (function(){
   }
 
   // Initialize on load and re-render on input changes
+  // Wait for Chart.js and drag plugin to fully load
   window.addEventListener('load', () => {
-    setTimeout(initChart, 100);
+    // Give extra time for CDN scripts to load and initialize
+    setTimeout(() => {
+      console.log('🚀 Initializing chart after page load...');
+      initChart();
+    }, 300);
   });
 
   // Re-render chart when form values change
