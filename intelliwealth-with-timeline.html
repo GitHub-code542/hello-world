@@ -879,6 +879,88 @@
 
     <script src="script.js"></script>
 
+    <!-- Extended Navigation for Step 9 -->
+    <script>
+    // Override nextStep to handle navigation to step 9
+    const originalNextStep = window.nextStep;
+    window.nextStep = function(currentStep) {
+        if (currentStep === 8) {
+            // Navigate from step 8 to step 9
+            document.querySelector('.step.active')?.classList.remove('active');
+            document.querySelector('[data-step="9"]')?.classList.add('active');
+
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+            }
+
+            // Update step indicator
+            const stepIndicator = document.getElementById('stepIndicator');
+            if (stepIndicator) {
+                stepIndicator.textContent = 'Step 9 of 9';
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Initialize timeline chart after a brief delay
+            setTimeout(() => {
+                if (typeof TimelineChart !== 'undefined') {
+                    TimelineChart.initChart();
+                }
+            }, 300);
+        } else if (originalNextStep) {
+            // Use original navigation for steps 1-7
+            originalNextStep(currentStep);
+        }
+    };
+
+    // Override prevStep to handle navigation from step 9
+    const originalPrevStep = window.prevStep;
+    window.prevStep = function(currentStep) {
+        if (currentStep === 9) {
+            // Navigate from step 9 back to step 8
+            document.querySelector('.step.active')?.classList.remove('active');
+            document.querySelector('[data-step="8"]')?.classList.add('active');
+
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = '87.5%'; // 7/8 steps
+            }
+
+            // Update step indicator
+            const stepIndicator = document.getElementById('stepIndicator');
+            if (stepIndicator) {
+                stepIndicator.textContent = 'Step 8 of 9';
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (originalPrevStep) {
+            // Use original navigation for other steps
+            originalPrevStep(currentStep);
+        }
+    };
+
+    // Update step indicators for all steps to show "of 9"
+    document.addEventListener('DOMContentLoaded', () => {
+        // Patch the step indicator update
+        const observer = new MutationObserver(() => {
+            const indicator = document.getElementById('stepIndicator');
+            if (indicator && indicator.textContent.includes('of 8')) {
+                indicator.textContent = indicator.textContent.replace('of 8', 'of 9');
+            }
+        });
+
+        const indicator = document.getElementById('stepIndicator');
+        if (indicator) {
+            observer.observe(indicator, { childList: true, characterData: true, subtree: true });
+        }
+    });
+    </script>
+
     <!-- Timeline Chart JavaScript -->
     <script>
     const TimelineChart = (() => {
