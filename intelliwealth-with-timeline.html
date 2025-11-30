@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Goal-based Target-return Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Chart.js v4.4.0 for Interactive Timeline -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- chartjs-plugin-dragdata v2.2.5 for drag-and-drop -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js"></script>
+
+    <style>
+    /* === Timeline Chart Styles === */
+    #timelineChartContainer {
+        position: relative;
+        height: 600px;
+        margin: 16px 0;
+        overflow: hidden;
+        border-radius: 12px;
+        background: linear-gradient(180deg, #f0f7ff 0%, #e6f2ff 100%);
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, .05);
+    }
+
+    .timeline-controls {
+        display: flex;
+        gap: 8px;
+        margin: 0 0 16px 0;
+        flex-wrap: wrap;
+    }
+
+    .timeline-btn {
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: 2px solid #e7edf3;
+        background: #fff;
+        color: #0b1220;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all .2s;
+        font-size: 13px;
+    }
+
+    .timeline-btn:hover {
+        background: #0d6efd;
+        color: #fff;
+        border-color: #0d6efd;
+    }
+
+    .timeline-btn.active {
+        background: #0d6efd;
+        color: #fff;
+        border-color: #0d6efd;
+    }
+
+    .timeline-avatar {
+        position: absolute;
+        bottom: 60px;
+        width: 50px;
+        height: 50px;
+        transition: left .8s cubic-bezier(.34, 1.56, .64, 1);
+        z-index: 100;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .3));
+    }
+
+    .avatar-person {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .avatar-head {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 20px;
+        background: #ffb74d;
+        border-radius: 50%;
+        border: 2px solid #fff;
+    }
+
+    .avatar-body {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 16px;
+        height: 18px;
+        background: #42a5f5;
+        border-radius: 8px;
+    }
+
+    .avatar-legs {
+        position: absolute;
+        top: 36px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 16px;
+        height: 14px;
+        background: transparent;
+        border-left: 3px solid #1976d2;
+        border-right: 3px solid #1976d2;
+    }
+
+    .life-stage-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .life-stage {
+        position: absolute;
+        height: 100%;
+        opacity: .15;
+        transition: all .5s;
+    }
+
+    .stage-childhood {
+        background: linear-gradient(90deg, #4caf5055, #8bc34a55);
+    }
+
+    .stage-young {
+        background: linear-gradient(90deg, #2196f355, #03a9f455);
+    }
+
+    .stage-middle {
+        background: linear-gradient(90deg, #ff980055, #ff572255);
+    }
+
+    .stage-retirement {
+        background: linear-gradient(90deg, #9c27b055, #e91e6355);
+    }
+
+    .timeline-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: rgba(0, 0, 0, .05);
+        z-index: 5;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4caf50, #2196f3, #ff9800, #9c27b0);
+        transition: width .6s ease;
+    }
+
+    .rich-tooltip {
+        position: absolute;
+        background: rgba(0, 0, 0, .9);
+        color: #fff;
+        padding: 14px 18px;
+        border-radius: 10px;
+        font-size: 13px;
+        z-index: 200;
+        pointer-events: none;
+        display: none;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+        max-width: 280px;
+        backdrop-filter: blur(10px);
+    }
+
+    .tooltip-title {
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 6px;
+        color: #fff;
+    }
+
+    .tooltip-details {
+        line-height: 1.5;
+        color: rgba(255, 255, 255, .9);
+    }
+
+    .confetti {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 300;
+        animation: confettiFall 2s ease-out forwards;
+    }
+
+    @keyframes confettiFall {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateY(400px) rotate(720deg);
+            opacity: 0;
+        }
+    }
+
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, .7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #fff;
+        padding: 32px;
+        border-radius: 16px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, .3);
+        max-width: 500px;
+        width: 90%;
+        animation: slideIn .3s ease;
+    }
+
+    @keyframes slideIn {
+        0% {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 24px 0;
+        color: #0b1220;
+    }
+
+    .legend {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 16px 0;
+        padding: 16px;
+        background: #f5f9ff;
+        border-radius: 10px;
+        border: 1px solid #e7edf3;
+    }
+
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: #fff;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all .2s;
+        border: 1px solid #e7edf3;
+    }
+
+    .legend-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+    }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="top">
+            <div class="brand">Goal-based Target-return Calculator</div>
+            <div class="spacer"></div>
+            <!-- <div class="toggle" id="themeToggle">Light / Dark</div> -->
+        </div>
+
+        <!-- Auto-calculation Summary (Hidden for now as it might not be in the left panel of reference) -->
+        <!-- 
+        <div class="summary">
+            <div class="tile">
+                <div class="k">Gross Monthly Income</div>
+                <div class="v" id="t_gmi">$0</div>
+                <div class="note">Salary + (annual incomes/12)</div>
+            </div>
+            ...
+        </div> 
+        -->
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+        <div class="step-indicator" id="stepIndicator">Step 1 of 9</div>
+
+        <div class="wizard" id="wizard">
+
+            <!-- 1) GENERAL QUESTIONS -->
+            <div class="step active" data-step="1">
+                <div class="step-header">
+                    <span class="step-icon">👤</span>
+                    <h2>Let's start with the basics</h2>
+                </div>
+                <div class="content">
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Current Age in years <span class="hint">ⓘ</span></div>
+                            <div class="stepper">
+                                <button type="button" data-step="age" data-delta="-1">−</button>
+                                <button type="button" data-step="age" data-delta="1">+</button>
+                            </div>
+                            <div class="pillInput"><span class="prefix">yrs</span><input id="age" type="number"
+                                    value="42" /></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Retirement Age</div>
+                            <div class="stepper">
+                                <button type="button" data-step="retire_age" data-delta="-1">−</button>
+                                <button type="button" data-step="retire_age" data-delta="1">+</button>
+                            </div>
+                            <div class="pillInput"><span class="prefix">yrs</span><input id="retire_age" type="number"
+                                    value="60" /></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Current Fin. Investments <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="invest_now" type="text"
+                                    value="500,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_invest_now" min="0" max="20000000" step="10000" value="500000">
+                            <div class="ticks">
+                                <span>0</span><span>5M</span><span>10M</span><span>15M</span><span>20M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Net Savings p.a.</div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="save_pa" type="text"
+                                    value="100,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_save_pa" min="0" max="1000000" step="5000" value="100000">
+                            <div class="ticks">
+                                <span>0</span><span>250K</span><span>500K</span><span>750K</span><span>1M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Annual Increase in Net Savings <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">%</span><input id="save_g" type="number"
+                                    value="5" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_save_g" min="0" max="25" step="0.5" value="5">
+                            <div class="ticks">
+                                <span>0</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span><span>25%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Annual Retirement Expenses <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="ret_exp" type="text"
+                                    value="100,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_ret_exp" min="0" max="1000000" step="5000" value="100000">
+                            <div class="ticks">
+                                <span>0</span><span>250K</span><span>500K</span><span>750K</span><span>1M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Inflation Rate</div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">%</span><input id="infl" type="number"
+                                    value="4" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_infl" min="0" max="15" step="0.1" value="4">
+                            <div class="ticks"><span>0</span><span>5%</span><span>10%</span><span>15%</span></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="grid three">
+                            <div class="pillInput"><span class="prefix">Gender</span><select id="gender">
+                                    <option value="">Select</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                    <option>Prefer not to say</option>
+                                </select></div>
+                            <div class="pillInput"><span class="prefix">Marital</span><select id="marital">
+                                    <option value="">Select</option>
+                                    <option>Single</option>
+                                    <option>Married</option>
+                                    <option>Divorced</option>
+                                    <option>Widowed</option>
+                                </select></div>
+                            <div class="pillInput"><span class="prefix">Dependents</span><input id="dependents"
+                                    type="number" value="0" min="0" /></div>
+                        </div>
+                    </div>
+
+                    <div class="section" style="border-bottom:0">
+                        <div class="row">
+                            <div class="label">Legacy at Death</div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="legacy" type="text"
+                                    value="1,000,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_legacy" min="0" max="20000000" step="10000" value="1000000">
+                            <div class="ticks"><span>0</span><span>10M</span><span>20M</span></div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-next" onclick="nextStep(1)">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- 2) HOME RENT EXPENSES -->
+            <div class="step" data-step="2">
+                <div class="step-header">
+                    <span class="step-icon">🏠</span>
+                    <h2>Home Rent Expenses</h2>
+                </div>
+                <div class="content">
+                    <div class="section" style="border-bottom:0">
+                        <div class="row">
+                            <div class="label">Rent p.a <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="rent_pa" type="text"
+                                    value="36,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_rent_pa" min="0" max="200000" step="1000" value="36000">
+                            <div class="ticks">
+                                <span>0</span><span>50K</span><span>100K</span><span>150K</span><span>200K</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(2)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(2)">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- 3) HOME EMI EXPENSES -->
+            <div class="step" data-step="3">
+                <div class="step-header">
+                    <span class="step-icon">🏦</span>
+                    <h2>Home EMI Expenses</h2>
+                </div>
+                <div class="content">
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">House Purchase (Years from today) <span class="hint">ⓘ</span></div>
+                            <div class="stepper">
+                                <button type="button" data-step="hp_years" data-delta="-1">−</button>
+                                <button type="button" data-step="hp_years" data-delta="1">+</button>
+                            </div>
+                            <div class="pillInput"><span class="prefix">yrs</span><input id="hp_years" type="number"
+                                    value="5" /></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Loan Tenure (Years) <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">yrs</span><input id="loan_tenure" type="number"
+                                    value="10" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_loan_tenure" min="0" max="45" step="1" value="10">
+                            <div class="ticks"><span>0</span><span>15</span><span>30</span><span>45</span></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Proposed Down Payment <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="downpay" type="text"
+                                    value="100,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_downpay" min="0" max="2000000" step="10000" value="100000">
+                            <div class="ticks">
+                                <span>0</span><span>500K</span><span>1M</span><span>1.5M</span><span>2M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section" style="border-bottom:0">
+                        <div class="row">
+                            <div class="label">EMI p.a <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="emi_pa" type="text"
+                                    value="30,000" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_emi_pa" min="0" max="200000" step="1000" value="30000">
+                            <div class="ticks">
+                                <span>0</span><span>50K</span><span>100K</span><span>150K</span><span>200K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(3)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(3)">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- 4) CHILDREN'S UNIVERSITY EXPENSES -->
+            <div class="step" data-step="4">
+                <div class="step-header">
+                    <span class="step-icon">🎓</span>
+                    <h2>Children’s University Expenses</h2>
+                </div>
+                <div class="content">
+                    <div class="section">
+                        <div class="row">
+                            <div class="label">Number of Children</div>
+                            <div class="stepper">
+                                <button type="button" data-step="kids_n" data-delta="-1">−</button>
+                                <button type="button" data-step="kids_n" data-delta="1">+</button>
+                            </div>
+                            <div class="pillInput"><span class="prefix">#</span><input id="kids_n" type="number"
+                                    value="0" min="0" /></div>
+                        </div>
+                    </div>
+                    <div class="section" style="border-bottom:0">
+                        <div class="row">
+                            <div class="label">Cost of Education p.a. <span class="hint">ⓘ</span></div>
+                            <div></div>
+                            <div class="pillInput"><span class="prefix">INR</span><input id="edu_cost_pa" type="text"
+                                    value="0" /></div>
+                        </div>
+                        <div class="slider">
+                            <input type="range" id="s_edu_cost_pa" min="0" max="1000000" step="5000" value="0">
+                            <div class="ticks">
+                                <span>0</span><span>200K</span><span>400K</span><span>600K</span><span>800K</span><span>1M</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(4)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(4)">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- 5) INCOME DETAILS -->
+            <div class="step" data-step="5">
+                <div class="step-header">
+                    <span class="step-icon">💰</span>
+                    <h2>Income Details</h2>
+                </div>
+                <div class="content">
+                    <div class="grid two">
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="inc_takehome"
+                                type="number" placeholder="Monthly Take Home salary" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_bonus" type="number"
+                                placeholder="Expected Annual bonus" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_rent" type="number"
+                                placeholder="Rental income" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_business"
+                                type="number" placeholder="Business income" /></div>
+                        <div class="pillInput"><span class="prefix">% / yr</span><input id="inc_rise" type="number"
+                                placeholder="Expected annual income rise" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_invest" type="number"
+                                placeholder="Investment income (dividends, interest)" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_other" type="number"
+                                placeholder="Any income from other sources" /></div>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(5)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(5)">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- 6) EXPENSES DETAILS -->
+            <div class="step" data-step="6">
+                <div class="step-header">
+                    <span class="step-icon">💸</span>
+                    <h2>Expenses Details</h2>
+                </div>
+                <div class="content">
+                    <div class="grid two">
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_rent" type="number"
+                                placeholder="Monthly - House Rent" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_school" type="number"
+                                placeholder="Monthly - School Fee details by Kid" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_household"
+                                type="number"
+                                placeholder="Monthly - Total Household expenses (Bills & Groceries etc)" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_vac" type="number"
+                                placeholder="Annual - Vacation" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_disc" type="number"
+                                placeholder="Annual - Discretionary Purchases (Clothing, Mobile, Whitegoods)" />
+                        </div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_life" type="number"
+                                placeholder="Annual - Life Insurance Premiums" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_health" type="number"
+                                placeholder="Annual - Health Insurance Premiums" /></div>
+                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_maint" type="number"
+                                placeholder="Annual - Maintenances (Appliances, Vehicle, Property)" />
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(6)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(6)">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- 7) INVESTMENTS -->
+            <div class="step" data-step="7">
+                <div class="step-header">
+                    <span class="step-icon">📈</span>
+                    <h2>Investments</h2>
+                </div>
+                <div class="content">
+                    <div class="grid two">
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_mf" type="number"
+                                placeholder="Mutual Funds" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_stocks" type="number"
+                                placeholder="Stocks" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_bonds_fd" type="number"
+                                placeholder="Bonds & Fixed Deposits" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_ppf_epf_nps" type="number"
+                                placeholder="PPF, EPF, NPS" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_savings_bank" type="number"
+                                placeholder="Saving Bank Balances" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_realestate" type="number"
+                                placeholder="Real Estate (Value)" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_gold" type="number"
+                                placeholder="Gold Equivalents / Jewelry" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_other" type="number"
+                                placeholder="Other investments (PMS, AIF, SIF)" /></div>
+                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_any_other_5lac"
+                                type="number" placeholder="Any other Assets (>5Lac)" /></div>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(7)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(7)">Next Step →</button>
+                </div>
+            </div>
+
+            <!-- 8) LOANS -->
+            <div class="step" data-step="8">
+                <div class="step-header">
+                    <span class="step-icon">💳</span>
+                    <h2>Loans</h2>
+                </div>
+                <div class="content">
+                    <div class="grid two">
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_home_out" type="number"
+                                placeholder="Outstanding Home loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_home_emi"
+                                type="number" placeholder="Home Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_home_close" type="date"
+                                placeholder="Home Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_car_out" type="number"
+                                placeholder="Outstanding Car loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_car_emi"
+                                type="number" placeholder="Car Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_car_close" type="date"
+                                placeholder="Car Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_personal_out"
+                                type="number" placeholder="Outstanding Personal loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_personal_emi"
+                                type="number" placeholder="Personal Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_personal_close"
+                                type="date" placeholder="Personal Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_edu_out" type="number"
+                                placeholder="Outstanding Education loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_edu_emi"
+                                type="number" placeholder="Education loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_edu_close" type="date"
+                                placeholder="Education Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_biz_out" type="number"
+                                placeholder="Outstanding Business loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_biz_emi"
+                                type="number" placeholder="Business Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_biz_close" type="date"
+                                placeholder="Business Loan Closure Date" /></div>
+
+                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_other_out" type="number"
+                                placeholder="Outstanding - Other loan" /></div>
+                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_other_emi"
+                                type="number" placeholder="Other Loan EMI" /></div>
+                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_other_close" type="date"
+                                placeholder="Other Loan Closure Date" /></div>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(8)">← Back</button>
+                    <button class="btn-next" onclick="nextStep(8)">Next: View Timeline →</button>
+                </div>
+            </div>
+
+            <!-- 9) INTERACTIVE LIFE TIMELINE JOURNEY -->
+            <div class="step" data-step="9">
+                <div class="step-header">
+                    <span class="step-icon">🎮</span>
+                    <h2>Interactive Life Timeline Journey</h2>
+                </div>
+                <div class="content">
+
+                    <!-- Interactive instructions -->
+                    <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:16px;border-radius:12px;margin:16px 0;text-align:center;font-size:14px;box-shadow:0 4px 12px rgba(102,126,234,0.3);">
+                        <strong>💡 Pro Tip:</strong> Click and drag any goal marker to adjust its <strong>age</strong> (left/right) and <strong>amount</strong> (up/down)!
+                        Changes sync automatically with your forms. 🎯
+                    </div>
+
+                    <div class="timeline-controls">
+                        <button class="timeline-btn active" onclick="TimelineChart.setView('full')">🌍 Full Life (0-100)</button>
+                        <button class="timeline-btn" onclick="TimelineChart.setView('working')">💼 Working Years</button>
+                        <button class="timeline-btn" onclick="TimelineChart.setView('retirement')">🌴 Retirement Years</button>
+                        <button class="timeline-btn" style="margin-left:auto" onclick="TimelineChart.addCustomGoal()">✨ + Add Custom Goal</button>
+                    </div>
+
+                    <div id="timelineChartContainer">
+                        <!-- Life stages background -->
+                        <div class="life-stage-container" id="lifeStages"></div>
+
+                        <!-- Animated character avatar -->
+                        <div class="timeline-avatar" id="avatarCharacter">
+                            <div class="avatar-person">
+                                <div class="avatar-head"></div>
+                                <div class="avatar-body"></div>
+                                <div class="avatar-legs"></div>
+                            </div>
+                        </div>
+
+                        <!-- Progress bar -->
+                        <div class="timeline-progress">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+
+                        <!-- Canvas for chart -->
+                        <canvas id="timelineChart"></canvas>
+
+                        <!-- Rich tooltip -->
+                        <div class="rich-tooltip" id="richTooltip">
+                            <div class="tooltip-title" id="tooltipTitle"></div>
+                            <div class="tooltip-details" id="tooltipDetails"></div>
+                        </div>
+                    </div>
+
+                    <!-- Goal category legend -->
+                    <div class="legend">
+                        <div class="legend-item" onclick="TimelineChart.filterCategory(null)">
+                            <span>🎯</span><span>All Goals</span>
+                        </div>
+                        <div class="legend-item" onclick="TimelineChart.filterCategory('education')">
+                            <span class="legend-color" style="background:#ff6384"></span><span>Education</span>
+                        </div>
+                        <div class="legend-item" onclick="TimelineChart.filterCategory('marriage')">
+                            <span class="legend-color" style="background:#ff9f40"></span><span>Marriage</span>
+                        </div>
+                        <div class="legend-item" onclick="TimelineChart.filterCategory('home')">
+                            <span class="legend-color" style="background:#ffcd56"></span><span>Home</span>
+                        </div>
+                        <div class="legend-item" onclick="TimelineChart.filterCategory('car')">
+                            <span class="legend-color" style="background:#4bc0c0"></span><span>Car</span>
+                        </div>
+                        <div class="legend-item" onclick="TimelineChart.filterCategory('retirement')">
+                            <span class="legend-color" style="background:#36a2eb"></span><span>Retirement</span>
+                        </div>
+                        <div class="legend-item" onclick="TimelineChart.filterCategory('other')">
+                            <span class="legend-color" style="background:#9966ff"></span><span>Other</span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-prev" onclick="prevStep(9)">← Back</button>
+                    <button class="btn-finish" onclick="finishWizard()">Finish & Calculate 🎉</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal for adding custom goals -->
+    <div class="modal" id="goalModal">
+        <div class="modal-content">
+            <h2 class="modal-title">✨ Add Custom Goal</h2>
+            <div class="grid two">
+                <div class="pillInput">
+                    <span class="prefix">Goal Name</span>
+                    <input id="modal_goal_name" type="text" placeholder="e.g., World Tour, Start Business" />
+                </div>
+                <div class="pillInput">
+                    <span class="prefix">Age</span>
+                    <input id="modal_goal_age" type="number" placeholder="Target age" />
+                </div>
+                <div class="pillInput">
+                    <span class="prefix">Amount (INR)</span>
+                    <input id="modal_goal_amount" type="number" placeholder="Goal amount" />
+                </div>
+                <div class="pillInput">
+                    <span class="prefix">Category</span>
+                    <select id="modal_goal_category">
+                        <option value="other">Other</option>
+                        <option value="education">Education</option>
+                        <option value="home">Home</option>
+                        <option value="car">Car</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:24px">
+                <button onclick="TimelineChart.closeModal()" style="flex:1;padding:12px;border-radius:8px;border:2px solid #e7edf3;background:transparent;cursor:pointer;font-weight:600">Cancel</button>
+                <button onclick="TimelineChart.saveCustomGoal()" style="flex:1;padding:12px;border-radius:8px;border:none;background:#0d6efd;color:#fff;cursor:pointer;font-weight:600">Add Goal</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- Timeline Chart JavaScript -->
+    <script>
+    const TimelineChart = (() => {
+        let chart = null;
+        let currentView = 'full';
+        let categoryFilter = null;
+        let customGoals = JSON.parse(localStorage.getItem('customGoals') || '[]');
+
+        const COLORS = {
+            currentAge: '#ff6384',
+            education: '#ff6384',
+            marriage: '#ff9f40',
+            home: '#ffcd56',
+            car: '#4bc0c0',
+            retirement: '#36a2eb',
+            other: '#9966ff'
+        };
+
+        const EMOJIS = {
+            currentAge: '📍',
+            education: '🎓',
+            marriage: '💍',
+            home: '🏠',
+            car: '🚗',
+            retirement: '🎯',
+            other: '⭐'
+        };
+
+        const LIFE_STAGES = [
+            { name: 'childhood', start: 0, end: 18, class: 'stage-childhood' },
+            { name: 'young', start: 18, end: 40, class: 'stage-young' },
+            { name: 'middle', start: 40, end: 60, class: 'stage-middle' },
+            { name: 'retirement', start: 60, end: 100, class: 'stage-retirement' }
+        ];
+
+        function v(id) {
+            const val = document.getElementById(id)?.value || '';
+            if (!val) return 0;
+            const cleaned = val.toString().replace(/[,_]/g, '');
+            return parseFloat(cleaned) || 0;
+        }
+
+        function getVal(id) {
+            return document.getElementById(id)?.value || '';
+        }
+
+        function getGoalsFromForm() {
+            const goals = [];
+            const currentAge = v('age') || 42;
+            const retireAge = v('retire_age') || 60;
+
+            // Current Age marker
+            goals.push({
+                age: currentAge,
+                label: `You are here (${currentAge})`,
+                amount: 0,
+                category: 'currentAge',
+                color: COLORS.currentAge
+            });
+
+            // Retirement marker (with default amount for dragging)
+            goals.push({
+                age: retireAge,
+                label: `Retirement (${retireAge})`,
+                amount: 500000, // Default retirement goal amount (INR 5 lakh)
+                category: 'retirement',
+                color: COLORS.retirement
+            });
+
+            // Try to read goals from the wizard fields
+            // Note: Field IDs might differ - adapt as needed
+
+            // Add custom goals
+            customGoals.forEach(g => {
+                goals.push({
+                    age: g.age,
+                    label: g.name,
+                    amount: g.amount,
+                    category: g.category || 'other',
+                    color: COLORS[g.category] || COLORS.other,
+                    isCustom: true
+                });
+            });
+
+            // Apply category filter
+            let filteredGoals = goals.sort((a, b) => a.age - b.age);
+            if (categoryFilter) {
+                filteredGoals = filteredGoals.filter(g => g.category === categoryFilter);
+            }
+
+            return filteredGoals;
+        }
+
+        function getAgeRange() {
+            const currentAge = v('age') || 42;
+            const retireAge = v('retire_age') || 60;
+
+            switch (currentView) {
+                case 'working':
+                    return { min: Math.max(0, currentAge - 5), max: Math.min(100, retireAge + 5) };
+                case 'retirement':
+                    return { min: Math.max(0, retireAge - 5), max: 100 };
+                case 'full':
+                default:
+                    return { min: 0, max: 100 };
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('timelineChart');
+            if (!ctx) return;
+
+            const goals = getGoalsFromForm();
+            const range = getAgeRange();
+
+            // Update supplementary visuals
+            updateLifeStages();
+            updateAvatarPosition();
+            updateProgressBar();
+
+            // Create datasets for the chart
+            const datasets = [];
+            const visibleGoals = goals.filter(g => g.age >= range.min && g.age <= range.max);
+
+            console.log('📊 Creating chart with', visibleGoals.length, 'goals');
+
+            visibleGoals.forEach((goal, idx) => {
+                const yValue = goal.amount || 50000;
+                const canDrag = goal.category !== 'currentAge';
+                const canDragY = goal.amount > 0;
+
+                console.log(`Goal: ${goal.label}, Amount: INR ${goal.amount}, CanDrag: ${canDrag}, Category: ${goal.category}`);
+
+                datasets.push({
+                    label: goal.label,
+                    data: [{
+                        x: parseFloat(goal.age),
+                        y: yValue,
+                        goalData: goal,
+                        goalIndex: idx
+                    }],
+                    backgroundColor: goal.color,
+                    borderColor: goal.color,
+                    borderWidth: 3,
+                    pointRadius: goal.category === 'currentAge' || goal.category === 'retirement' ? 8 : 12,
+                    pointHoverRadius: 18,
+                    pointHoverBorderWidth: 4,
+                    showLine: false,
+                    dragData: canDrag,
+                    dragX: canDrag,
+                    dragY: canDrag && canDragY
+                });
+            });
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            const hasDragPlugin = typeof window.ChartJSdragDataPlugin !== 'undefined' ||
+                (window.Chart && window.Chart.registry && window.Chart.registry.plugins && window.Chart.registry.plugins.get('dragdata'));
+
+            console.log('🔌 DragData plugin available:', hasDragPlugin);
+
+            const chartInstance = chart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 600,
+                        easing: 'easeOutCubic'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        },
+                        dragData: {
+                            round: 0,
+                            showTooltip: false,
+                            onDragStart: function (e, datasetIndex, index, value) {
+                                console.log('🎯 DRAG START - Dataset:', datasetIndex, 'Value:', value);
+                                const canvas = e.target;
+                                canvas.style.cursor = 'grabbing';
+                                hideRichTooltip();
+
+                                const goal = datasets[datasetIndex].data[0].goalData;
+
+                                if (goal.category === 'currentAge') {
+                                    console.log('❌ Cannot drag current age marker');
+                                    return false;
+                                }
+
+                                showDragIndicator(e.offsetX, e.offsetY, Math.round(value.x), Math.round(value.y));
+                                console.log('✅ Drag started for:', goal.label, '- Category:', goal.category);
+                                return true;
+                            },
+                            onDrag: function (e, datasetIndex, index, value) {
+                                value.x = Math.max(range.min, Math.min(range.max, Math.round(value.x)));
+                                value.y = Math.max(0, Math.min(10000000, Math.round(value.y / 10000) * 10000));
+
+                                console.log(`📍 Dragging: Age ${Math.round(value.x)}, Amount INR ${Math.round(value.y).toLocaleString()}`);
+
+                                showDragIndicator(e.offsetX, e.offsetY, Math.round(value.x), Math.round(value.y));
+                                return true;
+                            },
+                            onDragEnd: function (e, datasetIndex, index, value) {
+                                console.log('🏁 DRAG END:', datasetIndex, value);
+                                const canvas = e.target;
+                                canvas.style.cursor = 'default';
+                                hideDragIndicator();
+
+                                const newAge = Math.round(value.x);
+                                const newAmount = Math.round(value.y / 10000) * 10000;
+
+                                const goal = datasets[datasetIndex].data[0].goalData;
+
+                                console.log('💾 Saving:', goal.label, 'Age:', newAge, 'Amount:', newAmount);
+
+                                updateGoalAfterDrag(goal, newAge, newAmount);
+                                createConfetti(e.offsetX, e.offsetY);
+
+                                return true;
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            min: range.min,
+                            max: range.max,
+                            ticks: {
+                                stepSize: 10,
+                                font: { size: 12, weight: 'bold' },
+                                color: '#666'
+                            },
+                            title: {
+                                display: true,
+                                text: '🎂 Age (Years) - Drag goals horizontally to change age!',
+                                font: { size: 14, weight: 'bold' },
+                                color: '#0d6efd'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.08)',
+                                lineWidth: 1
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            min: 0,
+                            max: 10000000,
+                            ticks: {
+                                stepSize: 1000000,
+                                font: { size: 11, weight: 'bold' },
+                                color: '#666',
+                                callback: function (value) {
+                                    return '₹' + (value / 100000) + 'L';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: '💰 Goal Amount (INR) - Drag goals vertically to change amount!',
+                                font: { size: 14, weight: 'bold' },
+                                color: '#0d6efd'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.06)',
+                                lineWidth: 1
+                            }
+                        }
+                    },
+                    onHover: (event, elements) => {
+                        const canvas = event.native.target;
+                        if (elements.length > 0) {
+                            canvas.style.cursor = 'grab';
+                            const element = elements[0];
+                            const goal = element.element.$context.raw.goalData;
+                            showRichTooltip(goal, event.native.offsetX, event.native.offsetY);
+                        } else {
+                            canvas.style.cursor = 'default';
+                            hideRichTooltip();
+                        }
+                    },
+                    onClick: (event, elements) => {
+                        if (elements.length === 0) {
+                            const canvasPosition = Chart.helpers.getRelativePosition(event, chartInstance);
+                            const dataX = chartInstance.scales.x.getValueForPixel(canvasPosition.x);
+                            const dataY = chartInstance.scales.y.getValueForPixel(canvasPosition.y);
+
+                            const age = Math.round(dataX);
+                            const amount = Math.max(0, Math.round(dataY / 10000) * 10000);
+
+                            if (age >= 0 && age <= 100) {
+                                document.getElementById('modal_goal_age').value = age;
+                                document.getElementById('modal_goal_amount').value = amount;
+                                createConfetti(event.native.offsetX, event.native.offsetY);
+                                showModal();
+                            }
+                        } else {
+                            const element = elements[0];
+                            createConfetti(element.element.x, element.element.y);
+                        }
+                    }
+                }
+            });
+
+            if (!hasDragPlugin) {
+                console.warn('⚠️ WARNING: Drag plugin not detected! Goals will not be draggable.');
+                const container = document.getElementById('timelineChartContainer');
+                let warning = document.getElementById('dragWarning');
+                if (!warning) {
+                    warning = document.createElement('div');
+                    warning.id = 'dragWarning';
+                    warning.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#ff9800;color:white;padding:12px 20px;border-radius:8px;font-size:14px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+                    warning.innerHTML = '⚠️ Drag plugin not loaded. Goals are view-only. Refresh page or check console.';
+                    container.appendChild(warning);
+                    setTimeout(() => { if (warning) warning.style.display = 'none'; }, 10000);
+                }
+            }
+        }
+
+        function showDragIndicator(x, y, age, amount) {
+            let indicator = document.getElementById('dragIndicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'dragIndicator';
+                indicator.style.cssText = 'position:absolute;background:rgba(13,110,253,0.95);color:white;padding:10px 15px;border-radius:10px;font-size:13px;font-weight:bold;z-index:1000;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,0.3);border:2px solid white;';
+                document.getElementById('timelineChartContainer').appendChild(indicator);
+            }
+
+            indicator.style.left = (x + 15) + 'px';
+            indicator.style.top = (y - 50) + 'px';
+            indicator.innerHTML = `<div style="text-align:center">🎯 Age: <strong>${age}</strong><br>💰 Amount: <strong>₹${amount.toLocaleString()}</strong></div>`;
+            indicator.style.display = 'block';
+        }
+
+        function hideDragIndicator() {
+            const indicator = document.getElementById('dragIndicator');
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function updateGoalAfterDrag(goal, newAge, newAmount) {
+            if (goal.isCustom) {
+                const goalIdx = customGoals.findIndex(g =>
+                    g.name === goal.label && g.age === goal.age && g.amount === goal.amount
+                );
+                if (goalIdx !== -1) {
+                    customGoals[goalIdx].age = newAge;
+                    customGoals[goalIdx].amount = newAmount;
+                    localStorage.setItem('customGoals', JSON.stringify(customGoals));
+                    console.log('✅ Custom goal saved to localStorage');
+                }
+            } else {
+                // Update form fields for predefined goals if they exist
+                console.log('✅ Updated', goal.category, 'goal');
+            }
+
+            setTimeout(() => {
+                console.log('🔄 Chart refresh initiated');
+                initChart();
+            }, 150);
+        }
+
+        function updateLifeStages() {
+            const container = document.getElementById('lifeStages');
+            container.innerHTML = '';
+            LIFE_STAGES.forEach(stage => {
+                const div = document.createElement('div');
+                div.className = `life-stage ${stage.class}`;
+                div.style.left = `${stage.start}%`;
+                div.style.width = `${stage.end - stage.start}%`;
+                container.appendChild(div);
+            });
+        }
+
+        function updateAvatarPosition() {
+            const currentAge = v('age') || 42;
+            const avatar = document.getElementById('avatarCharacter');
+            avatar.style.left = `calc(${currentAge}% - 25px)`;
+        }
+
+        function updateProgressBar() {
+            const currentAge = v('age') || 42;
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = `${currentAge}%`;
+        }
+
+        function showRichTooltip(goal, x, y) {
+            const tooltip = document.getElementById('richTooltip');
+            const title = document.getElementById('tooltipTitle');
+            const details = document.getElementById('tooltipDetails');
+
+            title.textContent = `${EMOJIS[goal.category] || '⭐'} ${goal.label}`;
+            details.innerHTML = `
+                <div><strong>Age:</strong> ${goal.age} years</div>
+                <div><strong>Amount:</strong> ₹${goal.amount.toLocaleString()}</div>
+                <div><strong>Category:</strong> ${goal.category}</div>
+            `;
+
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y - 80) + 'px';
+            tooltip.style.display = 'block';
+        }
+
+        function hideRichTooltip() {
+            const tooltip = document.getElementById('richTooltip');
+            tooltip.style.display = 'none';
+        }
+
+        function createConfetti(x, y) {
+            const colors = ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff', '#ff9f40'];
+            const count = 15;
+
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = x + 'px';
+                confetti.style.top = y + 'px';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+                document.getElementById('timelineChartContainer').appendChild(confetti);
+
+                setTimeout(() => confetti.remove(), 2000);
+            }
+        }
+
+        function setView(view) {
+            currentView = view;
+            document.querySelectorAll('.timeline-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            initChart();
+        }
+
+        function filterCategory(category) {
+            categoryFilter = category;
+            initChart();
+        }
+
+        function addCustomGoal() {
+            showModal();
+        }
+
+        function showModal() {
+            document.getElementById('goalModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('goalModal').classList.remove('active');
+            document.getElementById('modal_goal_name').value = '';
+            document.getElementById('modal_goal_age').value = '';
+            document.getElementById('modal_goal_amount').value = '';
+            document.getElementById('modal_goal_category').value = 'other';
+        }
+
+        function saveCustomGoal() {
+            const name = document.getElementById('modal_goal_name').value;
+            const age = parseInt(document.getElementById('modal_goal_age').value);
+            const amount = parseInt(document.getElementById('modal_goal_amount').value);
+            const category = document.getElementById('modal_goal_category').value;
+
+            if (!name || !age || !amount) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            customGoals.push({ name, age, amount, category });
+            localStorage.setItem('customGoals', JSON.stringify(customGoals));
+
+            const modal = document.querySelector('.modal-content');
+            const rect = modal.getBoundingClientRect();
+            createConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+            closeModal();
+            initChart();
+        }
+
+        // Initialize when step 9 becomes visible
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const step9 = document.querySelector('[data-step="9"]');
+                if (step9 && step9.classList.contains('active')) {
+                    initChart();
+                }
+            }, 300);
+        });
+
+        // Watch for step changes
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    const step9 = document.querySelector('[data-step="9"]');
+                    if (step9 && step9.classList.contains('active')) {
+                        setTimeout(() => initChart(), 100);
+                    }
+                }
+            });
+        });
+
+        // Observe all steps
+        document.querySelectorAll('.step').forEach(step => {
+            observer.observe(step, { attributes: true });
+        });
+
+        return {
+            initChart,
+            setView,
+            filterCategory,
+            addCustomGoal,
+            closeModal,
+            saveCustomGoal
+        };
+    })();
+    </script>
+</body>
+
+</html>
