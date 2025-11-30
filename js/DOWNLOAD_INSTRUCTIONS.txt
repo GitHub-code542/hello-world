@@ -1,0 +1,107 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    JAVASCRIPT DEPENDENCIES DOWNLOAD                          ║
+║                  Interactive Financial Planning Application                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+This folder should contain the following JavaScript files for optimal performance:
+
+📦 REQUIRED FILES:
+================
+
+1. chart.umd.min.js (~220 KB)
+   - Chart.js v4.4.0
+   - Interactive charting library
+   - Download: https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js
+
+2. chartjs-plugin-dragdata.min.js (~15 KB)
+   - chartjs-plugin-dragdata v2.2.5
+   - Drag-and-drop functionality for charts
+   - Download: https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 QUICK SETUP OPTIONS:
+=======================
+
+Option A: Run Setup Script (Easiest)
+-------------------------------------
+Linux/Mac:     ./setup-dependencies.sh
+Windows:       setup-dependencies.bat
+
+Option B: Manual Download (3 methods)
+--------------------------------------
+Method 1 - Using curl:
+  curl -L -o js/chart.umd.min.js https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js
+  curl -L -o js/chartjs-plugin-dragdata.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js
+
+Method 2 - Using wget:
+  wget -O js/chart.umd.min.js https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js
+  wget -O js/chartjs-plugin-dragdata.min.js https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js
+
+Method 3 - Browser Download:
+  1. Open each URL above in your web browser
+  2. Right-click → Save As...
+  3. Save to this js/ folder with the exact filenames shown
+
+Option C: Use CDN (No Download Needed)
+---------------------------------------
+The application will automatically use CDN if local files are missing!
+No action required - just open index.html in your browser.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ BENEFITS OF LOCAL FILES:
+===========================
+• ⚡ Faster loading (no CDN latency)
+• 🔒 Privacy (no external requests)
+• 📴 Offline functionality
+• 🎯 Version locked (guaranteed compatibility)
+• 🛡️ No CDN downtime risks
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📝 CURRENT STATUS:
+==================
+Check if files are downloaded:
+
+Linux/Mac:
+  ls -lh js/
+
+Windows:
+  dir js\
+
+You should see both files listed above.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+❓ FREQUENTLY ASKED QUESTIONS:
+==============================
+
+Q: Do I NEED to download these files?
+A: No! The app works fine with CDN. Local files are optional for better performance.
+
+Q: What if downloads fail?
+A: The app has CDN fallback built-in. It will automatically load from CDN if local files are missing.
+
+Q: Can I use newer versions?
+A: Yes, but test thoroughly. Update the URLs in setup scripts to use newer versions.
+
+Q: How do I verify files downloaded correctly?
+A: Check file sizes:
+   - chart.umd.min.js should be ~220 KB
+   - chartjs-plugin-dragdata.min.js should be ~15 KB
+
+Q: Files downloaded but app still uses CDN?
+A: Clear your browser cache and hard refresh (Ctrl+F5 or Cmd+Shift+R)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔗 USEFUL LINKS:
+================
+Chart.js Documentation:        https://www.chartjs.org/
+Drag Plugin Repository:        https://github.com/chrispahm/chartjs-plugin-dragdata
+Application Documentation:     See README.md in root folder
+
+═══════════════════════════════════════════════════════════════════════════════
+
+For more information, see: js/README.md

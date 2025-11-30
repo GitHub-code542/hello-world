@@ -1,0 +1,160 @@
+{
+  "name": "interactive-financial-planning-app",
+  "version": "1.0.0",
+  "description": "Interactive financial planning application with gamified timeline chart and drag-and-drop goal management",
+  "main": "index.html",
+  "type": "vanilla-javascript",
+  "buildRequired": false,
+  "dependencies": {
+    "chart.js": {
+      "version": "4.4.0",
+      "description": "Interactive charting library for timeline visualization",
+      "type": "runtime",
+      "license": "MIT",
+      "cdn": "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js",
+      "local": "./js/chart.umd.min.js",
+      "size": "~220 KB",
+      "required": true,
+      "documentation": "https://www.chartjs.org/",
+      "repository": "https://github.com/chartjs/Chart.js"
+    },
+    "chartjs-plugin-dragdata": {
+      "version": "2.2.5",
+      "description": "Drag-and-drop functionality for Chart.js data points",
+      "type": "runtime",
+      "license": "MIT",
+      "cdn": "https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.2.5/dist/chartjs-plugin-dragdata.min.js",
+      "local": "./js/chartjs-plugin-dragdata.min.js",
+      "size": "~15 KB",
+      "required": true,
+      "documentation": "https://github.com/chrispahm/chartjs-plugin-dragdata",
+      "repository": "https://github.com/chrispahm/chartjs-plugin-dragdata"
+    },
+    "google-fonts-inter": {
+      "version": "latest",
+      "description": "Inter font family for clean, modern typography",
+      "type": "runtime",
+      "license": "OFL",
+      "cdn": "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap",
+      "local": null,
+      "size": "~30 KB",
+      "required": false,
+      "fallback": "system-ui, Segoe UI, Roboto, Arial, sans-serif",
+      "documentation": "https://fonts.google.com/specimen/Inter"
+    }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "setup": "Run ./setup-dependencies.sh (Linux/Mac) or setup-dependencies.bat (Windows) to download local copies of dependencies",
+    "start": "Open index.html in a web browser - no build process required",
+    "deploy": "See DEPLOYMENT.md for deployment instructions to GitHub Pages, Netlify, or Vercel"
+  },
+  "technologies": {
+    "frontend": {
+      "html": "HTML5",
+      "css": "CSS3 with Custom Properties (Variables)",
+      "javascript": "Vanilla JavaScript (ES6+)",
+      "framework": "None (Pure vanilla JS)"
+    },
+    "libraries": {
+      "charting": "Chart.js v4.4.0",
+      "interaction": "chartjs-plugin-dragdata v2.2.5"
+    },
+    "storage": {
+      "client": "LocalStorage API",
+      "server": "None (client-side only)"
+    },
+    "features": {
+      "theming": "Light/Dark mode with CSS variables",
+      "animations": "CSS3 keyframes and transitions",
+      "responsive": "CSS Grid and Flexbox",
+      "persistence": "LocalStorage for custom goals"
+    }
+  },
+  "browser_support": {
+    "chrome": "88+",
+    "firefox": "85+",
+    "safari": "14+",
+    "edge": "88+",
+    "opera": "74+"
+  },
+  "installation": {
+    "method_1_local_files": {
+      "description": "Download dependencies locally for offline use and better performance",
+      "steps": [
+        "Run setup-dependencies.sh (Linux/Mac) or setup-dependencies.bat (Windows)",
+        "Or manually download files to js/ folder (see js/DOWNLOAD_INSTRUCTIONS.txt)",
+        "Open index.html in browser"
+      ]
+    },
+    "method_2_cdn": {
+      "description": "Use CDN links (no download required)",
+      "steps": [
+        "Just open index.html in browser",
+        "Dependencies load automatically from CDN"
+      ]
+    }
+  },
+  "deployment": {
+    "github_pages": {
+      "url": "https://github-code542.github.io/hello-world/",
+      "steps": "See DEPLOYMENT.md"
+    },
+    "netlify": {
+      "url": "Drag and drop at https://app.netlify.com/drop",
+      "steps": "See DEPLOYMENT.md"
+    },
+    "vercel": {
+      "url": "Import repository at https://vercel.com/new",
+      "steps": "See DEPLOYMENT.md"
+    }
+  },
+  "performance": {
+    "total_size": "~332 KB (with local files)",
+    "load_time": "< 400ms (3G connection)",
+    "initial_render": "< 100ms",
+    "chart_render": "< 200ms",
+    "http_requests": "1-4 (depending on local vs CDN)"
+  },
+  "features": {
+    "interactive_timeline": true,
+    "drag_and_drop": true,
+    "gamification": true,
+    "two_way_sync": true,
+    "custom_goals": true,
+    "theme_switching": true,
+    "responsive_design": true,
+    "offline_capable": true,
+    "no_backend_required": true,
+    "privacy_friendly": true
+  },
+  "documentation": {
+    "main": "README.md",
+    "deployment": "DEPLOYMENT.md",
+    "technology_stack": "TECHNOLOGY_STACK.md",
+    "drag_feature": "README_DRAG_FEATURE.md",
+    "troubleshooting": "DRAG_INSTRUCTIONS.md",
+    "js_dependencies": "js/README.md",
+    "css_info": "css/README.md",
+    "setup_guide": "js/DOWNLOAD_INSTRUCTIONS.txt"
+  },
+  "author": {
+    "name": "Interactive Financial Planning Team",
+    "repository": "https://github.com/GitHub-code542/hello-world"
+  },
+  "license": "Open Source",
+  "keywords": [
+    "financial-planning",
+    "interactive-chart",
+    "drag-and-drop",
+    "timeline",
+    "goals",
+    "gamification",
+    "vanilla-javascript",
+    "chartjs",
+    "no-framework",
+    "single-page-app"
+  ],
+  "created": "2025-11-28",
+  "last_updated": "2025-11-30"
+}

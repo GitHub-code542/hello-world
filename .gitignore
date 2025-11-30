@@ -1,0 +1,32 @@
+# JavaScript Libraries (Optional - can be re-downloaded)
+# Uncomment the lines below if you don't want to commit library files
+# They will be loaded from CDN if not present locally
+
+# js/chart.umd.min.js
+# js/chartjs-plugin-dragdata.min.js
+
+# Development files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*_backup.*
+*.bak
+
+# Operating system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
