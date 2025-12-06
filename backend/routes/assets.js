@@ -1,21 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
+const {
+    getAll,
+    create,
+    update,
+    delete: deleteAsset
+} = require('../controllers/assetsController');
 
-router.get('/', protect, async (req, res) => {
-    res.json({ success: true, message: 'List all' });
-});
-
-router.post('/', protect, async (req, res) => {
-    res.json({ success: true, message: 'Create new' });
-});
-
-router.put('/:id', protect, async (req, res) => {
-    res.json({ success: true, message: 'Update by ID' });
-});
-
-router.delete('/:id', protect, async (req, res) => {
-    res.json({ success: true, message: 'Delete by ID' });
-});
+router.get('/', protect, getAll);
+router.post('/', protect, create);
+router.put('/:id', protect, update);
+router.delete('/:id', protect, deleteAsset);
 
 module.exports = router;
