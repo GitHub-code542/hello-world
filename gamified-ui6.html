@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliWealth - Your Financial Vault (Gamified)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .panel-dark {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .panel-purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .panel-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .income-item, .expense-item {
+            margin-bottom: 20px;
+        }
+
+        .item-label {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .amount-slider {
+            position: relative;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .slider-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .vault-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .vault {
+            width: 200px;
+            height: 250px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            margin: 0 auto 30px;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+
+        .money-flow {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #27ae60;
+            border-radius: 50%;
+            animation: flow 2s ease-in-out infinite;
+        }
+
+        @keyframes flow {
+            0%, 100% { opacity: 0; transform: translateY(0); }
+            50% { opacity: 1; }
+        }
+
+        .savings-display {
+            background: rgba(46, 204, 113, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .savings-amount {
+            font-size: 2em;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .calculations {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .calc-box {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .calc-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .calc-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .savings-rate {
+            grid-column: 1 / -1;
+            background: rgba(46, 204, 113, 0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Page 2: Balance Sheet */
+        .balance-container {
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .balance-scale {
+            width: 400px;
+            height: 300px;
+            position: relative;
+            transition: transform 0.5s ease;
+        }
+
+        .balance-beam {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(90deg, #34495e, #2c3e50);
+            border-radius: 10px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transform-origin: center;
+        }
+
+        .balance-side {
+            position: absolute;
+            width: 180px;
+            min-height: 100px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .balance-left {
+            left: -200px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .balance-right {
+            right: -200px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .balance-fulcrum {
+            width: 0;
+            height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 60px solid #2c3e50;
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .drag-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-left: -60px;
+        }
+
+        .drag-section {
+            margin-bottom: 30px;
+        }
+
+        .drag-section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .loans-title {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
+
+        .assets-title {
+            background: linear-gradient(90deg, #27ae60, #229954);
+        }
+
+        .drag-item {
+            background: rgba(0,0,0,0.05);
+            padding: 12px 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: move;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .drag-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .drag-item.dragging {
+            opacity: 0.5;
+        }
+
+        .clickable-item {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .clickable-item:active {
+            transform: scale(0.95);
+        }
+
+        .editable-value {
+            width: 60px;
+            padding: 4px 8px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            text-align: center;
+            background: white;
+            color: #2c3e50;
+        }
+
+        .editable-value:focus {
+            outline: none;
+            border-color: #2980b9;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+        .balance-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .liability-item {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .asset-item {
+            background: linear-gradient(90deg, #27ae60, #229954);
+            color: white;
+        }
+
+        .balance-editable-value {
+            width: 50px;
+            padding: 2px 6px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            color: #2c3e50;
+        }
+
+        .balance-editable-value:focus {
+            outline: none;
+            border-color: white;
+            box-shadow: 0 0 5px rgba(255,255,255,0.8);
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 2px 4px;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        /* Page 3: Timeline */
+        .timeline-container {
+            position: relative;
+            height: 500px;
+            padding: 40px;
+        }
+
+        .timeline-curve {
+            width: 100%;
+            height: 300px;
+            position: relative;
+        }
+
+        .timeline-path {
+            stroke: #3498db;
+            stroke-width: 3;
+            fill: none;
+        }
+
+        .age-markers {
+            position: absolute;
+            top: 270px;
+            left: 40px;
+            right: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .age-marker {
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #34495e;
+            text-align: center;
+        }
+
+        .character {
+            position: absolute;
+            width: 80px;
+            height: 120px;
+            font-size: 4em;
+            transition: all 0.5s ease;
+        }
+
+        .character-start {
+            bottom: 50px;
+            left: 50px;
+        }
+
+        .character-end {
+            bottom: 50px;
+            right: 50px;
+        }
+
+        .goal-on-timeline {
+            position: absolute;
+            text-align: center;
+            cursor: move;
+            transition: transform 0.3s ease;
+        }
+
+        .goal-on-timeline:hover {
+            transform: scale(1.1);
+        }
+
+        .goal-icon-big {
+            font-size: 3em;
+            margin-bottom: 5px;
+            position: relative;
+        }
+
+        .goal-delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 0.7em;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .goal-on-timeline:hover .goal-delete-btn {
+            display: flex;
+        }
+
+        .goal-delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.2);
+        }
+
+        .goal-label {
+            font-size: 0.8em;
+            font-weight: bold;
+            background: rgba(255,255,255,0.9);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .goal-icons-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .goal-icon-item {
+            font-size: 3em;
+            padding: 20px;
+            margin: 10px 0;
+            text-align: center;
+            cursor: move;
+            transition: all 0.3s ease;
+            border-radius: 15px;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .goal-icon-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .goal-icon-item[data-goal-name="Retirement"] {
+            position: relative;
+        }
+
+        .goal-icon-item[data-goal-name="Retirement"]::after {
+            content: 'Default age is 60, let us know when you want to retire';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.75em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            margin-bottom: 10px;
+            z-index: 100;
+        }
+
+        .goal-icon-item[data-goal-name="Retirement"]:hover::after {
+            opacity: 1;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #06beb6 0%, #48b1bf 100%);
+            color: white;
+        }
+
+        .btn-prev {
+            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .instruction-bubble {
+            background: #fffacd;
+            padding: 15px 20px;
+            border-radius: 20px;
+            border: 2px solid #f39c12;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- PAGE 1: INCOME & EXPENSES -->
+        <div class="page active" id="page1">
+            <h1 class="page-title">💰 Your Financial Vault – Income & Expenses Details</h1>
+
+            <div class="content-grid">
+                <!-- Left Panel: Income Sources -->
+                <div class="panel panel-dark">
+                    <div class="panel-title">
+                        📈 Income Sources<br>
+                        <span style="font-size: 0.7em;">Annual: ₹<span id="totalIncome">40,18,000</span></span>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Monthly Take Home Salary <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="salary" data-max="500000" data-value="230000">
+                            <div class="slider-fill">₹2,30,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Expected Annual Bonus <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="bonus" data-max="1000000" data-value="850000">
+                            <div class="slider-fill">₹8,50,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Rental Income <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="rental" data-max="100000" data-value="12000">
+                            <div class="slider-fill">₹12,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Business Income <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="business" data-max="100000" data-value="8000">
+                            <div class="slider-fill">₹8,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Investment Income <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="investment" data-max="100000" data-value="14000">
+                            <div class="slider-fill">₹14,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Other Income Sources <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="otherIncome" data-max="100000" data-value="0">
+                            <div class="slider-fill">₹0</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Expected Annual Income Rise</div>
+                        <div class="amount-slider" data-field="incomeRise" data-max="20" data-value="7" data-type="percent">
+                            <div class="slider-fill">7%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Panel: Vault Visualization -->
+                <div class="panel">
+                    <div class="vault-container">
+                        <div class="vault">
+                            🔐
+                        </div>
+                        <div class="savings-display">
+                            <div style="font-size: 0.9em; margin-bottom: 10px;">Net Savings</div>
+                            <div class="savings-amount" id="netSavings">₹17,00,025</div>
+                            <div style="font-size: 0.8em; margin-top: 5px;">per year</div>
+                        </div>
+                    </div>
+
+                    <div class="calculations">
+                        <div class="calc-box">
+                            <div class="calc-label">Total Inflow</div>
+                            <div class="calc-value" id="inflowDisplay">₹40,18,000</div>
+                        </div>
+                        <div class="calc-box">
+                            <div class="calc-label">Total Outflow</div>
+                            <div class="calc-value" id="outflowDisplay">₹23,17,975</div>
+                        </div>
+                        <div class="calc-box savings-rate">
+                            <div class="calc-label">Savings Rate</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="savingsRateBar" style="width: 42.3%">42.3%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Expenses -->
+                <div class="panel panel-purple">
+                    <div class="panel-title">
+                        💸 Expenses<br>
+                        <span style="font-size: 0.7em;">Annual: ₹<span id="totalExpenses">23,17,975</span></span>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">House Rent <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="rent" data-max="100000" data-value="38000">
+                            <div class="slider-fill">₹38,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">School Fees <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="schoolFees" data-max="50000" data-value="13000">
+                            <div class="slider-fill">₹13,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Household Expenses <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="household" data-max="150000" data-value="64998">
+                            <div class="slider-fill">₹64,998</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Loan EMIs <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="emis" data-max="100000" data-value="24000">
+                            <div class="slider-fill">₹24,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Vacation Budget <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="vacation" data-max="500000" data-value="399999">
+                            <div class="slider-fill">₹3,99,999</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Discretionary Purchases <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="discretionary" data-max="500000" data-value="200000">
+                            <div class="slider-fill">₹2,00,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Life Insurance <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="lifeInsurance" data-max="100000" data-value="26000">
+                            <div class="slider-fill">₹26,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Health Insurance <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="healthInsurance" data-max="50000" data-value="4500">
+                            <div class="slider-fill">₹4,500</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Maintenance <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="maintenance" data-max="50000" data-value="7500">
+                            <div class="slider-fill">₹7,500</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-save" onclick="savePage1()">💾 SAVE</button>
+                <button class="btn btn-next" onclick="goToPage(2)">NEXT ➔</button>
+            </div>
+        </div>
+
+        <!-- PAGE 2: ASSETS & LIABILITIES -->
+        <div class="page" id="page2">
+            <h1 class="page-title">⚖️ Your Personal Balance Sheet – Assets & Liabilities</h1>
+
+            <div class="instruction-bubble">
+                💡 <strong>How it works:</strong> Click on any loan or asset from the list on the right. You'll be prompted to enter the amount, and it will automatically appear on the balance scale. The balance will tilt based on your net worth!
+            </div>
+
+            <div class="content-grid">
+                <!-- Balance Scale -->
+                <div class="panel" style="grid-column: 1 / 3;">
+                    <div class="balance-container">
+                        <div class="balance-scale" id="balanceScale">
+                            <div class="balance-beam" id="balanceBeam"></div>
+
+                            <div class="balance-side balance-left" id="liabilitiesBox">
+                                <h3 style="color: #e74c3c; margin-bottom: 10px;">📊 Liabilities</h3>
+                                <div id="liabilitiesList"></div>
+                                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #e74c3c;">
+                                    <strong>Total: ₹<span id="totalLiabilities">0</span></strong>
+                                </div>
+                            </div>
+
+                            <div class="balance-side balance-right" id="assetsBox">
+                                <h3 style="color: #27ae60; margin-bottom: 10px;">💰 Assets</h3>
+                                <div id="assetsList"></div>
+                                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #27ae60;">
+                                    <strong>Total: ₹<span id="totalAssets">0</span></strong>
+                                </div>
+                            </div>
+
+                            <div class="balance-fulcrum"></div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 30px; font-size: 1.2em;">
+                            <strong>Net Worth: ₹<span id="netWorth">0</span></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Panel -->
+                <div class="panel drag-panel">
+                    <div class="drag-section">
+                        <div class="drag-section-title loans-title">📋 Loans</div>
+                        <div class="drag-item clickable-item" data-type="liability" data-name="House Loan" onclick="addItemWithPrompt(this)">
+                            House Loan
+                        </div>
+                        <div class="drag-item clickable-item" data-type="liability" data-name="Personal Loan" onclick="addItemWithPrompt(this)">
+                            Personal Loan
+                        </div>
+                        <div class="drag-item clickable-item" data-type="liability" data-name="Education Loan" onclick="addItemWithPrompt(this)">
+                            Education Loan
+                        </div>
+                        <div class="drag-item clickable-item" data-type="liability" data-name="Car Loan" onclick="addItemWithPrompt(this)">
+                            Car Loan
+                        </div>
+                    </div>
+
+                    <div class="drag-section">
+                        <div class="drag-section-title assets-title">💎 Assets</div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="Mutual Funds" onclick="addItemWithPrompt(this)">
+                            Mutual Funds
+                        </div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="FD" onclick="addItemWithPrompt(this)">
+                            FD
+                        </div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="House" onclick="addItemWithPrompt(this)">
+                            House
+                        </div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="PF" onclick="addItemWithPrompt(this)">
+                            PF
+                        </div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="Gold" onclick="addItemWithPrompt(this)">
+                            Gold
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-prev" onclick="goToPage(1)">⬅ BACK</button>
+                <button class="btn btn-save" onclick="savePage2()">💾 SAVE</button>
+                <button class="btn btn-next" onclick="goToPage(3)">NEXT ➔</button>
+            </div>
+        </div>
+
+        <!-- PAGE 3: MILESTONES GOALS -->
+        <div class="page" id="page3">
+            <h1 class="page-title">🎯 Plan Your Life – Key Milestones Goals</h1>
+
+            <div class="instruction-bubble">
+                💡 <strong>How it works:</strong> Select applicable goals from the right panel and drag & drop them onto your life timeline. Icons will change based on your gender!
+            </div>
+
+            <div class="content-grid">
+                <!-- Timeline -->
+                <div class="panel" style="grid-column: 1 / 3;">
+                    <div class="timeline-container" id="timelineContainer">
+                        <svg width="100%" height="300" class="timeline-curve">
+                            <path id="timelinePath" d="M 50 250 Q 300 100, 550 250 T 1050 250" class="timeline-path"/>
+                        </svg>
+
+                        <!-- Age Markers -->
+                        <div class="age-markers" id="ageMarkers">
+                            <!-- Will be dynamically generated -->
+                        </div>
+
+                        <!-- Characters -->
+                        <div class="character character-start" id="characterStart">🧑‍💼</div>
+                        <div class="character character-end" id="characterEnd">🧓</div>
+
+                        <!-- Goals will be added here dynamically -->
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; padding: 20px; margin-top: 20px; background: rgba(0,0,0,0.05); border-radius: 10px;">
+                        <div>
+                            <strong>Present Age:</strong> <span id="currentAge">32</span> years
+                        </div>
+                        <div>
+                            <strong>Life Expectancy:</strong> 100 years
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goal Icons Panel -->
+                <div class="panel goal-icons-panel">
+                    <h3 style="margin-bottom: 20px;">📌 Available Goals</h3>
+
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="🪑" data-goal-name="Retirement" title="Retirement">
+                        🪑 Retirement
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="🎓" data-goal-name="Education" title="Education">
+                        🎓 Education
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="💍" data-goal-name="Marriage" title="Marriage">
+                        💍 Marriage
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="✈️" data-goal-name="Vacation" title="Vacation">
+                        ✈️ Vacation
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="🏠" data-goal-name="House" title="House">
+                        🏠 House
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="🚗" data-goal-name="Car" title="Car">
+                        🚗 Car
+                    </div>
+
+                    <div style="margin-top: 30px; padding: 15px; background: rgba(103, 126, 234, 0.1); border-radius: 10px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="genderToggle" onchange="toggleGender()">
+                            <span>👨 Male User (Toggle for icons)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-prev" onclick="goToPage(2)">⬅ BACK</button>
+                <button class="btn btn-save" onclick="savePage3()">💾 SAVE</button>
+                <button class="btn btn-next" onclick="finishApp()">🎉 FINISH</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Page Navigation
+        function goToPage(pageNum) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById('page' + pageNum).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        // PAGE 1: Income & Expenses - Drag Sliders
+        document.querySelectorAll('.amount-slider').forEach(slider => {
+            let isDragging = false;
+
+            slider.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                updateSlider(e, slider);
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    updateSlider(e, slider);
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            function updateSlider(e, slider) {
+                const rect = slider.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                const maxValue = parseInt(slider.dataset.max);
+                const value = Math.round((percentage / 100) * maxValue);
+
+                slider.dataset.value = value;
+                const fill = slider.querySelector('.slider-fill');
+                fill.style.width = percentage + '%';
+
+                if (slider.dataset.type === 'percent') {
+                    fill.textContent = value + '%';
+                } else {
+                    fill.textContent = '₹' + value.toLocaleString('en-IN');
+                }
+
+                calculateTotals();
+            }
+        });
+
+        function calculateTotals() {
+            // Income
+            const salary = parseInt(document.querySelector('[data-field="salary"]').dataset.value) * 12;
+            const bonus = parseInt(document.querySelector('[data-field="bonus"]').dataset.value);
+            const rental = parseInt(document.querySelector('[data-field="rental"]').dataset.value) * 12;
+            const business = parseInt(document.querySelector('[data-field="business"]').dataset.value) * 12;
+            const investment = parseInt(document.querySelector('[data-field="investment"]').dataset.value) * 12;
+            const otherIncome = parseInt(document.querySelector('[data-field="otherIncome"]').dataset.value) * 12;
+
+            const totalIncome = salary + bonus + rental + business + investment + otherIncome;
+
+            // Expenses
+            const rent = parseInt(document.querySelector('[data-field="rent"]').dataset.value) * 12;
+            const schoolFees = parseInt(document.querySelector('[data-field="schoolFees"]').dataset.value) * 12;
+            const household = parseInt(document.querySelector('[data-field="household"]').dataset.value) * 12;
+            const emis = parseInt(document.querySelector('[data-field="emis"]').dataset.value) * 12;
+            const vacation = parseInt(document.querySelector('[data-field="vacation"]').dataset.value);
+            const discretionary = parseInt(document.querySelector('[data-field="discretionary"]').dataset.value);
+            const lifeInsurance = parseInt(document.querySelector('[data-field="lifeInsurance"]').dataset.value);
+            const healthInsurance = parseInt(document.querySelector('[data-field="healthInsurance"]').dataset.value);
+            const maintenance = parseInt(document.querySelector('[data-field="maintenance"]').dataset.value);
+
+            const totalExpenses = rent + schoolFees + household + emis + vacation + discretionary + lifeInsurance + healthInsurance + maintenance;
+
+            // Savings
+            const netSavings = totalIncome - totalExpenses;
+            const savingsRate = totalIncome > 0 ? (netSavings / totalIncome * 100) : 0;
+
+            // Update displays
+            document.getElementById('totalIncome').textContent = totalIncome.toLocaleString('en-IN');
+            document.getElementById('totalExpenses').textContent = totalExpenses.toLocaleString('en-IN');
+            document.getElementById('inflowDisplay').textContent = '₹' + totalIncome.toLocaleString('en-IN');
+            document.getElementById('outflowDisplay').textContent = '₹' + totalExpenses.toLocaleString('en-IN');
+            document.getElementById('netSavings').textContent = '₹' + netSavings.toLocaleString('en-IN');
+
+            const savingsBar = document.getElementById('savingsRateBar');
+            savingsBar.style.width = Math.max(0, savingsRate) + '%';
+            savingsBar.textContent = savingsRate.toFixed(1) + '%';
+        }
+
+        // Initial calculation
+        calculateTotals();
+
+        // PAGE 2: Assets & Liabilities - Drag & Drop
+        const droppedItems = {
+            liabilities: [],
+            assets: []
+        };
+
+        // Add item with prompt - triggered when user clicks on a loan/asset
+        function addItemWithPrompt(element) {
+            const type = element.dataset.type;
+            const name = element.dataset.name;
+
+            // Check if already added
+            const list = type === 'liability' ? droppedItems.liabilities : droppedItems.assets;
+            if (list.find(item => item.name === name)) {
+                alert(`${name} is already added to the balance!`);
+                return;
+            }
+
+            // Prompt for amount
+            const amountStr = prompt(`Enter amount for ${name} (in Lakhs):`, '10');
+            if (!amountStr || amountStr.trim() === '') {
+                return; // User cancelled
+            }
+
+            const amountInLakhs = parseFloat(amountStr);
+            if (isNaN(amountInLakhs) || amountInLakhs < 0) {
+                alert('Please enter a valid positive number!');
+                return;
+            }
+
+            // Convert to rupees
+            const amountInRupees = amountInLakhs * 100000;
+
+            // Add to balance
+            const data = {
+                type: type,
+                name: name,
+                value: amountInRupees.toString()
+            };
+
+            list.push(data);
+            updateBalanceSheet();
+
+            // Visual feedback
+            element.style.backgroundColor = 'rgba(46, 204, 113, 0.2)';
+            setTimeout(() => {
+                element.style.backgroundColor = '';
+            }, 500);
+        }
+
+        function updateBalanceSheet() {
+            // Update liabilities
+            const liabilitiesList = document.getElementById('liabilitiesList');
+            liabilitiesList.innerHTML = '';
+            let totalLiabilities = 0;
+
+            droppedItems.liabilities.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'balance-item liability-item';
+                div.innerHTML = `
+                    <span>${item.name}</span>
+                    <span style="display: flex; align-items: center; gap: 8px;">
+                        ₹<input type="number" class="balance-editable-value" value="${(parseInt(item.value) / 100000).toFixed(0)}"
+                               min="0" step="1" data-index="${index}" data-type="liability"
+                               onchange="updateBalanceItemValue(this)" onclick="event.stopPropagation()"> L
+                        <button class="remove-btn" onclick="removeFromBalance('liability', ${index})" title="Remove">❌</button>
+                    </span>
+                `;
+                liabilitiesList.appendChild(div);
+                totalLiabilities += parseInt(item.value);
+            });
+
+            // Update assets
+            const assetsList = document.getElementById('assetsList');
+            assetsList.innerHTML = '';
+            let totalAssets = 0;
+
+            droppedItems.assets.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'balance-item asset-item';
+                const isInCrores = parseInt(item.value) >= 10000000;
+                const displayValue = isInCrores ? (parseInt(item.value) / 10000000).toFixed(1) : (parseInt(item.value) / 100000).toFixed(0);
+                const unit = isInCrores ? 'Cr' : 'L';
+                div.innerHTML = `
+                    <span>${item.name}</span>
+                    <span style="display: flex; align-items: center; gap: 8px;">
+                        ₹<input type="number" class="balance-editable-value" value="${displayValue}"
+                               min="0" step="${isInCrores ? '0.1' : '1'}" data-index="${index}" data-type="asset"
+                               data-unit="${unit}" onchange="updateBalanceItemValue(this)" onclick="event.stopPropagation()"> ${unit}
+                        <button class="remove-btn" onclick="removeFromBalance('asset', ${index})" title="Remove">❌</button>
+                    </span>
+                `;
+                assetsList.appendChild(div);
+                totalAssets += parseInt(item.value);
+            });
+
+            // Update totals
+            document.getElementById('totalLiabilities').textContent = (totalLiabilities / 100000).toFixed(0) + ' Lacs';
+            document.getElementById('totalAssets').textContent = totalAssets >= 10000000 ?
+                (totalAssets / 10000000).toFixed(2) + ' Cr' :
+                (totalAssets / 100000).toFixed(0) + ' Lacs';
+
+            const netWorth = totalAssets - totalLiabilities;
+            document.getElementById('netWorth').textContent = netWorth >= 10000000 ?
+                (netWorth / 10000000).toFixed(2) + ' Cr' :
+                (netWorth / 100000).toFixed(0) + ' Lacs';
+
+            // Tilt balance scale (heavier side goes down)
+            const balance = document.getElementById('balanceBeam');
+            const tiltDegree = Math.max(-15, Math.min(15, (totalAssets - totalLiabilities) / 1000000));
+            balance.style.transform = `translate(-50%, -50%) rotate(${tiltDegree}deg)`;
+        }
+
+        // Update balance item value when edited
+        function updateBalanceItemValue(input) {
+            const index = parseInt(input.dataset.index);
+            const type = input.dataset.type;
+            const value = parseFloat(input.value);
+            const unit = input.dataset.unit || 'L';
+
+            // Convert to rupees
+            let rupees;
+            if (unit === 'Cr') {
+                rupees = value * 10000000;
+            } else {
+                rupees = value * 100000;
+            }
+
+            // Update the stored value
+            if (type === 'liability') {
+                droppedItems.liabilities[index].value = rupees.toString();
+            } else {
+                droppedItems.assets[index].value = rupees.toString();
+            }
+
+            // Refresh display
+            updateBalanceSheet();
+        }
+
+        // Remove item from balance
+        function removeFromBalance(type, index) {
+            if (type === 'liability') {
+                droppedItems.liabilities.splice(index, 1);
+            } else {
+                droppedItems.assets.splice(index, 1);
+            }
+            updateBalanceSheet();
+        }
+
+        // PAGE 3: Timeline Goals - Drag & Drop
+        let draggedGoal = null;
+        let isDraggingExisting = false;
+        let retirementAdded = false; // Track if retirement goal is already added
+
+        // Generate age markers
+        function generateAgeMarkers() {
+            const ageMarkersDiv = document.getElementById('ageMarkers');
+            const currentAge = parseInt(document.getElementById('currentAge').textContent);
+            const lifeExpectancy = 100;
+
+            // Create markers at intervals
+            const intervals = [currentAge, 40, 50, 60, 70, 80, 90, 100];
+            const uniqueIntervals = [...new Set(intervals)].sort((a, b) => a - b).filter(age => age >= currentAge && age <= lifeExpectancy);
+
+            ageMarkersDiv.innerHTML = '';
+            uniqueIntervals.forEach(age => {
+                const marker = document.createElement('div');
+                marker.className = 'age-marker';
+                marker.textContent = age;
+                ageMarkersDiv.appendChild(marker);
+            });
+        }
+
+        // Call on page load
+        generateAgeMarkers();
+
+        // Make existing timeline goals draggable
+        function makeGoalDraggable(goal) {
+            goal.addEventListener('dragstart', (e) => {
+                isDraggingExisting = true;
+                draggedGoal = goal;
+                goal.style.opacity = '0.5';
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            goal.addEventListener('dragend', (e) => {
+                goal.style.opacity = '1';
+                isDraggingExisting = false;
+            });
+        }
+
+        document.querySelectorAll('.goal-on-timeline').forEach(goal => {
+            makeGoalDraggable(goal);
+        });
+
+        // Make goal icons draggable
+        document.querySelectorAll('.goal-icon-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                isDraggingExisting = false;
+                const goalData = {
+                    icon: item.dataset.goalIcon,
+                    name: item.dataset.goalName
+                };
+                e.dataTransfer.setData('text/plain', JSON.stringify(goalData));
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+        });
+
+        // Make timeline container a drop zone
+        const timelineContainer = document.getElementById('timelineContainer');
+
+        timelineContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = isDraggingExisting ? 'move' : 'copy';
+        });
+
+        timelineContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const rect = timelineContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (isDraggingExisting && draggedGoal) {
+                // Reposition existing goal
+                draggedGoal.style.left = x + 'px';
+                draggedGoal.style.top = y + 'px';
+            } else {
+                // Add new goal from panel
+                try {
+                    const goalData = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    addNewGoalToTimeline(goalData, x, y);
+                } catch (err) {
+                    console.error('Error adding goal:', err);
+                }
+            }
+        });
+
+        function addNewGoalToTimeline(goalData, x, y) {
+            // Check if retirement and already added
+            if (goalData.name === 'Retirement' && retirementAdded) {
+                alert('Retirement goal can only be added once!');
+                return;
+            }
+
+            // Set default age for retirement
+            const defaultAge = goalData.name === 'Retirement' ? '60' : '40';
+            const age = prompt(`Enter age for this goal:`, defaultAge);
+            if (!age) return;
+
+            const amount = prompt('Enter budget amount (in Lakhs):', '50');
+            if (!amount) return;
+
+            const newGoal = document.createElement('div');
+            newGoal.className = 'goal-on-timeline';
+            newGoal.draggable = true;
+            newGoal.style.left = x + 'px';
+            newGoal.style.top = y + 'px';
+            newGoal.dataset.age = age;
+            newGoal.dataset.amount = parseFloat(amount) * 100000;
+            newGoal.dataset.goalType = goalData.name.toLowerCase();
+
+            newGoal.innerHTML = `
+                <div class="goal-icon-big">
+                    ${goalData.icon}
+                    <button class="goal-delete-btn" onclick="deleteGoal(event, this.closest('.goal-on-timeline'))">✕</button>
+                </div>
+                <div class="goal-label" onclick="editGoal(event, this.closest('.goal-on-timeline'))">
+                    ${goalData.name}<br>
+                    Age ${age}<br>
+                    Budget ₹${amount} Lacs
+                </div>
+            `;
+
+            // Mark retirement as added
+            if (goalData.name === 'Retirement') {
+                retirementAdded = true;
+            }
+
+            // Add drag listeners to new goal
+            makeGoalDraggable(newGoal);
+
+            timelineContainer.appendChild(newGoal);
+        }
+
+        // Delete goal from timeline
+        function deleteGoal(event, goalElement) {
+            event.stopPropagation();
+            const goalType = goalElement.dataset.goalType;
+
+            if (confirm('Are you sure you want to delete this goal?')) {
+                // If deleting retirement, allow it to be added again
+                if (goalType === 'retirement') {
+                    retirementAdded = false;
+                }
+                goalElement.remove();
+            }
+        }
+
+        function editGoal(event, goalElement) {
+            event.stopPropagation();
+            const currentAge = goalElement.dataset.age;
+            const currentAmount = goalElement.dataset.amount;
+            const goalType = goalElement.dataset.goalType;
+
+            const newAge = prompt('Edit age for this goal:', currentAge);
+            if (!newAge) return;
+
+            const newAmount = prompt('Edit budget amount (in Lakhs):', (parseFloat(currentAmount) / 100000).toFixed(0));
+            if (!newAmount) return;
+
+            goalElement.dataset.age = newAge;
+            goalElement.dataset.amount = parseFloat(newAmount) * 100000;
+
+            const label = goalElement.querySelector('.goal-label');
+            const lines = label.innerHTML.split('<br>');
+            lines[1] = `Age ${newAge}`;
+            lines[2] = `Budget ₹${newAmount} Lacs`;
+
+            // Re-attach the onclick handler
+            label.onclick = function(e) { editGoal(e, goalElement); };
+            label.innerHTML = lines.join('<br>');
+        }
+
+        // PAGE 3: Gender Toggle
+        function toggleGender() {
+            const isMale = document.getElementById('genderToggle').checked;
+            document.getElementById('characterStart').textContent = isMale ? '👨‍💼' : '👩‍💼';
+            document.getElementById('characterEnd').textContent = isMale ? '👨‍🦳' : '👩‍🦳';
+        }
+
+        // Save Functions
+        function savePage1() {
+            alert('✅ Income & Expenses data saved!');
+        }
+
+        function savePage2() {
+            alert('✅ Assets & Liabilities saved!');
+        }
+
+        function savePage3() {
+            alert('✅ Milestones Goals saved!');
+        }
+
+        function finishApp() {
+            alert('🎉 Congratulations! Your financial plan is complete!\n\nYou can now review your:\n✓ Income & Expenses\n✓ Assets & Liabilities\n✓ Life Goals Timeline');
+        }
+    </script>
+</body>
+</html>
