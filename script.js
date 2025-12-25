@@ -565,25 +565,153 @@ let draggedGoal = null;
 let isDraggingExisting = false;
 let retirementAdded = false;
 
-// Generate age markers
+// Calculate X position on timeline based on age
+function ageToX(age) {
+    const currentAge = parseInt(document.getElementById('currentAge').textContent);
+    const lifeExpectancy = 100;
+    const svg = document.querySelector('.timeline-curve');
+    const timelineWidth = (svg && svg.clientWidth) || 1000;
+    const startX = 50;
+
+    const ageRange = lifeExpectancy - currentAge;
+    const ageDiff = age - currentAge;
+    const percentage = Math.max(0, Math.min(1, ageDiff / ageRange));
+
+    return startX + (percentage * (timelineWidth - 100));
+}
+
+// Calculate Y position on Bezier curve for given X
+function getYOnCurve(x) {
+    const svg = document.querySelector('.timeline-curve');
+    const width = (svg && svg.clientWidth) || 1000;
+
+    // For quadratic Bezier: M startX startY Q midX midY, endX endY
+    const startX = 50;
+    const endX = width - 50;
+    const midX = width / 2;
+
+    const startY = 180;
+    const midY = 120;
+    const endY = 180;
+
+    // Calculate position on quadratic Bezier curve
+    const t = (x - startX) / (endX - startX);
+    if (t < 0 || t > 1) return startY;
+
+    // Quadratic Bezier formula: B(t) = (1-t)²P₀ + 2(1-t)tP₁ + t²P₂
+    const y = Math.pow(1 - t, 2) * startY +
+              2 * (1 - t) * t * midY +
+              Math.pow(t, 2) * endY;
+
+    return y;
+}
+
+// Generate responsive SVG path
+function generateTimelinePath() {
+    const svg = document.querySelector('.timeline-curve');
+    if (!svg) return;
+
+    const width = svg.clientWidth || 1000;
+    const path = document.getElementById('timelinePath');
+    if (!path) return;
+
+    const startX = 50;
+    const endX = width - 50;
+    const midX = width / 2;
+
+    const startY = 180;
+    const midY = 120;
+    const endY = 180;
+
+    const pathData = `M ${startX} ${startY} Q ${midX} ${midY}, ${endX} ${endY}`;
+    path.setAttribute('d', pathData);
+}
+
+// Position characters on curve
+function positionCharacters() {
+    const startChar = document.getElementById('characterStart');
+    const endChar = document.getElementById('characterEnd');
+    if (!startChar || !endChar) return;
+
+    const currentAge = parseInt(document.getElementById('currentAge').textContent);
+
+    const startX = ageToX(currentAge);
+    const startY = getYOnCurve(startX);
+    startChar.style.left = startX + 'px';
+    startChar.style.top = (startY - 20) + 'px';
+
+    const endX = ageToX(100);
+    const endY = getYOnCurve(endX);
+    endChar.style.left = endX + 'px';
+    endChar.style.top = (endY - 20) + 'px';
+}
+
+// Generate age markers positioned on curve
 function generateAgeMarkers() {
     const ageMarkersDiv = document.getElementById('ageMarkers');
+    if (!ageMarkersDiv) return;
+
     const currentAge = parseInt(document.getElementById('currentAge').textContent);
     const lifeExpectancy = 100;
 
     const intervals = [currentAge, 40, 50, 60, 70, 80, 90, 100];
-    const uniqueIntervals = [...new Set(intervals)].sort((a, b) => a - b).filter(age => age >= currentAge && age <= lifeExpectancy);
+    const uniqueIntervals = [...new Set(intervals)]
+        .sort((a, b) => a - b)
+        .filter(age => age >= currentAge && age <= lifeExpectancy);
 
     ageMarkersDiv.innerHTML = '';
+
     uniqueIntervals.forEach(age => {
         const marker = document.createElement('div');
         marker.className = 'age-marker';
         marker.textContent = age;
+
+        const x = ageToX(age);
+        const y = getYOnCurve(x) + 60;
+
+        marker.style.position = 'absolute';
+        marker.style.left = x + 'px';
+        marker.style.top = y + 'px';
+        marker.style.transform = 'translateX(-50%)';
+
         ageMarkersDiv.appendChild(marker);
     });
 }
 
-generateAgeMarkers();
+// Initialize Page 3 timeline
+function initializePage3() {
+    generateTimelinePath();
+    generateAgeMarkers();
+    positionCharacters();
+}
+
+// Debounce helper for resize
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Reposition existing goals on resize
+function repositionExistingGoals() {
+    document.querySelectorAll('.goal-on-timeline').forEach(goal => {
+        const age = parseInt(goal.dataset.age);
+        if (!isNaN(age)) {
+            const x = ageToX(age);
+            const y = getYOnCurve(x);
+            goal.style.left = x + 'px';
+            goal.style.top = y + 'px';
+        }
+    });
+}
+
+initializePage3();
 
 // Make goal draggable
 function makeGoalDraggable(goal) {
@@ -648,17 +776,27 @@ function addNewGoalToTimeline(goalData, x, y) {
     }
 
     const defaultAge = goalData.name === 'Retirement' ? '60' : '40';
-    const age = prompt(`Enter age for this goal:`, defaultAge);
-    if (!age) return;
+    const age = prompt(`Enter age for ${goalData.name}:`, defaultAge);
+    if (!age || isNaN(age)) return;
+
+    const ageNum = parseInt(age);
+    const currentAge = parseInt(document.getElementById('currentAge').textContent);
+    if (ageNum < currentAge || ageNum > 100) {
+        alert('Age must be between current age and 100');
+        return;
+    }
 
     const amount = prompt('Enter budget amount (in Lakhs):', '50');
     if (!amount) return;
 
+    // Calculate position on curve based on age
+    const posX = ageToX(ageNum);
+    const posY = getYOnCurve(posX);
+
     const newGoal = document.createElement('div');
     newGoal.className = 'goal-on-timeline';
-    newGoal.draggable = true;
-    newGoal.style.left = x + 'px';
-    newGoal.style.top = y + 'px';
+    newGoal.style.left = posX + 'px';
+    newGoal.style.top = posY + 'px';
     newGoal.dataset.age = age;
     newGoal.dataset.amount = parseFloat(amount) * 100000;
     newGoal.dataset.goalType = goalData.name.toLowerCase();
@@ -671,7 +809,7 @@ function addNewGoalToTimeline(goalData, x, y) {
         <div class="goal-label" onclick="editGoal(event, this.closest('.goal-on-timeline'))">
             ${goalData.name}<br>
             Age ${age}<br>
-            Budget ₹${amount} Lacs
+            ₹${amount}L
         </div>
     `;
 
@@ -679,17 +817,20 @@ function addNewGoalToTimeline(goalData, x, y) {
         retirementAdded = true;
     }
 
-    makeGoalDraggable(newGoal);
     timelineContainer.appendChild(newGoal);
     triggerAutoSave();
 }
 
 function addSavedGoalToTimeline(goalData) {
+    // Calculate position based on age instead of using saved coordinates
+    const age = parseInt(goalData.age);
+    const posX = ageToX(age);
+    const posY = getYOnCurve(posX);
+
     const newGoal = document.createElement('div');
     newGoal.className = 'goal-on-timeline';
-    newGoal.draggable = true;
-    newGoal.style.left = goalData.left;
-    newGoal.style.top = goalData.top;
+    newGoal.style.left = posX + 'px';
+    newGoal.style.top = posY + 'px';
     newGoal.dataset.age = goalData.age;
     newGoal.dataset.amount = goalData.amount;
     newGoal.dataset.goalType = goalData.goalType;
@@ -702,7 +843,7 @@ function addSavedGoalToTimeline(goalData) {
         <div class="goal-label" onclick="editGoal(event, this.closest('.goal-on-timeline'))">
             ${goalData.name}<br>
             Age ${goalData.age}<br>
-            Budget ₹${(goalData.amount / 100000).toFixed(0)} Lacs
+            ₹${(goalData.amount / 100000).toFixed(0)}L
         </div>
     `;
 
@@ -710,7 +851,6 @@ function addSavedGoalToTimeline(goalData) {
         retirementAdded = true;
     }
 
-    makeGoalDraggable(newGoal);
     timelineContainer.appendChild(newGoal);
 }
 
@@ -733,7 +873,14 @@ function editGoal(event, goalElement) {
     const currentAmount = goalElement.dataset.amount;
 
     const newAge = prompt('Edit age for this goal:', currentAge);
-    if (!newAge) return;
+    if (!newAge || isNaN(newAge)) return;
+
+    const ageNum = parseInt(newAge);
+    const minAge = parseInt(document.getElementById('currentAge').textContent);
+    if (ageNum < minAge || ageNum > 100) {
+        alert('Age must be between current age and 100');
+        return;
+    }
 
     const newAmount = prompt('Edit budget amount (in Lakhs):', (parseFloat(currentAmount) / 100000).toFixed(0));
     if (!newAmount) return;
@@ -741,10 +888,16 @@ function editGoal(event, goalElement) {
     goalElement.dataset.age = newAge;
     goalElement.dataset.amount = parseFloat(newAmount) * 100000;
 
+    // Reposition goal based on new age
+    const posX = ageToX(ageNum);
+    const posY = getYOnCurve(posX);
+    goalElement.style.left = posX + 'px';
+    goalElement.style.top = posY + 'px';
+
     const label = goalElement.querySelector('.goal-label');
     const lines = label.innerHTML.split('<br>');
     lines[1] = `Age ${newAge}`;
-    lines[2] = `Budget ₹${newAmount} Lacs`;
+    lines[2] = `₹${newAmount}L`;
 
     label.onclick = function(e) { editGoal(e, goalElement); };
     label.innerHTML = lines.join('<br>');
@@ -978,10 +1131,18 @@ function finishApp() {
 // ===== PAGE LOAD INITIALIZATION =====
 window.addEventListener('DOMContentLoaded', () => {
     loadAllData();
-    generateAgeMarkers();
+    initializePage3();
 
     // Create initial particles
     setTimeout(() => {
         createVaultParticles();
     }, 1000);
 });
+
+// Handle window resize for timeline responsiveness
+window.addEventListener('resize', debounce(() => {
+    generateTimelinePath();
+    generateAgeMarkers();
+    positionCharacters();
+    repositionExistingGoals();
+}, 250));
