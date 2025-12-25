@@ -1,486 +1,651 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
-
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Goal-based Target-return Calculator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelliWealth - Your Premium Financial Vault</title>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles-enhanced.css">
 </head>
-
 <body>
-    <div class="wrap">
-        <div class="top">
-            <div class="brand">Goal-based Target-return Calculator</div>
-            <div class="spacer"></div>
-            <!-- <div class="toggle" id="themeToggle">Light / Dark</div> -->
-        </div>
-
-        <!-- Auto-calculation Summary (Hidden for now as it might not be in the left panel of reference) -->
-        <!-- 
-        <div class="summary">
-            <div class="tile">
-                <div class="k">Gross Monthly Income</div>
-                <div class="v" id="t_gmi">$0</div>
-                <div class="note">Salary + (annual incomes/12)</div>
-            </div>
-            ...
-        </div> 
-        -->
-
-        <!-- Progress Bar -->
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
-        </div>
-        <div class="step-indicator" id="stepIndicator">Step 1 of 8</div>
-
-        <div class="wizard" id="wizard">
-
-            <!-- 1) GENERAL QUESTIONS -->
-            <div class="step active" data-step="1">
-                <div class="step-header">
-                    <span class="step-icon">👤</span>
-                    <h2>Let's start with the basics</h2>
-                </div>
-                <div class="content">
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Current Age in years <span class="hint">ⓘ</span></div>
-                            <div class="stepper">
-                                <button type="button" data-step="age" data-delta="-1">−</button>
-                                <button type="button" data-step="age" data-delta="1">+</button>
-                            </div>
-                            <div class="pillInput"><span class="prefix">yrs</span><input id="age" type="number"
-                                    value="42" /></div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Retirement Age</div>
-                            <div class="stepper">
-                                <button type="button" data-step="retire_age" data-delta="-1">−</button>
-                                <button type="button" data-step="retire_age" data-delta="1">+</button>
-                            </div>
-                            <div class="pillInput"><span class="prefix">yrs</span><input id="retire_age" type="number"
-                                    value="60" /></div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Current Fin. Investments <span class="hint">ⓘ</span></div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">INR</span><input id="invest_now" type="text"
-                                    value="500,000" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_invest_now" min="0" max="20000000" step="10000" value="500000">
-                            <div class="ticks">
-                                <span>0</span><span>5M</span><span>10M</span><span>15M</span><span>20M</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Net Savings p.a.</div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">INR</span><input id="save_pa" type="text"
-                                    value="100,000" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_save_pa" min="0" max="1000000" step="5000" value="100000">
-                            <div class="ticks">
-                                <span>0</span><span>250K</span><span>500K</span><span>750K</span><span>1M</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Annual Increase in Net Savings <span class="hint">ⓘ</span></div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">%</span><input id="save_g" type="number"
-                                    value="5" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_save_g" min="0" max="25" step="0.5" value="5">
-                            <div class="ticks">
-                                <span>0</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span><span>25%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Annual Retirement Expenses <span class="hint">ⓘ</span></div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">INR</span><input id="ret_exp" type="text"
-                                    value="100,000" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_ret_exp" min="0" max="1000000" step="5000" value="100000">
-                            <div class="ticks">
-                                <span>0</span><span>250K</span><span>500K</span><span>750K</span><span>1M</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Inflation Rate</div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">%</span><input id="infl" type="number"
-                                    value="4" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_infl" min="0" max="15" step="0.1" value="4">
-                            <div class="ticks"><span>0</span><span>5%</span><span>10%</span><span>15%</span></div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="grid three">
-                            <div class="pillInput"><span class="prefix">Gender</span><select id="gender">
-                                    <option value="">Select</option>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Other</option>
-                                    <option>Prefer not to say</option>
-                                </select></div>
-                            <div class="pillInput"><span class="prefix">Marital</span><select id="marital">
-                                    <option value="">Select</option>
-                                    <option>Single</option>
-                                    <option>Married</option>
-                                    <option>Divorced</option>
-                                    <option>Widowed</option>
-                                </select></div>
-                            <div class="pillInput"><span class="prefix">Dependents</span><input id="dependents"
-                                    type="number" value="0" min="0" /></div>
-                        </div>
-                    </div>
-
-                    <div class="section" style="border-bottom:0">
-                        <div class="row">
-                            <div class="label">Legacy at Death</div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">INR</span><input id="legacy" type="text"
-                                    value="1,000,000" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_legacy" min="0" max="20000000" step="10000" value="1000000">
-                            <div class="ticks"><span>0</span><span>10M</span><span>20M</span></div>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="nav-buttons">
-                    <button class="btn-next" onclick="nextStep(1)">Next Step →</button>
-                </div>
-            </div>
-
-            <!-- 2) HOME RENT EXPENSES -->
-            <div class="step" data-step="2">
-                <div class="step-header">
-                    <span class="step-icon">🏠</span>
-                    <h2>Home Rent Expenses</h2>
-                </div>
-                <div class="content">
-                    <div class="section" style="border-bottom:0">
-                        <div class="row">
-                            <div class="label">Rent p.a <span class="hint">ⓘ</span></div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">INR</span><input id="rent_pa" type="text"
-                                    value="36,000" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_rent_pa" min="0" max="200000" step="1000" value="36000">
-                            <div class="ticks">
-                                <span>0</span><span>50K</span><span>100K</span><span>150K</span><span>200K</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="nav-buttons">
-                    <button class="btn-prev" onclick="prevStep(2)">← Back</button>
-                    <button class="btn-next" onclick="nextStep(2)">Next Step →</button>
-                </div>
-            </div>
-
-            <!-- 3) HOME EMI EXPENSES -->
-            <div class="step" data-step="3">
-                <div class="step-header">
-                    <span class="step-icon">🏦</span>
-                    <h2>Home EMI Expenses</h2>
-                </div>
-                <div class="content">
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">House Purchase (Years from today) <span class="hint">ⓘ</span></div>
-                            <div class="stepper">
-                                <button type="button" data-step="hp_years" data-delta="-1">−</button>
-                                <button type="button" data-step="hp_years" data-delta="1">+</button>
-                            </div>
-                            <div class="pillInput"><span class="prefix">yrs</span><input id="hp_years" type="number"
-                                    value="5" /></div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Loan Tenure (Years) <span class="hint">ⓘ</span></div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">yrs</span><input id="loan_tenure" type="number"
-                                    value="10" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_loan_tenure" min="0" max="45" step="1" value="10">
-                            <div class="ticks"><span>0</span><span>15</span><span>30</span><span>45</span></div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Proposed Down Payment <span class="hint">ⓘ</span></div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">INR</span><input id="downpay" type="text"
-                                    value="100,000" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_downpay" min="0" max="2000000" step="10000" value="100000">
-                            <div class="ticks">
-                                <span>0</span><span>500K</span><span>1M</span><span>1.5M</span><span>2M</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section" style="border-bottom:0">
-                        <div class="row">
-                            <div class="label">EMI p.a <span class="hint">ⓘ</span></div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">INR</span><input id="emi_pa" type="text"
-                                    value="30,000" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_emi_pa" min="0" max="200000" step="1000" value="30000">
-                            <div class="ticks">
-                                <span>0</span><span>50K</span><span>100K</span><span>150K</span><span>200K</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="nav-buttons">
-                    <button class="btn-prev" onclick="prevStep(3)">← Back</button>
-                    <button class="btn-next" onclick="nextStep(3)">Next Step →</button>
-                </div>
-            </div>
-
-            <!-- 4) CHILDREN'S UNIVERSITY EXPENSES -->
-            <div class="step" data-step="4">
-                <div class="step-header">
-                    <span class="step-icon">🎓</span>
-                    <h2>Children’s University Expenses</h2>
-                </div>
-                <div class="content">
-                    <div class="section">
-                        <div class="row">
-                            <div class="label">Number of Children</div>
-                            <div class="stepper">
-                                <button type="button" data-step="kids_n" data-delta="-1">−</button>
-                                <button type="button" data-step="kids_n" data-delta="1">+</button>
-                            </div>
-                            <div class="pillInput"><span class="prefix">#</span><input id="kids_n" type="number"
-                                    value="0" min="0" /></div>
-                        </div>
-                    </div>
-                    <div class="section" style="border-bottom:0">
-                        <div class="row">
-                            <div class="label">Cost of Education p.a. <span class="hint">ⓘ</span></div>
-                            <div></div>
-                            <div class="pillInput"><span class="prefix">INR</span><input id="edu_cost_pa" type="text"
-                                    value="0" /></div>
-                        </div>
-                        <div class="slider">
-                            <input type="range" id="s_edu_cost_pa" min="0" max="1000000" step="5000" value="0">
-                            <div class="ticks">
-                                <span>0</span><span>200K</span><span>400K</span><span>600K</span><span>800K</span><span>1M</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="nav-buttons">
-                    <button class="btn-prev" onclick="prevStep(4)">← Back</button>
-                    <button class="btn-next" onclick="nextStep(4)">Next Step →</button>
-                </div>
-            </div>
-
-            <!-- 5) INCOME DETAILS -->
-            <div class="step" data-step="5">
-                <div class="step-header">
-                    <span class="step-icon">💰</span>
-                    <h2>Income Details</h2>
-                </div>
-                <div class="content">
-                    <div class="grid two">
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="inc_takehome"
-                                type="number" placeholder="Monthly Take Home salary" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_bonus" type="number"
-                                placeholder="Expected Annual bonus" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_rent" type="number"
-                                placeholder="Rental income" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_business"
-                                type="number" placeholder="Business income" /></div>
-                        <div class="pillInput"><span class="prefix">% / yr</span><input id="inc_rise" type="number"
-                                placeholder="Expected annual income rise" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_invest" type="number"
-                                placeholder="Investment income (dividends, interest)" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="inc_other" type="number"
-                                placeholder="Any income from other sources" /></div>
-                    </div>
-                </div>
-                <div class="nav-buttons">
-                    <button class="btn-prev" onclick="prevStep(5)">← Back</button>
-                    <button class="btn-next" onclick="nextStep(5)">Next Step →</button>
-                </div>
-            </div>
-
-            <!-- 6) EXPENSES DETAILS -->
-            <div class="step" data-step="6">
-                <div class="step-header">
-                    <span class="step-icon">💸</span>
-                    <h2>Expenses Details</h2>
-                </div>
-                <div class="content">
-                    <div class="grid two">
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_rent" type="number"
-                                placeholder="Monthly - House Rent" /></div>
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_school" type="number"
-                                placeholder="Monthly - School Fee details by Kid" /></div>
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="exp_household"
-                                type="number"
-                                placeholder="Monthly - Total Household expenses (Bills & Groceries etc)" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_vac" type="number"
-                                placeholder="Annual - Vacation" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_disc" type="number"
-                                placeholder="Annual - Discretionary Purchases (Clothing, Mobile, Whitegoods)" />
-                        </div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_life" type="number"
-                                placeholder="Annual - Life Insurance Premiums" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_health" type="number"
-                                placeholder="Annual - Health Insurance Premiums" /></div>
-                        <div class="pillInput"><span class="prefix">INR / yr</span><input id="exp_maint" type="number"
-                                placeholder="Annual - Maintenances (Appliances, Vehicle, Property)" />
-                        </div>
-                    </div>
-                </div>
-                <div class="nav-buttons">
-                    <button class="btn-prev" onclick="prevStep(6)">← Back</button>
-                    <button class="btn-next" onclick="nextStep(6)">Next Step →</button>
-                </div>
-            </div>
-
-            <!-- 7) INVESTMENTS -->
-            <div class="step" data-step="7">
-                <div class="step-header">
-                    <span class="step-icon">📈</span>
-                    <h2>Investments</h2>
-                </div>
-                <div class="content">
-                    <div class="grid two">
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_mf" type="number"
-                                placeholder="Mutual Funds" /></div>
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_stocks" type="number"
-                                placeholder="Stocks" /></div>
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_bonds_fd" type="number"
-                                placeholder="Bonds & Fixed Deposits" /></div>
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_ppf_epf_nps" type="number"
-                                placeholder="PPF, EPF, NPS" /></div>
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_savings_bank" type="number"
-                                placeholder="Saving Bank Balances" /></div>
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_realestate" type="number"
-                                placeholder="Real Estate (Value)" /></div>
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_gold" type="number"
-                                placeholder="Gold Equivalents / Jewelry" /></div>
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_other" type="number"
-                                placeholder="Other investments (PMS, AIF, SIF)" /></div>
-                        <div class="pillInput"><span class="prefix">INR</span><input id="inv_any_other_5lac"
-                                type="number" placeholder="Any other Assets (>5Lac)" /></div>
-                    </div>
-                </div>
-                <div class="nav-buttons">
-                    <button class="btn-prev" onclick="prevStep(7)">← Back</button>
-                    <button class="btn-next" onclick="nextStep(7)">Next Step →</button>
-                </div>
-            </div>
-
-            <!-- 8) LOANS -->
-            <div class="step" data-step="8">
-                <div class="step-header">
-                    <span class="step-icon">💳</span>
-                    <h2>Loans</h2>
-                </div>
-                <div class="content">
-                    <div class="grid two">
-                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_home_out" type="number"
-                                placeholder="Outstanding Home loan" /></div>
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_home_emi"
-                                type="number" placeholder="Home Loan EMI" /></div>
-                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_home_close" type="date"
-                                placeholder="Home Loan Closure Date" /></div>
-
-                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_car_out" type="number"
-                                placeholder="Outstanding Car loan" /></div>
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_car_emi"
-                                type="number" placeholder="Car Loan EMI" /></div>
-                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_car_close" type="date"
-                                placeholder="Car Loan Closure Date" /></div>
-
-                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_personal_out"
-                                type="number" placeholder="Outstanding Personal loan" /></div>
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_personal_emi"
-                                type="number" placeholder="Personal Loan EMI" /></div>
-                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_personal_close"
-                                type="date" placeholder="Personal Loan Closure Date" /></div>
-
-                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_edu_out" type="number"
-                                placeholder="Outstanding Education loan" /></div>
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_edu_emi"
-                                type="number" placeholder="Education loan EMI" /></div>
-                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_edu_close" type="date"
-                                placeholder="Education Loan Closure Date" /></div>
-
-                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_biz_out" type="number"
-                                placeholder="Outstanding Business loan" /></div>
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_biz_emi"
-                                type="number" placeholder="Business Loan EMI" /></div>
-                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_biz_close" type="date"
-                                placeholder="Business Loan Closure Date" /></div>
-
-                        <div class="pillInput"><span class="prefix">INR</span><input id="loan_other_out" type="number"
-                                placeholder="Outstanding - Other loan" /></div>
-                        <div class="pillInput"><span class="prefix">INR / mo</span><input id="loan_other_emi"
-                                type="number" placeholder="Other Loan EMI" /></div>
-                        <div class="pillInput"><span class="prefix">Date</span><input id="loan_other_close" type="date"
-                                placeholder="Other Loan Closure Date" /></div>
-                    </div>
-                </div>
-                <div class="nav-buttons">
-                    <button class="btn-prev" onclick="prevStep(8)">← Back</button>
-                    <button class="btn-finish" onclick="finishWizard()">Finish & Calculate 🎉</button>
-                </div>
-            </div>
-
-        </div>
+    <!-- Data Controls -->
+    <div class="data-controls">
+        <button class="btn-sm" onclick="exportData()" title="Export your data">📤 Export</button>
+        <button class="btn-sm" onclick="importData()" title="Import data">📥 Import</button>
+        <button class="btn-sm" onclick="clearAllData()" title="Clear all data">🗑️ Clear</button>
     </div>
 
-    <script src="script.js"></script>
-</body>
+    <!-- Auto-save Indicator -->
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        ✓ Auto-saved
+    </div>
 
+    <div class="container">
+        <!-- Header with User Stats -->
+        <div class="header">
+            <div class="logo">IntelliWealth</div>
+
+            <div class="user-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Financial Score</div>
+                    <div class="stat-value" id="financialScore">750</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-label">Level</div>
+                    <div class="level-badge" id="userLevel">Level 5</div>
+                    <div class="xp-bar">
+                        <div class="xp-fill" id="xpFill" style="width: 65%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-label">Streak</div>
+                    <div class="stat-value">🔥 7 days</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Progress -->
+        <div class="nav-progress">
+            <div class="nav-step active" onclick="goToPage(1)">
+                <div class="nav-step-circle">1</div>
+                <div class="nav-step-label">Income & Expenses</div>
+            </div>
+            <div class="nav-step" onclick="goToPage(2)">
+                <div class="nav-step-circle">2</div>
+                <div class="nav-step-label">Balance Sheet</div>
+            </div>
+            <div class="nav-step" onclick="goToPage(3)">
+                <div class="nav-step-circle">3</div>
+                <div class="nav-step-label">Life Goals</div>
+            </div>
+            <div class="nav-step" onclick="goToPage(4)">
+                <div class="nav-step-circle">4</div>
+                <div class="nav-step-label">FIRE Analysis</div>
+            </div>
+        </div>
+
+        <!-- PAGE 1: INCOME & EXPENSES -->
+        <div class="page active" id="page1">
+            <h1 class="page-title">Your Financial Vault</h1>
+            <p class="page-subtitle">Master your income streams and expense patterns</p>
+
+            <div class="content-grid">
+                <!-- Left Panel: Income Sources -->
+                <div class="panel panel-emerald">
+                    <div class="panel-title">
+                        📈 Income Sources
+                    </div>
+                    <div style="font-size: 0.85em; color: var(--silver); margin-bottom: 20px;">
+                        Annual Total: ₹<span id="totalIncome">40,18,000</span>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Monthly Take Home Salary <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="salary" data-max="500000" data-value="230000">
+                            <div class="slider-fill">₹2,30,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Expected Annual Bonus <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="bonus" data-max="1000000" data-value="850000">
+                            <div class="slider-fill">₹8,50,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Rental Income <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="rental" data-max="100000" data-value="12000">
+                            <div class="slider-fill">₹12,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Business Income <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="business" data-max="100000" data-value="8000">
+                            <div class="slider-fill">₹8,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Investment Income <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="investment" data-max="100000" data-value="14000">
+                            <div class="slider-fill">₹14,000</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Other Income Sources <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="otherIncome" data-max="100000" data-value="0">
+                            <div class="slider-fill">₹0</div>
+                        </div>
+                    </div>
+
+                    <div class="income-item">
+                        <div class="item-label">Expected Annual Income Rise</div>
+                        <div class="amount-slider" data-field="incomeRise" data-max="20" data-value="7" data-type="percent">
+                            <div class="slider-fill">7%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center Panel: Vault Visualization -->
+                <div class="panel">
+                    <div class="vault-container">
+                        <div class="vault" id="vault">
+                            🔐
+                        </div>
+                        <div class="savings-display">
+                            <div class="savings-label">Net Savings</div>
+                            <div class="savings-amount" id="netSavings">₹17,00,025</div>
+                            <div class="savings-period">per year</div>
+                        </div>
+                    </div>
+
+                    <div class="calculations">
+                        <div class="calc-box">
+                            <div class="calc-label">Total Inflow</div>
+                            <div class="calc-value" id="inflowDisplay">₹40,18,000</div>
+                        </div>
+                        <div class="calc-box">
+                            <div class="calc-label">Total Outflow</div>
+                            <div class="calc-value" id="outflowDisplay">₹23,17,975</div>
+                        </div>
+                        <div class="calc-box savings-rate">
+                            <div class="calc-label">Savings Rate</div>
+                            <div style="margin-top: 15px;">
+                                <div class="progress-percentage" id="savingsRateText">42.3%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievement Badges -->
+                    <div class="achievements">
+                        <div class="achievement-badge unlocked" title="Achieved positive savings">
+                            <div class="achievement-icon">🎯</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">Saver</div>
+                                <div class="achievement-desc">Positive savings rate</div>
+                            </div>
+                        </div>
+                        <div class="achievement-badge" id="badge-high-saver" title="Save more than 40%">
+                            <div class="achievement-icon">💰</div>
+                            <div class="achievement-info">
+                                <div class="achievement-name">High Saver</div>
+                                <div class="achievement-desc">40%+ savings rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Expenses -->
+                <div class="panel panel-ruby">
+                    <div class="panel-title">
+                        💸 Expenses
+                    </div>
+                    <div style="font-size: 0.85em; color: var(--silver); margin-bottom: 20px;">
+                        Annual Total: ₹<span id="totalExpenses">23,17,975</span>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">House Rent <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="rent" data-max="100000" data-value="38000">
+                            <div class="slider-fill slider-fill-expense">₹38,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">School Fees <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="schoolFees" data-max="50000" data-value="13000">
+                            <div class="slider-fill slider-fill-expense">₹13,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Household Expenses <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="household" data-max="150000" data-value="64998">
+                            <div class="slider-fill slider-fill-expense">₹64,998</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Loan EMIs <small>(Monthly)</small></div>
+                        <div class="amount-slider" data-field="emis" data-max="100000" data-value="24000">
+                            <div class="slider-fill slider-fill-expense">₹24,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Vacation Budget <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="vacation" data-max="500000" data-value="399999">
+                            <div class="slider-fill slider-fill-expense">₹3,99,999</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Discretionary Purchases <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="discretionary" data-max="500000" data-value="200000">
+                            <div class="slider-fill slider-fill-expense">₹2,00,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Life Insurance <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="lifeInsurance" data-max="100000" data-value="26000">
+                            <div class="slider-fill slider-fill-expense">₹26,000</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Health Insurance <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="healthInsurance" data-max="50000" data-value="4500">
+                            <div class="slider-fill slider-fill-expense">₹4,500</div>
+                        </div>
+                    </div>
+
+                    <div class="expense-item">
+                        <div class="item-label">Maintenance <small>(Annual)</small></div>
+                        <div class="amount-slider" data-field="maintenance" data-max="50000" data-value="7500">
+                            <div class="slider-fill slider-fill-expense">₹7,500</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-save" onclick="savePage1()"><span>💾 SAVE</span></button>
+                <button class="btn btn-next" onclick="goToPage(2)"><span>NEXT ➔</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 2: ASSETS & LIABILITIES -->
+        <div class="page" id="page2">
+            <h1 class="page-title">Your Balance Sheet</h1>
+            <p class="page-subtitle">Build your net worth - assets vs liabilities</p>
+
+            <div class="instruction-bubble">
+                💡 <strong>How it works:</strong> Click on any loan or asset from the list on the right. You'll be prompted to enter the amount, and it will automatically appear on the balance scale. The balance will tilt based on your net worth!
+            </div>
+
+            <div class="content-grid">
+                <!-- Balance Scale -->
+                <div class="panel" style="grid-column: 1 / 3;">
+                    <div class="balance-container">
+                        <div class="balance-scale" id="balanceScale">
+                            <div class="balance-beam" id="balanceBeam"></div>
+
+                            <div class="balance-side balance-left" id="liabilitiesBox">
+                                <h3 style="color: var(--ruby); margin-bottom: 15px; font-family: 'Playfair Display', serif;">📊 Liabilities</h3>
+                                <div id="liabilitiesList"></div>
+                                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--ruby);">
+                                    <strong>Total: ₹<span id="totalLiabilities">0</span></strong>
+                                </div>
+                            </div>
+
+                            <div class="balance-side balance-right" id="assetsBox">
+                                <h3 style="color: var(--emerald); margin-bottom: 15px; font-family: 'Playfair Display', serif;">💰 Assets</h3>
+                                <div id="assetsList"></div>
+                                <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid var(--emerald);">
+                                    <strong>Total: ₹<span id="totalAssets">0</span></strong>
+                                </div>
+                            </div>
+
+                            <div class="balance-fulcrum"></div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 40px;">
+                            <div style="font-size: 0.9em; color: var(--silver); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Net Worth</div>
+                            <div style="font-family: 'Playfair Display', serif; font-size: 2.5em; font-weight: 800; color: var(--gold);">
+                                ₹<span id="netWorth">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Panel -->
+                <div class="drag-panel">
+                    <div class="drag-section">
+                        <div class="drag-section-title loans-title">📋 Loans</div>
+                        <div class="drag-item clickable-item" data-type="liability" data-name="House Loan" onclick="addItemWithPrompt(this)">
+                            House Loan
+                        </div>
+                        <div class="drag-item clickable-item" data-type="liability" data-name="Personal Loan" onclick="addItemWithPrompt(this)">
+                            Personal Loan
+                        </div>
+                        <div class="drag-item clickable-item" data-type="liability" data-name="Education Loan" onclick="addItemWithPrompt(this)">
+                            Education Loan
+                        </div>
+                        <div class="drag-item clickable-item" data-type="liability" data-name="Car Loan" onclick="addItemWithPrompt(this)">
+                            Car Loan
+                        </div>
+                    </div>
+
+                    <div class="drag-section">
+                        <div class="drag-section-title assets-title">💎 Assets</div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="Mutual Funds" onclick="addItemWithPrompt(this)">
+                            Mutual Funds
+                        </div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="FD" onclick="addItemWithPrompt(this)">
+                            Fixed Deposits
+                        </div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="House" onclick="addItemWithPrompt(this)">
+                            House
+                        </div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="PF" onclick="addItemWithPrompt(this)">
+                            Provident Fund
+                        </div>
+                        <div class="drag-item clickable-item" data-type="asset" data-name="Gold" onclick="addItemWithPrompt(this)">
+                            Gold
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-prev" onclick="goToPage(1)"><span>⬅ BACK</span></button>
+                <button class="btn btn-save" onclick="savePage2()"><span>💾 SAVE</span></button>
+                <button class="btn btn-next" onclick="goToPage(3)"><span>NEXT ➔</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 3: MILESTONES GOALS -->
+        <div class="page" id="page3">
+            <h1 class="page-title">Plan Your Life Journey</h1>
+            <p class="page-subtitle">Map your financial milestones across your lifetime</p>
+
+            <div class="instruction-bubble">
+                💡 <strong>How it works:</strong> Select applicable goals from the right panel and drag & drop them onto your life timeline. Icons will change based on your gender!
+            </div>
+
+            <div class="content-grid">
+                <!-- Timeline -->
+                <div class="panel" style="grid-column: 1 / 3;">
+                    <div class="timeline-container" id="timelineContainer">
+                        <svg width="100%" height="300" class="timeline-curve">
+                            <path id="timelinePath" d="M 50 250 Q 300 100, 550 250 T 1050 250" class="timeline-path"/>
+                        </svg>
+
+                        <!-- Age Markers -->
+                        <div class="age-markers" id="ageMarkers">
+                            <!-- Will be dynamically generated -->
+                        </div>
+
+                        <!-- Characters -->
+                        <div class="character character-start" id="characterStart">🧑‍💼</div>
+                        <div class="character character-end" id="characterEnd">🧓</div>
+
+                        <!-- Goals will be added here dynamically -->
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; padding: 25px; margin-top: 25px; background: rgba(0,0,0,0.2); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div>
+                            <strong style="color: var(--gold);">Present Age:</strong> <span id="currentAge">32</span> years
+                        </div>
+                        <div>
+                            <strong style="color: var(--gold);">Life Expectancy:</strong> 100 years
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goal Icons Panel -->
+                <div class="goal-icons-panel">
+                    <h3 style="margin-bottom: 25px; font-family: 'Playfair Display', serif; font-size: 1.5em;">📌 Available Goals</h3>
+
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="🪑" data-goal-name="Retirement" title="Retirement">
+                        🪑 Retirement
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="🎓" data-goal-name="Education" title="Education">
+                        🎓 Education
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="💍" data-goal-name="Marriage" title="Marriage">
+                        💍 Marriage
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="✈️" data-goal-name="Vacation" title="Vacation">
+                        ✈️ Vacation
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="🏠" data-goal-name="House" title="House">
+                        🏠 House
+                    </div>
+                    <div class="goal-icon-item" draggable="true" data-goal-icon="🚗" data-goal-name="Car" title="Car">
+                        🚗 Car
+                    </div>
+
+                    <div style="margin-top: 30px; padding: 20px; background: rgba(212, 175, 55, 0.1); border-radius: 16px; border: 1px solid rgba(212, 175, 55, 0.2);">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" id="genderToggle" onchange="toggleGender()" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: 600;">👨 Male User (Toggle for icons)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-prev" onclick="goToPage(2)"><span>⬅ BACK</span></button>
+                <button class="btn btn-save" onclick="savePage3()"><span>💾 SAVE</span></button>
+                <button class="btn btn-next" onclick="goToPage(4)"><span>VIEW ANALYSIS ➔</span></button>
+            </div>
+        </div>
+
+        <!-- PAGE 4: FIRE ANALYSIS & SCENARIO PLANNING -->
+        <div class="page" id="page4">
+            <h1 class="page-title">FIRE Analysis</h1>
+            <p class="page-subtitle">Financial Independence, Retire Early - Your personalized roadmap</p>
+
+            <div class="info-box">
+                <strong>💡 How it works:</strong> This analysis auto-populates from your inputs on Pages 1-3. Your FIRE (Financial Independence) number is calculated as <b>25 × your retirement expenses</b> (inflation-adjusted). Adjust the sliders below to see how different scenarios affect your FIRE age.
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-tiles">
+                <div class="summary-tile">
+                    <div class="tile-label">FI Target (Today)</div>
+                    <div class="tile-value" id="fiTargetToday">₹ 2.42 Cr</div>
+                    <div class="tile-note">25 × retirement expenses</div>
+                </div>
+                <div class="summary-tile">
+                    <div class="tile-label">Time to FI</div>
+                    <div class="tile-value" id="timeToFI">13 years</div>
+                    <div class="tile-note">Based on current inputs</div>
+                </div>
+                <div class="summary-tile">
+                    <div class="tile-label">Net Worth at FI</div>
+                    <div class="tile-value" id="nwAtFI">₹ 4.93 Cr</div>
+                    <div class="tile-note">Projected wealth</div>
+                </div>
+                <div class="summary-tile">
+                    <div class="tile-label">Status</div>
+                    <div class="tile-value" style="font-size: 1.2em; color: var(--emerald);" id="fiStatus">On Track ✓</div>
+                    <div class="tile-note">Under current assumptions</div>
+                </div>
+            </div>
+
+            <!-- FIRE Age Display -->
+            <div class="fire-display">
+                <div class="fire-label">🎯 Your Projected FIRE Age</div>
+                <div class="fire-age" id="fireAgeDisplay">55 years</div>
+                <div class="fire-label" style="margin-top: 15px; font-size: 0.9em;">Move any slider below to see instant updates</div>
+            </div>
+
+            <!-- Analysis Tabs -->
+            <div class="analysis-tabs">
+                <button class="analysis-tab active" onclick="showAnalysisTab('scenario')">📈 Scenario Analysis</button>
+                <button class="analysis-tab" onclick="showAnalysisTab('stress')">⚠️ Stress Test</button>
+            </div>
+
+            <!-- Scenario Analysis Panel -->
+            <div class="analysis-panel active" id="scenarioPanel">
+                <div class="analysis-grid">
+                    <div class="panel">
+                        <h3 style="margin-bottom: 25px; font-family: 'Playfair Display', serif; color: var(--gold);">💼 Employment & Income Shocks</h3>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Job Gap Duration</div>
+                            <div class="scenario-value"><span id="v_gapY">0</span> years</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="gapY" min="0" max="5" step="1" value="0">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Income Loss During Gap</div>
+                            <div class="scenario-value"><span id="v_gapLoss">100</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="gapLoss" min="0" max="100" step="5" value="100">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Post-Gap Income Loss Duration</div>
+                            <div class="scenario-value"><span id="v_postLossY">0</span> years</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="postLossY" min="0" max="5" step="1" value="0">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Post-Gap Income Reduction</div>
+                            <div class="scenario-value"><span id="v_postLossPct">0</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="postLossPct" min="0" max="50" step="5" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3 style="margin-bottom: 25px; font-family: 'Playfair Display', serif; color: var(--gold);">🏥 Unexpected Expenses</h3>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">One-Time Emergency (Year 1)</div>
+                            <div class="scenario-value">₹ <span id="v_oneOff">0</span></div>
+                            <div class="scenario-slider">
+                                <input type="range" id="oneOff" min="0" max="2000000" step="50000" value="0">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Medical Recurring (Monthly)</div>
+                            <div class="scenario-value">₹ <span id="v_medMo">0</span> /mo</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="medMo" min="0" max="100000" step="1000" value="0">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Medical Duration</div>
+                            <div class="scenario-value"><span id="v_medY">0</span> years</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="medY" min="0" max="10" step="1" value="0">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Caregiving Break</div>
+                            <div class="scenario-value"><span id="v_careY">0</span> years</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="careY" min="0" max="5" step="1" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stress Test Panel -->
+            <div class="analysis-panel" id="stressPanel">
+                <div class="analysis-grid">
+                    <div class="panel">
+                        <h3 style="margin-bottom: 25px; font-family: 'Playfair Display', serif; color: var(--gold);">📉 Macro & Market Assumptions</h3>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Portfolio ROI (Annual)</div>
+                            <div class="scenario-value"><span id="v_roi">12</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="roi" min="0" max="20" step="0.5" value="12">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Inflation Rate</div>
+                            <div class="scenario-value"><span id="v_infl">6</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="infl" min="0" max="12" step="0.5" value="6">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Income Growth Rate</div>
+                            <div class="scenario-value"><span id="v_incG">7</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="incG" min="0" max="20" step="0.5" value="7">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Expense Growth Rate</div>
+                            <div class="scenario-value"><span id="v_expG">6</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="expG" min="0" max="20" step="0.5" value="6">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3 style="margin-bottom: 25px; font-family: 'Playfair Display', serif; color: var(--gold);">💥 Market Shocks & Limits</h3>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Market Crash (Year 1)</div>
+                            <div class="scenario-value"><span id="v_crash">0</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="crash" min="0" max="60" step="5" value="0">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Savings Rate Shock (3 yrs)</div>
+                            <div class="scenario-value"><span id="v_svShock">0</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="svShock" min="0" max="80" step="5" value="0">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Maximum Working Age</div>
+                            <div class="scenario-value"><span id="v_maxAge">65</span> years</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="maxAge" min="50" max="75" step="1" value="65">
+                            </div>
+                        </div>
+
+                        <div class="scenario-row">
+                            <div class="scenario-label">Retirement Expense %</div>
+                            <div class="scenario-value"><span id="v_retPct">80</span>%</div>
+                            <div class="scenario-slider">
+                                <input type="range" id="retPct" min="40" max="120" step="5" value="80">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 40px;">
+                <strong>ℹ️ Methodology:</strong> This calculator uses the 4% rule (25× expenses) for FIRE target calculation. All projections assume yearly compounding with the specified growth rates. Scenario sliders apply from year 0 forward unless otherwise noted. This is a simplified model for planning purposes only.
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-prev" onclick="goToPage(3)"><span>⬅ BACK TO GOALS</span></button>
+                <button class="btn btn-save" onclick="saveAllData(); showSaveConfirmation()"><span>💾 SAVE ALL</span></button>
+                <button class="btn btn-next" onclick="finishApp()"><span>🎉 COMPLETE</span></button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script-enhanced.js"></script>
+</body>
 </html>
