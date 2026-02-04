@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>WealthTrack - Net Worth Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a24;
+      --bg-hover: #22222e;
+      --border: rgba(255,255,255,0.08);
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0b0;
+      --text-muted: #6b6b7b;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --green: #22c55e;
+      --green-bg: rgba(34,197,94,0.1);
+      --red: #ef4444;
+      --red-bg: rgba(239,68,68,0.1);
+      --blue: #3b82f6;
+      --purple: #a855f7;
+      --orange: #f97316;
+      --yellow: #eab308;
+      --cyan: #06b6d4;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    html[data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-hover: #f1f5f9;
+      --border: rgba(0,0,0,0.08);
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 240px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.5px;
+    }
+
+    .nav { flex: 1; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent); color: white; }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+    }
+
+    .nav-section {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      padding: 16px 12px 8px;
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover { background: var(--bg-hover); }
+
+    /* Main Content */
+    .main {
+      margin-left: 240px;
+      padding: 32px 40px;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: var(--bg-hover); }
+
+    /* Net Worth Summary */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .summary-card.featured {
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(99,102,241,0.1) 100%);
+      border-color: rgba(99,102,241,0.3);
+    }
+
+    .summary-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .summary-value {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+
+    .summary-card.featured .summary-value {
+      font-size: 40px;
+    }
+
+    .summary-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .summary-change.positive {
+      color: var(--green);
+      background: var(--green-bg);
+    }
+
+    .summary-change.negative {
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    /* Asset Allocation Chart */
+    .chart-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .chart-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .chart-period {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-hover);
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .chart-period button {
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .chart-period button.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    /* Donut Chart */
+    .donut-container {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .donut-chart {
+      position: relative;
+      width: 180px;
+      height: 180px;
+    }
+
+    .donut-chart svg {
+      transform: rotate(-90deg);
+    }
+
+    .donut-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .donut-center-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .donut-center-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .allocation-legend {
+      flex: 1;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .legend-item:last-child { border-bottom: none; }
+
+    .legend-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .legend-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .legend-percent {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+
+    /* Line Chart Placeholder */
+    .line-chart {
+      height: 200px;
+      background: linear-gradient(180deg, rgba(99,102,241,0.1) 0%, transparent 100%);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .line-chart-line {
+      position: absolute;
+      bottom: 20%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .line-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Balance Sheet */
+    .balance-sheet {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sheet-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .sheet-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-hover);
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .sheet-tabs button {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .sheet-tabs button.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    /* Table Styles */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 14px 24px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    .data-table tr:hover td {
+      background: var(--bg-hover);
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .asset-name {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .asset-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .asset-details h4 {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .asset-details span {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .asset-value {
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .asset-change {
+      text-align: right;
+    }
+
+    .change-positive { color: var(--green); }
+    .change-negative { color: var(--red); }
+
+    /* Category Header */
+    .category-row td {
+      background: var(--bg-secondary);
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .category-row:hover td {
+      background: var(--bg-secondary) !important;
+    }
+
+    .category-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .category-total {
+      text-align: right;
+      font-weight: 600;
+    }
+
+    /* Add Asset Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 500px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--bg-hover);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 18px;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .chart-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .main {
+        margin-left: 0;
+        padding: 20px;
+      }
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      .donut-container {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">W</div>
+      <span class="logo-text">WealthTrack</span>
+    </div>
+
+    <div class="nav">
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Assets
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg>
+        Performance
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Transactions
+      </div>
+
+      <div class="nav-section">Planning</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Goals
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Scenarios
+      </div>
+
+      <div class="nav-section">Account</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m7.08 7.08 4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m7.08-7.08 4.24-4.24"/></svg>
+        Settings
+      </div>
+    </div>
+
+    <div class="theme-toggle" id="themeToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      Toggle Theme
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="header">
+      <h1>Dashboard</h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <button class="btn btn-primary" id="addAssetBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Asset
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+      <div class="summary-card featured">
+        <div class="summary-label">Total Net Worth</div>
+        <div class="summary-value" id="netWorthValue">$0</div>
+        <span class="summary-change positive" id="netWorthChange">+0% this month</span>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Total Assets</div>
+        <div class="summary-value" id="totalAssets">$0</div>
+        <span class="summary-change positive">+0%</span>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Total Liabilities</div>
+        <div class="summary-value" id="totalLiabilities">$0</div>
+        <span class="summary-change negative">-0%</span>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Monthly Change</div>
+        <div class="summary-value" id="monthlyChange">$0</div>
+        <span class="summary-change positive">+0%</span>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="chart-section">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Asset Allocation</h3>
+        </div>
+        <div class="donut-container">
+          <div class="donut-chart">
+            <svg viewBox="0 0 100 100" width="180" height="180">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--border)" stroke-width="12"/>
+              <circle id="donut1" cx="50" cy="50" r="40" fill="none" stroke="var(--blue)" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round"/>
+              <circle id="donut2" cx="50" cy="50" r="40" fill="none" stroke="var(--green)" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round"/>
+              <circle id="donut3" cx="50" cy="50" r="40" fill="none" stroke="var(--purple)" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round"/>
+              <circle id="donut4" cx="50" cy="50" r="40" fill="none" stroke="var(--orange)" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round"/>
+              <circle id="donut5" cx="50" cy="50" r="40" fill="none" stroke="var(--cyan)" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round"/>
+            </svg>
+            <div class="donut-center">
+              <div class="donut-center-value" id="donutTotal">$0</div>
+              <div class="donut-center-label">Total</div>
+            </div>
+          </div>
+          <div class="allocation-legend" id="allocationLegend">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">Net Worth History</h3>
+          <div class="chart-period">
+            <button>1M</button>
+            <button>3M</button>
+            <button class="active">1Y</button>
+            <button>All</button>
+          </div>
+        </div>
+        <div class="line-chart">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none" id="lineChart">
+            <defs>
+              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--accent);stop-opacity:0.3"/>
+                <stop offset="100%" style="stop-color:var(--accent);stop-opacity:0"/>
+              </linearGradient>
+            </defs>
+            <path id="chartArea" fill="url(#lineGradient)" d="M0,200 L0,200 L400,200 Z"/>
+            <path id="chartLine" fill="none" stroke="var(--accent)" stroke-width="2" d="M0,200 L400,200"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balance Sheet -->
+    <div class="balance-sheet">
+      <div class="sheet-header">
+        <h3 class="sheet-title">Balance Sheet</h3>
+        <div class="sheet-tabs">
+          <button class="active" data-tab="all">All</button>
+          <button data-tab="assets">Assets</button>
+          <button data-tab="liabilities">Liabilities</button>
+        </div>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Institution</th>
+            <th style="text-align:right">Value</th>
+            <th style="text-align:right">Change</th>
+          </tr>
+        </thead>
+        <tbody id="balanceSheetBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Add Asset Modal -->
+  <div class="modal-overlay" id="addAssetModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Asset</h3>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-select" id="assetCategory">
+            <option value="cash">Cash & Bank Accounts</option>
+            <option value="investments">Investments</option>
+            <option value="crypto">Cryptocurrency</option>
+            <option value="realestate">Real Estate</option>
+            <option value="other">Other Assets</option>
+            <option value="liabilities">Liabilities</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Asset Name</label>
+          <input type="text" class="form-input" id="assetName" placeholder="e.g., Savings Account, Tesla Stock">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Institution / Platform</label>
+          <input type="text" class="form-input" id="assetInstitution" placeholder="e.g., Chase, Coinbase, Fidelity">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Value (USD)</label>
+          <input type="number" class="form-input" id="assetValue" placeholder="0.00">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelAsset">Cancel</button>
+        <button class="btn btn-primary" id="saveAsset">Add Asset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('wealthtrack-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('wealthtrack-theme', next);
+    });
+
+    // Data Store
+    let assets = JSON.parse(localStorage.getItem('wealthtrack-assets')) || [
+      { id: 1, category: 'cash', name: 'Checking Account', institution: 'Chase', value: 15000 },
+      { id: 2, category: 'cash', name: 'Savings Account', institution: 'Marcus', value: 50000 },
+      { id: 3, category: 'cash', name: 'Emergency Fund', institution: 'Ally', value: 25000 },
+      { id: 4, category: 'investments', name: 'Brokerage Account', institution: 'Fidelity', value: 125000 },
+      { id: 5, category: 'investments', name: '401(k)', institution: 'Vanguard', value: 180000 },
+      { id: 6, category: 'investments', name: 'Roth IRA', institution: 'Schwab', value: 45000 },
+      { id: 7, category: 'crypto', name: 'Bitcoin', institution: 'Coinbase', value: 35000 },
+      { id: 8, category: 'crypto', name: 'Ethereum', institution: 'Coinbase', value: 15000 },
+      { id: 9, category: 'realestate', name: 'Primary Residence', institution: 'Property', value: 450000 },
+      { id: 10, category: 'other', name: 'Vehicle', institution: 'Toyota', value: 25000 },
+      { id: 11, category: 'liabilities', name: 'Mortgage', institution: 'Wells Fargo', value: -320000 },
+      { id: 12, category: 'liabilities', name: 'Auto Loan', institution: 'Toyota Financial', value: -12000 },
+    ];
+
+    const categoryConfig = {
+      cash: { label: 'Cash & Bank Accounts', color: 'var(--blue)', icon: '🏦' },
+      investments: { label: 'Investments', color: 'var(--green)', icon: '📈' },
+      crypto: { label: 'Cryptocurrency', color: 'var(--purple)', icon: '₿' },
+      realestate: { label: 'Real Estate', color: 'var(--orange)', icon: '🏠' },
+      other: { label: 'Other Assets', color: 'var(--cyan)', icon: '💎' },
+      liabilities: { label: 'Liabilities', color: 'var(--red)', icon: '💳' }
+    };
+
+    // Format currency
+    const formatCurrency = (value) => {
+      const absValue = Math.abs(value);
+      const formatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(absValue);
+      return value < 0 ? `-${formatted}` : formatted;
+    };
+
+    // Calculate totals
+    const calculateTotals = () => {
+      const totalAssets = assets.filter(a => a.value > 0).reduce((sum, a) => sum + a.value, 0);
+      const totalLiabilities = Math.abs(assets.filter(a => a.value < 0).reduce((sum, a) => sum + a.value, 0));
+      const netWorth = totalAssets - totalLiabilities;
+      return { totalAssets, totalLiabilities, netWorth };
+    };
+
+    // Update summary cards
+    const updateSummary = () => {
+      const { totalAssets, totalLiabilities, netWorth } = calculateTotals();
+      document.getElementById('netWorthValue').textContent = formatCurrency(netWorth);
+      document.getElementById('totalAssets').textContent = formatCurrency(totalAssets);
+      document.getElementById('totalLiabilities').textContent = formatCurrency(totalLiabilities);
+      document.getElementById('monthlyChange').textContent = formatCurrency(netWorth * 0.023); // Simulated
+    };
+
+    // Update donut chart
+    const updateDonutChart = () => {
+      const categories = ['cash', 'investments', 'crypto', 'realestate', 'other'];
+      const totals = {};
+      let grandTotal = 0;
+
+      categories.forEach(cat => {
+        totals[cat] = assets.filter(a => a.category === cat && a.value > 0).reduce((sum, a) => sum + a.value, 0);
+        grandTotal += totals[cat];
+      });
+
+      document.getElementById('donutTotal').textContent = formatCurrency(grandTotal);
+
+      // Update donut segments
+      const circumference = 2 * Math.PI * 40;
+      let offset = 0;
+
+      categories.forEach((cat, i) => {
+        const segment = document.getElementById(`donut${i + 1}`);
+        const percent = grandTotal > 0 ? totals[cat] / grandTotal : 0;
+        const length = percent * circumference;
+        segment.setAttribute('stroke-dasharray', `${length} ${circumference}`);
+        segment.setAttribute('stroke-dashoffset', -offset);
+        offset += length;
+      });
+
+      // Update legend
+      const legendHtml = categories.map(cat => {
+        const percent = grandTotal > 0 ? ((totals[cat] / grandTotal) * 100).toFixed(1) : 0;
+        return `
+          <div class="legend-item">
+            <div class="legend-left">
+              <div class="legend-dot" style="background:${categoryConfig[cat].color}"></div>
+              <span class="legend-name">${categoryConfig[cat].label}</span>
+            </div>
+            <div>
+              <span class="legend-value">${formatCurrency(totals[cat])}</span>
+              <span class="legend-percent">${percent}%</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('allocationLegend').innerHTML = legendHtml;
+    };
+
+    // Update line chart (simulated data)
+    const updateLineChart = () => {
+      const { netWorth } = calculateTotals();
+      const points = [];
+      const months = 12;
+
+      for (let i = 0; i < months; i++) {
+        const variation = 1 - (0.15 * Math.random()) - ((months - 1 - i) * 0.02);
+        const value = netWorth * variation;
+        const x = (i / (months - 1)) * 400;
+        const y = 200 - ((value / (netWorth * 1.1)) * 180);
+        points.push({ x, y });
+      }
+
+      const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+      const areaPath = `M0,200 L${points.map(p => `${p.x},${p.y}`).join(' L')} L400,200 Z`;
+
+      document.getElementById('chartLine').setAttribute('d', linePath);
+      document.getElementById('chartArea').setAttribute('d', areaPath);
+    };
+
+    // Render balance sheet
+    const renderBalanceSheet = (filter = 'all') => {
+      const tbody = document.getElementById('balanceSheetBody');
+      const categories = ['cash', 'investments', 'crypto', 'realestate', 'other', 'liabilities'];
+
+      let html = '';
+
+      categories.forEach(cat => {
+        if (filter !== 'all') {
+          if (filter === 'assets' && cat === 'liabilities') return;
+          if (filter === 'liabilities' && cat !== 'liabilities') return;
+        }
+
+        const categoryAssets = assets.filter(a => a.category === cat);
+        if (categoryAssets.length === 0) return;
+
+        const categoryTotal = categoryAssets.reduce((sum, a) => sum + a.value, 0);
+        const config = categoryConfig[cat];
+
+        html += `
+          <tr class="category-row">
+            <td colspan="3">
+              <span class="category-icon">
+                <span style="font-size:16px">${config.icon}</span>
+                ${config.label}
+              </span>
+            </td>
+            <td class="category-total">${formatCurrency(categoryTotal)}</td>
+          </tr>
+        `;
+
+        categoryAssets.forEach(asset => {
+          const change = (Math.random() * 10 - 3).toFixed(2);
+          const changeClass = change >= 0 ? 'change-positive' : 'change-negative';
+
+          html += `
+            <tr>
+              <td>
+                <div class="asset-name">
+                  <div class="asset-icon" style="background:${config.color}20;color:${config.color}">
+                    ${asset.name.charAt(0)}
+                  </div>
+                  <div class="asset-details">
+                    <h4>${asset.name}</h4>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--text-secondary)">${asset.institution}</td>
+              <td class="asset-value">${formatCurrency(asset.value)}</td>
+              <td class="asset-change ${changeClass}">${change >= 0 ? '+' : ''}${change}%</td>
+            </tr>
+          `;
+        });
+      });
+
+      tbody.innerHTML = html;
+    };
+
+    // Tab switching
+    document.querySelectorAll('.sheet-tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sheet-tabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderBalanceSheet(btn.dataset.tab);
+      });
+    });
+
+    // Modal handling
+    const modal = document.getElementById('addAssetModal');
+    const addBtn = document.getElementById('addAssetBtn');
+    const closeBtn = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelAsset');
+    const saveBtn = document.getElementById('saveAsset');
+
+    addBtn.addEventListener('click', () => modal.classList.add('active'));
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    cancelBtn.addEventListener('click', () => modal.classList.remove('active'));
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const category = document.getElementById('assetCategory').value;
+      const name = document.getElementById('assetName').value;
+      const institution = document.getElementById('assetInstitution').value;
+      let value = parseFloat(document.getElementById('assetValue').value) || 0;
+
+      if (!name) return alert('Please enter an asset name');
+
+      if (category === 'liabilities') value = -Math.abs(value);
+
+      const newAsset = {
+        id: Date.now(),
+        category,
+        name,
+        institution,
+        value
+      };
+
+      assets.push(newAsset);
+      localStorage.setItem('wealthtrack-assets', JSON.stringify(assets));
+
+      // Clear form
+      document.getElementById('assetName').value = '';
+      document.getElementById('assetInstitution').value = '';
+      document.getElementById('assetValue').value = '';
+
+      modal.classList.remove('active');
+      updateAll();
+    });
+
+    // Update all UI
+    const updateAll = () => {
+      updateSummary();
+      updateDonutChart();
+      updateLineChart();
+      renderBalanceSheet();
+    };
+
+    // Initialize
+    updateAll();
+  </script>
+</body>
+</html>
