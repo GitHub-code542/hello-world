@@ -46,6 +46,9 @@ function loadAllData() {
                 });
 
                 updateBalanceSheet();
+            } else {
+                // No saved balance data — populate with default categories
+                populateDefaults();
             }
 
             // Load Page 3: Timeline goals
@@ -73,6 +76,9 @@ function loadAllData() {
         } catch (error) {
             console.error('Error loading data:', error);
         }
+    } else {
+        // No saved data at all — populate defaults
+        populateDefaults();
     }
 }
 
@@ -281,36 +287,36 @@ function goToPage(pageNum) {
             // ACTIVE STEP
             step.classList.add('active');
             step.classList.remove('completed');
-            
+
             // Circle: Blue background, White text, White Ring
             circle.classList.remove('bg-slate-200', 'text-slate-600', 'bg-green-500');
             circle.classList.add('bg-primary', 'text-white', 'ring-4');
-            
+
             // Label: Dark text, Bold
             label.classList.remove('text-slate-500', 'text-green-600');
             label.classList.add('text-slate-900', 'dark:text-white', 'font-bold');
-            
+
         } else if (stepNum < pageNum) {
             // COMPLETED STEP
             step.classList.add('completed');
             step.classList.remove('active');
-            
+
             // Circle: Green background (or Primary), White text
             circle.classList.remove('bg-slate-200', 'text-slate-600', 'bg-primary', 'ring-4');
             circle.classList.add('bg-green-500', 'text-white');
-            
+
             // Label: Green text
             label.classList.remove('text-slate-500', 'text-slate-900', 'dark:text-white');
             label.classList.add('text-green-600');
-            
+
         } else {
             // FUTURE STEP
             step.classList.remove('active', 'completed');
-            
+
             // Circle: Grey background, Grey text
             circle.classList.remove('bg-primary', 'bg-green-500', 'text-white', 'ring-4');
             circle.classList.add('bg-slate-200', 'text-slate-600');
-            
+
             // Label: Grey text
             label.classList.remove('text-slate-900', 'dark:text-white', 'text-green-600', 'font-bold');
             label.classList.add('text-slate-500');
@@ -465,6 +471,31 @@ const droppedItems = {
     liabilities: [],
     assets: []
 };
+
+// Default categories for new users (all start at ₹0)
+const DEFAULT_ASSETS = [
+    { name: 'Fixed Deposits', value: '0', icon: '💰', category: 'liquid' },
+    { name: 'Saving Bank Balances', value: '0', icon: '💰', category: 'liquid' },
+    { name: 'Stocks/Equity - Shares', value: '0', icon: '📈', category: 'invested' },
+    { name: 'Mutual Funds', value: '0', icon: '📈', category: 'invested' },
+    { name: 'Real Estate (Value)', value: '0', icon: '🏠', category: 'property' },
+    { name: 'EPF Balance as on date', value: '0', icon: '💰', category: 'liquid' },
+    { name: 'Any other Assets (>5Lac)', value: '0', icon: '🎨', category: 'other' }
+];
+
+const DEFAULT_LIABILITIES = [
+    { name: 'Outstanding Home Loan', value: '0', icon: '🏡', category: 'home-loan' },
+    { name: 'Vehicle Loan', value: '0', icon: '🚙', category: 'car-loan' },
+    { name: 'Personal Loan', value: '0', icon: '👤', category: 'personal' },
+    { name: 'Any Other Loan', value: '0', icon: '📋', category: 'other' }
+];
+
+function populateDefaults() {
+    droppedItems.assets = DEFAULT_ASSETS.map(item => ({ ...item }));
+    droppedItems.liabilities = DEFAULT_LIABILITIES.map(item => ({ ...item }));
+    updateBalanceSheet();
+}
+
 
 // Add item with prompt
 function addItemWithPrompt(element) {
@@ -1199,6 +1230,56 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Helper: compute display value and current unit from rupees
+function getDisplayAndUnit(rupees) {
+    const value = parseInt(rupees) || 0;
+    if (value >= 10000000) {
+        return { displayValue: (value / 10000000).toFixed(2), unit: 'Cr' };
+    } else if (value >= 100000) {
+        return { displayValue: (value / 100000).toFixed(0), unit: 'L' };
+    } else {
+        return { displayValue: (value / 1000).toFixed(0), unit: 'K' };
+    }
+}
+
+// Handle in-place value/unit change on a balance sheet card
+function updateInPlaceValue(type, index, inputEl) {
+    const card = inputEl.closest('.bs-card');
+    const unitSelect = card.querySelector('.bs-unit-select');
+    const numValue = parseFloat(inputEl.value) || 0;
+    const unit = unitSelect.value;
+
+    let rupees;
+    if (unit === 'Cr') rupees = numValue * 10000000;
+    else if (unit === 'L') rupees = numValue * 100000;
+    else if (unit === 'K') rupees = numValue * 1000;
+    else rupees = numValue;
+
+    const list = type === 'asset' ? droppedItems.assets : droppedItems.liabilities;
+    list[index].value = Math.round(rupees).toString();
+
+    // Update totals without full re-render (avoids losing focus)
+    let totalAssets = 0;
+    droppedItems.assets.forEach(item => { totalAssets += parseInt(item.value) || 0; });
+    let totalLiabilities = 0;
+    droppedItems.liabilities.forEach(item => { totalLiabilities += parseInt(item.value) || 0; });
+    const netWorth = totalAssets - totalLiabilities;
+
+    const fmt = (amount) => {
+        const abs = Math.abs(amount);
+        if (abs >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
+        if (abs >= 100000) return `₹${(amount / 100000).toFixed(0)} L`;
+        if (abs >= 1000) return `₹${(amount / 1000).toFixed(0)} K`;
+        return `₹${amount.toFixed(0)}`;
+    };
+
+    document.getElementById('totalAssets').textContent = fmt(totalAssets);
+    document.getElementById('totalLiabilities').textContent = fmt(totalLiabilities);
+    document.getElementById('netWorth').textContent = fmt(netWorth);
+
+    triggerAutoSave();
+}
+
 // Enhanced balance sheet renderer
 function updateBalanceSheetPremium() {
     // Render Assets
@@ -1213,18 +1294,12 @@ function updateBalanceSheetPremium() {
         `;
     } else {
         assetsList.innerHTML = droppedItems.assets.map((item, index) => {
-            const value = parseInt(item.value);
-            const displayValue = value >= 10000000
-                ? `₹${(value / 10000000).toFixed(2)} Cr`
-                : value >= 100000
-                    ? `₹${(value / 100000).toFixed(0)} L`
-                    : `₹${(value / 1000).toFixed(0)} K`;
+            const { displayValue, unit } = getDisplayAndUnit(item.value);
 
             return `
-                <div class="group bg-slate-50 dark:bg-gray-900 rounded-xl p-4 border-2 border-slate-100 dark:border-gray-800
+                <div class="bs-card group bg-slate-50 dark:bg-gray-900 rounded-xl p-4 border-2 border-slate-100 dark:border-gray-800
                             hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 hover:shadow-md
-                            transition-all cursor-pointer"
-                     onclick="editItemInline('asset', ${index})">
+                            transition-all">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-xl flex-shrink-0">
                             ${item.icon || '💰'}
@@ -1235,8 +1310,23 @@ function updateBalanceSheetPremium() {
                                 ${ASSET_CATEGORIES.find(c => c.value === item.category)?.label || item.category}
                             </div>` : ''}
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="text-lg font-bold text-emerald-600 dark:text-emerald-400">${displayValue}</div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <span class="text-sm font-bold text-slate-500">₹</span>
+                            <input type="number" value="${displayValue}" min="0" step="0.01"
+                                   class="w-20 px-2 py-1 rounded-lg border border-slate-200 dark:border-gray-700
+                                          bg-white dark:bg-gray-800 text-right font-bold text-emerald-600 dark:text-emerald-400
+                                          focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none transition-all text-sm"
+                                   oninput="updateInPlaceValue('asset', ${index}, this)"
+                                   onclick="event.stopPropagation(); this.select()">
+                            <select class="bs-unit-select px-1.5 py-1 rounded-lg border border-slate-200 dark:border-gray-700
+                                          bg-white dark:bg-gray-800 font-bold text-emerald-600 dark:text-emerald-400
+                                          focus:border-emerald-400 focus:outline-none cursor-pointer text-sm"
+                                    onchange="updateInPlaceValue('asset', ${index}, this.closest('.bs-card').querySelector('input[type=number]'))"
+                                    onclick="event.stopPropagation()">
+                                <option value="K" ${unit === 'K' ? 'selected' : ''}>K</option>
+                                <option value="L" ${unit === 'L' ? 'selected' : ''}>L</option>
+                                <option value="Cr" ${unit === 'Cr' ? 'selected' : ''}>Cr</option>
+                            </select>
                             <button onclick="event.stopPropagation(); removeBalanceItem('asset', ${index})"
                                 class="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400
                                        hover:bg-red-100 dark:hover:bg-red-900/50 flex items-center justify-center transition-all"
@@ -1262,18 +1352,12 @@ function updateBalanceSheetPremium() {
         `;
     } else {
         liabilitiesList.innerHTML = droppedItems.liabilities.map((item, index) => {
-            const value = parseInt(item.value);
-            const displayValue = value >= 10000000
-                ? `₹${(value / 10000000).toFixed(2)} Cr`
-                : value >= 100000
-                    ? `₹${(value / 100000).toFixed(0)} L`
-                    : `₹${(value / 1000).toFixed(0)} K`;
+            const { displayValue, unit } = getDisplayAndUnit(item.value);
 
             return `
-                <div class="group bg-slate-50 dark:bg-gray-900 rounded-xl p-4 border-2 border-slate-100 dark:border-gray-800
+                <div class="bs-card group bg-slate-50 dark:bg-gray-900 rounded-xl p-4 border-2 border-slate-100 dark:border-gray-800
                             hover:border-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 hover:shadow-md
-                            transition-all cursor-pointer"
-                     onclick="editItemInline('liability', ${index})">
+                            transition-all">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-xl flex-shrink-0">
                             ${item.icon || '💳'}
@@ -1284,8 +1368,23 @@ function updateBalanceSheetPremium() {
                                 ${LIABILITY_CATEGORIES.find(c => c.value === item.category)?.label || item.category}
                             </div>` : ''}
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div class="text-lg font-bold text-red-600 dark:text-red-400">${displayValue}</div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <span class="text-sm font-bold text-slate-500">₹</span>
+                            <input type="number" value="${displayValue}" min="0" step="0.01"
+                                   class="w-20 px-2 py-1 rounded-lg border border-slate-200 dark:border-gray-700
+                                          bg-white dark:bg-gray-800 text-right font-bold text-red-600 dark:text-red-400
+                                          focus:border-red-400 focus:ring-2 focus:ring-red-400/20 focus:outline-none transition-all text-sm"
+                                   oninput="updateInPlaceValue('liability', ${index}, this)"
+                                   onclick="event.stopPropagation(); this.select()">
+                            <select class="bs-unit-select px-1.5 py-1 rounded-lg border border-slate-200 dark:border-gray-700
+                                          bg-white dark:bg-gray-800 font-bold text-red-600 dark:text-red-400
+                                          focus:border-red-400 focus:outline-none cursor-pointer text-sm"
+                                    onchange="updateInPlaceValue('liability', ${index}, this.closest('.bs-card').querySelector('input[type=number]'))"
+                                    onclick="event.stopPropagation()">
+                                <option value="K" ${unit === 'K' ? 'selected' : ''}>K</option>
+                                <option value="L" ${unit === 'L' ? 'selected' : ''}>L</option>
+                                <option value="Cr" ${unit === 'Cr' ? 'selected' : ''}>Cr</option>
+                            </select>
                             <button onclick="event.stopPropagation(); removeBalanceItem('liability', ${index})"
                                 class="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400
                                        hover:bg-red-100 dark:hover:bg-red-900/50 flex items-center justify-center transition-all"
@@ -1302,12 +1401,12 @@ function updateBalanceSheetPremium() {
     // Update totals
     let totalAssets = 0;
     droppedItems.assets.forEach(item => {
-        totalAssets += parseInt(item.value);
+        totalAssets += parseInt(item.value) || 0;
     });
 
     let totalLiabilities = 0;
     droppedItems.liabilities.forEach(item => {
-        totalLiabilities += parseInt(item.value);
+        totalLiabilities += parseInt(item.value) || 0;
     });
 
     const netWorth = totalAssets - totalLiabilities;
@@ -1433,8 +1532,8 @@ function getYOnCurve(x) {
     if (t < 0 || t > 1) return frameTop + startY;
 
     const y = Math.pow(1 - t, 2) * startY +
-              2 * (1 - t) * t * midY +
-              Math.pow(t, 2) * endY;
+        2 * (1 - t) * t * midY +
+        Math.pow(t, 2) * endY;
 
     return frameTop + y;
 }
