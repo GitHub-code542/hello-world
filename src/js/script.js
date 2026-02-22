@@ -45,7 +45,13 @@ function loadAllData() {
                     if (!item.category) item.category = 'other';
                 });
 
-                updateBalanceSheet();
+                // If both arrays are empty (e.g. auto-save ran before user added items),
+                // populate with default categories so the balance sheet isn't blank
+                if (droppedItems.assets.length === 0 && droppedItems.liabilities.length === 0) {
+                    populateDefaults();
+                } else {
+                    updateBalanceSheet();
+                }
             } else {
                 // No saved balance data — populate with default categories
                 populateDefaults();
@@ -112,7 +118,7 @@ function saveAllData() {
     document.querySelectorAll('.goal-on-timeline').forEach(goal => {
         const goalIcon = goal.dataset.goalIcon || goal.querySelector('.goal-chip-icon')?.textContent?.trim() || '';
         const goalName = goal.dataset.goalName || goal.querySelector('.goal-chip-name')?.textContent?.trim() || '';
-        data.timeline.goals.push({
+        const goalEntry = {
             icon: goalIcon,
             name: goalName,
             age: goal.dataset.age,
@@ -120,7 +126,12 @@ function saveAllData() {
             goalType: goal.dataset.goalType,
             left: goal.style.left,
             top: goal.style.top
-        });
+        };
+        // Persist travel-specific data
+        if (goal.dataset.travelAnnualBudget) goalEntry.travelAnnualBudget = goal.dataset.travelAnnualBudget;
+        if (goal.dataset.travelStartYear) goalEntry.travelStartYear = goal.dataset.travelStartYear;
+        if (goal.dataset.travelEndYear) goalEntry.travelEndYear = goal.dataset.travelEndYear;
+        data.timeline.goals.push(goalEntry);
     });
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -806,28 +817,11 @@ function renderInlineFormHTML(type, itemData = null) {
                         <input type="number" class="inline-amount-input w-full pl-8 pr-3 py-2 rounded-lg border-2 border-slate-200 dark:border-gray-700
                                     bg-slate-50 dark:bg-gray-900 text-slate-900 dark:text-white font-semibold
                                     ${focusBorder} focus:ring-2 ${focusRing} focus:bg-white dark:focus:bg-gray-800
-                                    transition-all outline-none" placeholder="0" min="0" step="0.01" value="${displayValue}">
+                                    transition-all outline-none" placeholder="0" min="0" step="1" value="${displayValue}">
                     </div>
 
-                    <!-- Unit Selector -->
-                    <div class="inline-unit-selector flex gap-1 flex-shrink-0 flex-wrap">
-                        <button type="button" class="unit-btn-inline px-2 py-2 rounded-lg border-2 font-bold transition-all text-xs
-                                ${currentUnit === '₹' ? 'text-white' : 'border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300'}"
-                                ${currentUnit === '₹' ? `style="background-color: ${saveBtnColor}; border-color: ${saveBtnColor};"` : ''}
-                                data-unit="₹" onclick="selectInlineUnit(event, '${type}', '₹')" title="Absolute value in Rupees">₹</button>
-                        <button type="button" class="unit-btn-inline px-2 py-2 rounded-lg border-2 font-bold transition-all text-xs
-                                ${currentUnit === 'K' ? 'text-white' : 'border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300'}"
-                                ${currentUnit === 'K' ? `style="background-color: ${saveBtnColor}; border-color: ${saveBtnColor};"` : ''}
-                                data-unit="K" onclick="selectInlineUnit(event, '${type}', 'K')" title="Thousands">K</button>
-                        <button type="button" class="unit-btn-inline px-2 py-2 rounded-lg border-2 font-bold transition-all text-xs
-                                ${currentUnit === 'L' ? 'text-white' : 'border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300'}"
-                                ${currentUnit === 'L' ? `style="background-color: ${saveBtnColor}; border-color: ${saveBtnColor};"` : ''}
-                                data-unit="L" onclick="selectInlineUnit(event, '${type}', 'L')" title="Lakhs">L</button>
-                        <button type="button" class="unit-btn-inline px-2 py-2 rounded-lg border-2 font-bold transition-all text-xs
-                                ${currentUnit === 'Cr' ? 'text-white' : 'border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900 text-slate-700 dark:text-slate-300'}"
-                                ${currentUnit === 'Cr' ? `style="background-color: ${saveBtnColor}; border-color: ${saveBtnColor};"` : ''}
-                                data-unit="Cr" onclick="selectInlineUnit(event, '${type}', 'Cr')" title="Crores">Cr</button>
-                    </div>
+                    <!-- Unit Label (Lacs) -->
+                    <span class="px-2 py-2 font-bold text-sm text-slate-700 dark:text-slate-300">Lacs</span>
                 </div>
 
                 <!-- Row 2: Category Label and Action Buttons -->
@@ -1040,15 +1034,8 @@ function saveInlineItem(type) {
 
     const amount = parseFloat(amountStr);
 
-    // Convert to rupees
-    let rupees;
-    switch (selectedInlineUnit) {
-        case '₹': rupees = amount; break; // Absolute value in rupees
-        case 'K': rupees = amount * 1000; break;
-        case 'L': rupees = amount * 100000; break;
-        case 'Cr': rupees = amount * 10000000; break;
-        default: rupees = amount; // Default to absolute value
-    }
+    // Convert to rupees (always Lacs)
+    const rupees = amount * 100000;
 
     const itemData = {
         type: type,
@@ -1149,15 +1136,8 @@ function updateInlineItem(type, index) {
 
     const amount = parseFloat(amountStr);
 
-    // Convert to rupees
-    let rupees;
-    switch (selectedInlineUnit) {
-        case '₹': rupees = amount; break; // Absolute value in rupees
-        case 'K': rupees = amount * 1000; break;
-        case 'L': rupees = amount * 100000; break;
-        case 'Cr': rupees = amount * 10000000; break;
-        default: rupees = amount; // Default to absolute value
-    }
+    // Convert to rupees (always Lacs)
+    const rupees = amount * 100000;
 
     const itemData = {
         type: type,
@@ -1230,30 +1210,16 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Helper: compute display value and current unit from rupees
+// Helper: compute display value in Lacs from rupees
 function getDisplayAndUnit(rupees) {
     const value = parseInt(rupees) || 0;
-    if (value >= 10000000) {
-        return { displayValue: (value / 10000000).toFixed(2), unit: 'Cr' };
-    } else if (value >= 100000) {
-        return { displayValue: (value / 100000).toFixed(0), unit: 'L' };
-    } else {
-        return { displayValue: (value / 1000).toFixed(0), unit: 'K' };
-    }
+    return { displayValue: (value / 100000).toFixed(2), unit: 'L' };
 }
 
 // Handle in-place value/unit change on a balance sheet card
 function updateInPlaceValue(type, index, inputEl) {
-    const card = inputEl.closest('.bs-card');
-    const unitSelect = card.querySelector('.bs-unit-select');
     const numValue = parseFloat(inputEl.value) || 0;
-    const unit = unitSelect.value;
-
-    let rupees;
-    if (unit === 'Cr') rupees = numValue * 10000000;
-    else if (unit === 'L') rupees = numValue * 100000;
-    else if (unit === 'K') rupees = numValue * 1000;
-    else rupees = numValue;
+    const rupees = numValue * 100000; // Always Lacs
 
     const list = type === 'asset' ? droppedItems.assets : droppedItems.liabilities;
     list[index].value = Math.round(rupees).toString();
@@ -1265,13 +1231,7 @@ function updateInPlaceValue(type, index, inputEl) {
     droppedItems.liabilities.forEach(item => { totalLiabilities += parseInt(item.value) || 0; });
     const netWorth = totalAssets - totalLiabilities;
 
-    const fmt = (amount) => {
-        const abs = Math.abs(amount);
-        if (abs >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        if (abs >= 100000) return `₹${(amount / 100000).toFixed(0)} L`;
-        if (abs >= 1000) return `₹${(amount / 1000).toFixed(0)} K`;
-        return `₹${amount.toFixed(0)}`;
-    };
+    const fmt = (amount) => `₹${(amount / 100000).toFixed(2)} L`;
 
     document.getElementById('totalAssets').textContent = fmt(totalAssets);
     document.getElementById('totalLiabilities').textContent = fmt(totalLiabilities);
@@ -1312,21 +1272,13 @@ function updateBalanceSheetPremium() {
                         </div>
                         <div class="flex items-center gap-1.5 flex-shrink-0">
                             <span class="text-sm font-bold text-slate-500">₹</span>
-                            <input type="number" value="${displayValue}" min="0" step="0.01"
+                            <input type="number" value="${displayValue}" min="0" step="1"
                                    class="w-20 px-2 py-1 rounded-lg border border-slate-200 dark:border-gray-700
                                           bg-white dark:bg-gray-800 text-right font-bold text-emerald-600 dark:text-emerald-400
                                           focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 focus:outline-none transition-all text-sm"
                                    oninput="updateInPlaceValue('asset', ${index}, this)"
                                    onclick="event.stopPropagation(); this.select()">
-                            <select class="bs-unit-select px-1.5 py-1 rounded-lg border border-slate-200 dark:border-gray-700
-                                          bg-white dark:bg-gray-800 font-bold text-emerald-600 dark:text-emerald-400
-                                          focus:border-emerald-400 focus:outline-none cursor-pointer text-sm"
-                                    onchange="updateInPlaceValue('asset', ${index}, this.closest('.bs-card').querySelector('input[type=number]'))"
-                                    onclick="event.stopPropagation()">
-                                <option value="K" ${unit === 'K' ? 'selected' : ''}>K</option>
-                                <option value="L" ${unit === 'L' ? 'selected' : ''}>L</option>
-                                <option value="Cr" ${unit === 'Cr' ? 'selected' : ''}>Cr</option>
-                            </select>
+                            <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">L</span>
                             <button onclick="event.stopPropagation(); removeBalanceItem('asset', ${index})"
                                 class="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400
                                        hover:bg-red-100 dark:hover:bg-red-900/50 flex items-center justify-center transition-all"
@@ -1376,15 +1328,7 @@ function updateBalanceSheetPremium() {
                                           focus:border-red-400 focus:ring-2 focus:ring-red-400/20 focus:outline-none transition-all text-sm"
                                    oninput="updateInPlaceValue('liability', ${index}, this)"
                                    onclick="event.stopPropagation(); this.select()">
-                            <select class="bs-unit-select px-1.5 py-1 rounded-lg border border-slate-200 dark:border-gray-700
-                                          bg-white dark:bg-gray-800 font-bold text-red-600 dark:text-red-400
-                                          focus:border-red-400 focus:outline-none cursor-pointer text-sm"
-                                    onchange="updateInPlaceValue('liability', ${index}, this.closest('.bs-card').querySelector('input[type=number]'))"
-                                    onclick="event.stopPropagation()">
-                                <option value="K" ${unit === 'K' ? 'selected' : ''}>K</option>
-                                <option value="L" ${unit === 'L' ? 'selected' : ''}>L</option>
-                                <option value="Cr" ${unit === 'Cr' ? 'selected' : ''}>Cr</option>
-                            </select>
+                            <span class="text-sm font-bold text-red-600 dark:text-red-400">L</span>
                             <button onclick="event.stopPropagation(); removeBalanceItem('liability', ${index})"
                                 class="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400
                                        hover:bg-red-100 dark:hover:bg-red-900/50 flex items-center justify-center transition-all"
@@ -1411,19 +1355,8 @@ function updateBalanceSheetPremium() {
 
     const netWorth = totalAssets - totalLiabilities;
 
-    // Smart currency formatting function
-    const formatCurrency = (amount) => {
-        const absAmount = Math.abs(amount);
-        if (absAmount >= 10000000) {
-            return `₹${(amount / 10000000).toFixed(2)} Cr`;
-        } else if (absAmount >= 100000) {
-            return `₹${(amount / 100000).toFixed(0)} L`;
-        } else if (absAmount >= 1000) {
-            return `₹${(amount / 1000).toFixed(0)} K`;
-        } else {
-            return `₹${amount.toFixed(0)}`;
-        }
-    };
+    // Smart currency formatting function (always Lacs)
+    const formatCurrency = (amount) => `₹${(amount / 100000).toFixed(2)} L`;
 
     document.getElementById('totalAssets').textContent = formatCurrency(totalAssets);
     document.getElementById('totalLiabilities').textContent = formatCurrency(totalLiabilities);
@@ -1457,7 +1390,7 @@ let draggedGoalData = null;
 const timelineContainer = document.getElementById('timelineContainer');
 const timelineFrame = document.getElementById('timelineFrame');
 const goalNameInput = document.getElementById('goalNameInput');
-const goalAgeInput = document.getElementById('goalAgeInput');
+const goalYearInput = document.getElementById('goalYearInput');
 const goalBudgetInput = document.getElementById('goalBudgetInput');
 const goalIconInput = document.getElementById('goalIconInput');
 const goalSaveBtn = document.getElementById('goalSaveBtn');
@@ -1498,6 +1431,57 @@ function ageToX(age) {
     const percentage = Math.max(0, Math.min(1, ageDiff / ageRange));
 
     return frameLeft + startX + (percentage * (frameWidth - (startX * 2)));
+}
+
+// Year <-> Age conversion helpers
+function ageToYear(age) {
+    const currentAge = parseInt(document.getElementById('currentAge').textContent);
+    const currentYear = new Date().getFullYear();
+    return currentYear + (age - currentAge);
+}
+
+function yearToAge(year) {
+    const currentAge = parseInt(document.getElementById('currentAge').textContent);
+    const currentYear = new Date().getFullYear();
+    return currentAge + (year - currentYear);
+}
+
+// Show/hide goal-type-specific editor fields
+function updateEditorFieldVisibility(goalType) {
+    // Standard fields
+    const yearLabel = document.getElementById('goalYearLabel');
+    const budgetLabel = document.getElementById('goalBudgetLabel');
+    // Education fields
+    const eduAdmissionLabel = document.getElementById('eduAdmissionYearLabel');
+    const eduFeeLabel = document.getElementById('eduFeeBudgetLabel');
+    // Travel fields
+    const travelBudgetLabel = document.getElementById('travelAnnualBudgetLabel');
+    const travelStartLabel = document.getElementById('travelStartYearLabel');
+    const travelEndLabel = document.getElementById('travelEndYearLabel');
+
+    // Hide all optional fields first
+    [eduAdmissionLabel, eduFeeLabel, travelBudgetLabel, travelStartLabel, travelEndLabel].forEach(el => {
+        if (el) el.classList.add('hidden');
+    });
+
+    if (goalType === 'education') {
+        // Hide standard year/budget, show education-specific
+        if (yearLabel) yearLabel.classList.add('hidden');
+        if (budgetLabel) budgetLabel.classList.add('hidden');
+        if (eduAdmissionLabel) eduAdmissionLabel.classList.remove('hidden');
+        if (eduFeeLabel) eduFeeLabel.classList.remove('hidden');
+    } else if (goalType === 'travel') {
+        // Hide standard year/budget, show travel-specific
+        if (yearLabel) yearLabel.classList.add('hidden');
+        if (budgetLabel) budgetLabel.classList.add('hidden');
+        if (travelBudgetLabel) travelBudgetLabel.classList.remove('hidden');
+        if (travelStartLabel) travelStartLabel.classList.remove('hidden');
+        if (travelEndLabel) travelEndLabel.classList.remove('hidden');
+    } else {
+        // Show standard year/budget for house, retirement, custom goals
+        if (yearLabel) yearLabel.classList.remove('hidden');
+        if (budgetLabel) budgetLabel.classList.remove('hidden');
+    }
 }
 
 // Calculate age based on X position on timeline
@@ -1643,7 +1627,7 @@ function refreshTimelineSummary() {
 
     totalGoalsEl.textContent = goals.length.toString();
     totalBudgetEl.textContent = `₹${Math.round(totalBudget / 100000)}L`;
-    nextMilestoneEl.textContent = nextGoal ? `Age ${nextGoal.age} · ${nextGoal.name}` : '--';
+    nextMilestoneEl.textContent = nextGoal ? `Year ${ageToYear(nextGoal.age)} · ${nextGoal.name}` : '--';
 }
 
 function clearGoalSelection() {
@@ -1654,15 +1638,33 @@ function clearGoalSelection() {
 }
 
 function setEditorFields(data) {
-    if (!goalNameInput || !goalAgeInput || !goalBudgetInput || !goalIconInput) return;
+    if (!goalNameInput || !goalYearInput || !goalBudgetInput || !goalIconInput) return;
     goalNameInput.value = data.name || '';
-    goalAgeInput.value = data.age || '';
+    goalYearInput.value = data.year || '';
     goalBudgetInput.value = data.budget || '';
     goalIconInput.value = data.icon || '';
+
+    // Goal-type-specific fields
+    const goalType = data.goalType || '';
+    updateEditorFieldVisibility(goalType);
+
+    if (goalType === 'education') {
+        const eduYear = document.getElementById('eduAdmissionYearInput');
+        const eduFee = document.getElementById('eduFeeBudgetInput');
+        if (eduYear) eduYear.value = data.year || '';
+        if (eduFee) eduFee.value = data.budget || '';
+    } else if (goalType === 'travel') {
+        const travelBudget = document.getElementById('travelAnnualBudgetInput');
+        const travelStart = document.getElementById('travelStartYearInput');
+        const travelEnd = document.getElementById('travelEndYearInput');
+        if (travelBudget) travelBudget.value = data.travelAnnualBudget || data.budget || '';
+        if (travelStart) travelStart.value = data.travelStartYear || data.year || '';
+        if (travelEnd) travelEnd.value = data.travelEndYear || '';
+    }
 }
 
 function openGoalEditor(goalElement, draftData = null) {
-    if (!goalNameInput || !goalAgeInput || !goalBudgetInput || !goalIconInput) return;
+    if (!goalNameInput || !goalYearInput || !goalBudgetInput || !goalIconInput) return;
 
     clearGoalSelection();
     draftGoal = null;
@@ -1670,12 +1672,18 @@ function openGoalEditor(goalElement, draftData = null) {
     if (goalElement) {
         selectedGoal = goalElement;
         selectedGoal.classList.add('selected');
+        const goalType = goalElement.dataset.goalType || '';
+        const age = parseInt(goalElement.dataset.age) || 32;
 
         setEditorFields({
             name: goalElement.dataset.goalName || '',
-            age: goalElement.dataset.age || '',
+            year: ageToYear(age),
             budget: ((parseFloat(goalElement.dataset.amount) || 0) / 100000).toFixed(0),
-            icon: goalElement.dataset.goalIcon || ''
+            icon: goalElement.dataset.goalIcon || '',
+            goalType: goalType,
+            travelAnnualBudget: goalElement.dataset.travelAnnualBudget || '',
+            travelStartYear: goalElement.dataset.travelStartYear || '',
+            travelEndYear: goalElement.dataset.travelEndYear || ''
         });
 
         if (goalEditorTitle) goalEditorTitle.textContent = 'Edit milestone';
@@ -1685,9 +1693,10 @@ function openGoalEditor(goalElement, draftData = null) {
         draftGoal = draftData;
         setEditorFields({
             name: draftData.name || '',
-            age: draftData.age || '',
+            year: draftData.year || '',
             budget: draftData.budget || '',
-            icon: draftData.icon || ''
+            icon: draftData.icon || '',
+            goalType: draftData.goalType || ''
         });
         if (goalEditorTitle) goalEditorTitle.textContent = 'Add milestone';
         if (goalEditorHint) goalEditorHint.textContent = 'Review the details and save to place the goal.';
@@ -1698,7 +1707,7 @@ function openGoalEditor(goalElement, draftData = null) {
 function clearGoalEditor() {
     clearGoalSelection();
     draftGoal = null;
-    setEditorFields({ name: '', age: '', budget: '', icon: '' });
+    setEditorFields({ name: '', year: '', budget: '', icon: '', goalType: '' });
     if (goalEditorTitle) goalEditorTitle.textContent = 'Add a milestone';
     if (goalEditorHint) goalEditorHint.textContent = 'Select a goal to edit or drag a new one';
     if (goalDeleteBtn) goalDeleteBtn.classList.add('hidden');
@@ -1723,8 +1732,13 @@ function updateGoalElement(goalElement, data) {
     const iconEl = goalElement.querySelector('.goal-chip-icon');
 
     if (nameEl) nameEl.textContent = data.name;
-    if (subEl) subEl.textContent = `Age ${data.age} · ₹${(data.amount / 100000).toFixed(0)}L`;
+    if (subEl) subEl.textContent = `Year ${ageToYear(parseInt(data.age))} · ₹${(data.amount / 100000).toFixed(0)}L`;
     if (iconEl) iconEl.textContent = data.icon;
+
+    // Store travel-specific data
+    if (data.travelAnnualBudget) goalElement.dataset.travelAnnualBudget = data.travelAnnualBudget;
+    if (data.travelStartYear) goalElement.dataset.travelStartYear = data.travelStartYear;
+    if (data.travelEndYear) goalElement.dataset.travelEndYear = data.travelEndYear;
 
     goalElement.setAttribute('aria-label', `${data.name} goal`);
 }
@@ -1775,7 +1789,7 @@ function createGoalElement(goalData) {
             <span class="goal-chip-icon">${goalData.icon}</span>
             <div>
                 <div class="goal-chip-name">${goalData.name}</div>
-                <div class="goal-chip-sub">Age ${goalData.age} · ₹${(goalData.amount / 100000).toFixed(0)}L</div>
+                <div class="goal-chip-sub">Year ${ageToYear(parseInt(goalData.age))} · ₹${(goalData.amount / 100000).toFixed(0)}L</div>
             </div>
         </div>
         <button class="goal-delete-btn" aria-label="Delete goal">✕</button>
@@ -1916,12 +1930,12 @@ function setupTimelineDropZone() {
             const subEl = draggedGoal.querySelector('.goal-chip-sub');
             if (subEl) {
                 const amount = parseFloat(draggedGoal.dataset.amount) || 0;
-                subEl.textContent = `Age ${age} · ₹${(amount / 100000).toFixed(0)}L`;
+                subEl.textContent = `Year ${ageToYear(age)} · ₹${(amount / 100000).toFixed(0)}L`;
             }
 
-            const ageInput = document.getElementById('goalAgeInput');
-            if (selectedGoal === draggedGoal && ageInput) {
-                ageInput.value = age;
+            const yearInput = document.getElementById('goalYearInput');
+            if (selectedGoal === draggedGoal && yearInput) {
+                yearInput.value = ageToYear(age);
             }
 
             refreshTimelineSummary();
@@ -1989,6 +2003,11 @@ function addSavedGoalToTimeline(goalData) {
         goalType: goalData.goalType
     });
 
+    // Restore travel-specific data
+    if (goalData.travelAnnualBudget) newGoal.dataset.travelAnnualBudget = goalData.travelAnnualBudget;
+    if (goalData.travelStartYear) newGoal.dataset.travelStartYear = goalData.travelStartYear;
+    if (goalData.travelEndYear) newGoal.dataset.travelEndYear = goalData.travelEndYear;
+
     if (goalData.goalType === 'retirement') {
         retirementAdded = true;
     }
@@ -2016,21 +2035,56 @@ function deleteGoal(goalElement) {
 }
 
 function saveGoalFromEditor() {
-    if (!goalNameInput || !goalAgeInput || !goalBudgetInput || !goalIconInput) return;
+    if (!goalNameInput || !goalYearInput || !goalBudgetInput || !goalIconInput) return;
 
     const name = goalNameInput.value.trim();
     const icon = goalIconInput.value.trim() || '🎯';
-    const age = parseInt(goalAgeInput.value);
-    const budgetLakhs = parseFloat(goalBudgetInput.value);
-    const minAge = parseInt(document.getElementById('currentAge').textContent);
+    const goalType = selectedGoal
+        ? selectedGoal.dataset.goalType
+        : (draftGoal?.goalType || name.toLowerCase());
 
     if (!name) {
         alert('Please enter a goal name.');
         return;
     }
 
+    let age, budgetLakhs, travelAnnualBudget, travelStartYear, travelEndYear;
+
+    if (goalType === 'education') {
+        const admissionYear = parseInt(document.getElementById('eduAdmissionYearInput')?.value);
+        budgetLakhs = parseFloat(document.getElementById('eduFeeBudgetInput')?.value);
+        if (isNaN(admissionYear) || admissionYear < 2025 || admissionYear > 2080) {
+            alert('Please enter a valid college admission year (2025-2080).');
+            return;
+        }
+        age = yearToAge(admissionYear);
+    } else if (goalType === 'travel') {
+        travelAnnualBudget = parseFloat(document.getElementById('travelAnnualBudgetInput')?.value);
+        travelStartYear = parseInt(document.getElementById('travelStartYearInput')?.value);
+        travelEndYear = parseInt(document.getElementById('travelEndYearInput')?.value);
+        if (isNaN(travelAnnualBudget) || travelAnnualBudget <= 0) {
+            alert('Please enter a valid annual travel budget.');
+            return;
+        }
+        if (isNaN(travelStartYear) || isNaN(travelEndYear) || travelStartYear >= travelEndYear) {
+            alert('Please enter valid start and end years (start must be before end).');
+            return;
+        }
+        age = yearToAge(travelStartYear);
+        budgetLakhs = travelAnnualBudget * (travelEndYear - travelStartYear);
+    } else {
+        const year = parseInt(goalYearInput.value);
+        budgetLakhs = parseFloat(goalBudgetInput.value);
+        if (isNaN(year) || year < 2025 || year > 2080) {
+            alert('Please enter a valid target year (2025-2080).');
+            return;
+        }
+        age = yearToAge(year);
+    }
+
+    const minAge = parseInt(document.getElementById('currentAge').textContent);
     if (isNaN(age) || age < minAge || age > 100) {
-        alert('Age must be between current age and 100');
+        alert('The year must correspond to an age between current age and 100.');
         return;
     }
 
@@ -2040,31 +2094,23 @@ function saveGoalFromEditor() {
     }
 
     const amount = budgetLakhs * 100000;
-    const goalType = selectedGoal
-        ? selectedGoal.dataset.goalType
-        : (draftGoal?.goalType || name.toLowerCase());
 
     if (!selectedGoal && goalType === 'retirement' && retirementAdded) {
         alert('Retirement goal can only be added once!');
         return;
     }
 
+    const goalData = { name, icon, age, amount, goalType };
+    if (goalType === 'travel') {
+        goalData.travelAnnualBudget = travelAnnualBudget;
+        goalData.travelStartYear = travelStartYear;
+        goalData.travelEndYear = travelEndYear;
+    }
+
     if (selectedGoal) {
-        updateGoalElement(selectedGoal, {
-            name,
-            icon,
-            age,
-            amount,
-            goalType
-        });
+        updateGoalElement(selectedGoal, goalData);
     } else if (timelineContainer) {
-        const newGoal = createGoalElement({
-            name,
-            icon,
-            age,
-            amount,
-            goalType
-        });
+        const newGoal = createGoalElement(goalData);
         if (goalType === 'retirement') {
             retirementAdded = true;
         }
