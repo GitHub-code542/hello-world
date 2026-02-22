@@ -1853,6 +1853,43 @@ function makeGoalDraggable(goal) {
     });
 }
 
+// Add a goal to the Goal Library panel
+function addGoalToLibrary(goalData) {
+    const libraryList = document.getElementById('goalLibraryList');
+    if (!libraryList) return;
+
+    // Check if this goal already exists in the library
+    const existing = libraryList.querySelector(`[data-goal-name="${goalData.name}"]`);
+    if (existing) return;
+
+    const year = ageToYear(parseInt(goalData.age));
+    const budgetLakhs = Math.round((goalData.amount || 0) / 100000);
+
+    const item = document.createElement('div');
+    item.className = 'goal-icon-item cursor-move rounded-xl border border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-900/40 px-4 py-3 flex items-center justify-between';
+    item.setAttribute('draggable', 'true');
+    item.dataset.goalIcon = goalData.icon || '🎯';
+    item.dataset.goalName = goalData.name;
+    item.dataset.goalType = goalData.goalType || goalData.name.toLowerCase();
+    item.dataset.goalAge = goalData.age;
+    item.dataset.goalYear = year;
+    item.dataset.goalBudget = budgetLakhs;
+
+    item.innerHTML = `
+        <div class="flex items-center gap-3">
+            <span class="text-xl">${goalData.icon || '🎯'}</span>
+            <div>
+                <p class="font-semibold text-slate-900 dark:text-white">${goalData.name}</p>
+                <p class="text-xs text-slate-500">Year ${year} · ₹${budgetLakhs}L</p>
+            </div>
+        </div>
+        <span class="text-xs text-slate-400">Drag</span>
+    `;
+
+    libraryList.appendChild(item);
+    setupGoalLibraryDragHandlers(); // Set up drag on the new item
+}
+
 // Setup drag and drop for goal library items
 function setupGoalLibraryDragHandlers() {
     const items = document.querySelectorAll('.goal-icon-item');
@@ -2015,6 +2052,7 @@ function addSavedGoalToTimeline(goalData) {
     if (timelineContainer) {
         timelineContainer.appendChild(newGoal);
     }
+    addGoalToLibrary(goalData);
     refreshTimelineSummary();
     updateTimelineEmptyState();
 }
@@ -2115,6 +2153,7 @@ function saveGoalFromEditor() {
             retirementAdded = true;
         }
         timelineContainer.appendChild(newGoal);
+        addGoalToLibrary(goalData);
     }
 
     refreshTimelineSummary();
