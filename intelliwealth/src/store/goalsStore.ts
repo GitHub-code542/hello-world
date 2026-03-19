@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 import type { Goal, GoalCategory } from '../types/database'
+import { useXpStore } from './xpStore'
 
 export interface GoalInput {
   name: string
@@ -58,6 +59,7 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
       .single()
     if (row) {
       set((s) => ({ goals: [...s.goals, row as Goal] }))
+      useXpStore.getState().addXP(150, `goal:${(row as Goal).id}`, 'Goal Added')
       return row as Goal
     }
     return null

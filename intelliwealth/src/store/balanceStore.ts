@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 import type { Asset, Liability, AssetType, LiabilityType } from '../types/database'
+import { useXpStore } from './xpStore'
 
 // ─── Input types ──────────────────────────────────────────────
 
@@ -70,7 +71,10 @@ export const useBalanceStore = create<BalanceState>((set) => ({
       } as never)
       .select('*')
       .single()
-    if (row) set((s) => ({ assets: [...s.assets, row as Asset] }))
+    if (row) {
+      set((s) => ({ assets: [...s.assets, row as Asset] }))
+      useXpStore.getState().addXP(100, `asset:${(row as Asset).id}`, 'Asset Added')
+    }
   },
 
   updateAsset: async (id, data) => {
@@ -108,7 +112,10 @@ export const useBalanceStore = create<BalanceState>((set) => ({
       } as never)
       .select('*')
       .single()
-    if (row) set((s) => ({ liabilities: [...s.liabilities, row as Liability] }))
+    if (row) {
+      set((s) => ({ liabilities: [...s.liabilities, row as Liability] }))
+      useXpStore.getState().addXP(100, `liability:${(row as Liability).id}`, 'Balance Sheet Updated')
+    }
   },
 
   updateLiability: async (id, data) => {

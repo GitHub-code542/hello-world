@@ -6,6 +6,7 @@ import {
   EXP_ANNUAL_RISE_DEFAULT,
 } from '../lib/finance'
 import type { IncomeSource, Expense } from '../types/database'
+import { useXpStore } from './xpStore'
 
 // ─── State shape ──────────────────────────────────────────────
 
@@ -146,6 +147,14 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
             .single()
           if (data) newExpenseIds[field.key] = (data as { id: string }).id
         }
+      }
+
+      // Grant XP if any income record was newly inserted this save
+      const anyNewIncome = INCOME_FIELDS.some(
+        (f) => newIncomeIds[f.key] && !incomeIds[f.key],
+      )
+      if (anyNewIncome) {
+        useXpStore.getState().addXP(50, `income:${userId}`, 'Income Added')
       }
 
       set({ incomeIds: newIncomeIds, expenseIds: newExpenseIds, lastSaved: new Date() })

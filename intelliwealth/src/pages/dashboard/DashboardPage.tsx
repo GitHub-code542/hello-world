@@ -58,7 +58,7 @@ export default function DashboardPage() {
   // ── Allocation breakdown ───────────────────────────────────
   function sumTypes(types: AssetType[]) {
     return assets
-      .filter((a) => types.includes(a.asset_type as AssetType))
+      .filter((a) => types.includes(a.type as AssetType))
       .reduce((s, a) => s + Number(a.current_value), 0)
   }
 
@@ -104,7 +104,8 @@ export default function DashboardPage() {
 
   // ── Upcoming milestones ────────────────────────────────────
   const upcomingGoals = [...activeGoals]
-    .sort((a, b) => a.target_date.localeCompare(b.target_date))
+    .filter((g) => g.target_date !== null)
+    .sort((a, b) => (a.target_date ?? '').localeCompare(b.target_date ?? ''))
     .slice(0, 5)
 
   const currentYear = new Date().getFullYear()
@@ -312,7 +313,7 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-3 flex-1">
                 {upcomingGoals.map((goal) => {
-                  const targetYear = new Date(goal.target_date).getFullYear()
+                  const targetYear = new Date(goal.target_date ?? Date.now()).getFullYear()
                   const yearsLeft = targetYear - currentYear
                   return (
                     <div key={goal.id} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">

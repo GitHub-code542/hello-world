@@ -6,6 +6,7 @@ import { useBalanceStore } from '../../store/balanceStore'
 import { computeSummary, computeNetWorth, formatCorpus } from '../../lib/finance'
 import { calcFICorpus, calcTimeToFI, runMonteCarlo } from '../../lib/fireCalc'
 import { supabase } from '../../lib/supabase'
+import { useXpStore } from '../../store/xpStore'
 import AppShell from '../../components/layout/AppShell'
 import StepProgress from '../../components/layout/StepProgress'
 
@@ -96,6 +97,7 @@ export default function FIREPage() {
         fi_target_corpus: Math.round(fiCorpus),
       } as never, { onConflict: 'user_id' })
       setLastSaved(new Date())
+      useXpStore.getState().addXP(200, `fire:${new Date().toDateString()}`, 'FIRE Analysis Run')
     } finally {
       setSaving(false)
     }
