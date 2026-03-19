@@ -5,6 +5,7 @@ import ProtectedRoute, { AuthRoute } from './components/auth/ProtectedRoute'
 import LoginPage from './pages/auth/LoginPage'
 import SignupPage from './pages/auth/SignupPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
+import IncomeExpensesPage from './pages/dashboard/IncomeExpensesPage'
 
 export default function App() {
   const initialize = useAuthStore((s) => s.initialize)
@@ -30,7 +31,8 @@ export default function App() {
 
         {/* Protected routes — redirect to /login if not signed in */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard"       element={<DashboardPage />} />
+          <Route path="/income-expenses" element={<IncomeExpensesPage />} />
         </Route>
 
         {/* Catch-all */}

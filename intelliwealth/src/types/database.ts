@@ -125,46 +125,56 @@ export interface FireSettings {
 }
 
 // ─── Supabase Database shape (for createClient generic) ───────
+// Matches the structure Supabase JS v2 expects: Row/Insert/Update + Relationships
+
+type TableDef<R, I, U> = {
+  Row: R
+  Insert: I
+  Update: U
+  Relationships: []
+}
 
 export interface Database {
   public: {
     Tables: {
-      profiles: {
-        Row: Profile
-        Insert: Omit<Profile, 'created_at' | 'updated_at'>
-        Update: Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>
-      }
-      income_sources: {
-        Row: IncomeSource
-        Insert: Omit<IncomeSource, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Omit<IncomeSource, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-      }
-      expenses: {
-        Row: Expense
-        Insert: Omit<Expense, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Omit<Expense, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-      }
-      assets: {
-        Row: Asset
-        Insert: Omit<Asset, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Omit<Asset, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-      }
-      liabilities: {
-        Row: Liability
-        Insert: Omit<Liability, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Omit<Liability, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-      }
-      goals: {
-        Row: Goal
-        Insert: Omit<Goal, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Omit<Goal, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-      }
-      fire_settings: {
-        Row: FireSettings
-        Insert: Omit<FireSettings, 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Omit<FireSettings, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-      }
+      profiles: TableDef<
+        Profile,
+        Omit<Profile, 'created_at' | 'updated_at'>,
+        Partial<Omit<Profile, 'id' | 'created_at' | 'updated_at'>>
+      >
+      income_sources: TableDef<
+        IncomeSource,
+        Omit<IncomeSource, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<IncomeSource, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+      >
+      expenses: TableDef<
+        Expense,
+        Omit<Expense, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<Expense, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+      >
+      assets: TableDef<
+        Asset,
+        Omit<Asset, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<Asset, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+      >
+      liabilities: TableDef<
+        Liability,
+        Omit<Liability, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<Liability, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+      >
+      goals: TableDef<
+        Goal,
+        Omit<Goal, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<Goal, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+      >
+      fire_settings: TableDef<
+        FireSettings,
+        Omit<FireSettings, 'id' | 'created_at' | 'updated_at'>,
+        Partial<Omit<FireSettings, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+      >
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
     Enums: {
       income_type: IncomeType
       frequency_type: FrequencyType
@@ -175,5 +185,6 @@ export interface Database {
       goal_priority: GoalPriority
       fire_type: FireType
     }
+    CompositeTypes: Record<string, never>
   }
 }
