@@ -1,1 +1,51 @@
 @import "tailwindcss";
+
+/* ── Custom range slider ─────────────────────────────────────
+   Used by IncomeExpensesPage. The .iw-range class gets applied
+   to all IntelliWealth sliders for consistent cross-browser look.
+   The filled-track colour is driven by a linear-gradient inline
+   style; the thumb colour comes from the --thumb-color CSS var.
+──────────────────────────────────────────────────────────── */
+
+.iw-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  outline: none;
+}
+
+/* Webkit thumb */
+.iw-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--thumb-color, #3b82f6);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  border: 2px solid #ffffff;
+  transition: transform 0.1s ease;
+}
+.iw-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* Firefox thumb */
+.iw-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--thumb-color, #3b82f6);
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Firefox track */
+.iw-range::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: transparent;
+}
