@@ -1,4 +1,4 @@
-import type { FrequencyType, IncomeType, ExpenseCategory } from '../types/database'
+import type { FrequencyType, IncomeType, ExpenseCategory, AssetType, LiabilityType } from '../types/database'
 
 // ─── Frequency helpers ────────────────────────────────────────
 
@@ -194,6 +194,67 @@ export interface IncomeSummary {
   savingsRate: number
   monthlySurplus: number
 }
+
+// ─── Lakhs formatting (Balance Sheet) ────────────────────────
+
+/** ₹20.00 L — for card headers and row values */
+export function formatLakhs(amount: number): string {
+  const sign = amount < 0 ? '-' : ''
+  return `${sign}₹${(Math.abs(amount) / 100000).toFixed(2)} L`
+}
+
+/** 10.00 — just the lakh number for inline inputs */
+export function toLakhsStr(rupees: number): string {
+  return (rupees / 100000).toFixed(2)
+}
+
+/** rupees from a lakh string input */
+export function fromLakhs(lakhs: string): number {
+  return (parseFloat(lakhs) || 0) * 100000
+}
+
+// ─── Asset / Liability type labels ───────────────────────────
+
+export const ASSET_TYPE_LABELS: Record<AssetType, string> = {
+  equity_stocks:   'Equity / Stocks',
+  mutual_fund:     'Mutual Fund',
+  fixed_deposit:   'Fixed Deposit',
+  ppf:             'PPF',
+  epf:             'EPF',
+  nps:             'NPS',
+  real_estate:     'Real Estate',
+  gold:            'Gold',
+  crypto:          'Crypto',
+  savings_account: 'Savings Account',
+  bonds:           'Bonds',
+  other:           'Other Assets',
+}
+
+export const LIABILITY_TYPE_LABELS: Record<LiabilityType, string> = {
+  home_loan:       'Home Loan',
+  car_loan:        'Car Loan',
+  personal_loan:   'Personal Loan',
+  education_loan:  'Education Loan',
+  credit_card:     'Credit Card',
+  business_loan:   'Business Loan',
+  other:           'Other Debt',
+}
+
+export const ASSET_TYPES = Object.keys(ASSET_TYPE_LABELS) as AssetType[]
+export const LIABILITY_TYPES = Object.keys(LIABILITY_TYPE_LABELS) as LiabilityType[]
+
+// ─── Net worth ────────────────────────────────────────────────
+
+export function computeNetWorth(
+  assets: { current_value: number }[],
+  liabilities: { outstanding_amount: number }[],
+) {
+  const totalAssets = assets.reduce((s, a) => s + Number(a.current_value), 0)
+  const totalLiabilities = liabilities.reduce((s, l) => s + Number(l.outstanding_amount), 0)
+  return { totalAssets, totalLiabilities, netWorth: totalAssets - totalLiabilities }
+}
+
+// ─── computeSummary ───────────────────────────────────────────
 
 export function computeSummary(
   incomeValues: Record<string, number>,

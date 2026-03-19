@@ -11,6 +11,7 @@ import {
   formatINRPlain,
 } from '../../lib/finance'
 import AppShell from '../../components/layout/AppShell'
+import StepProgress from '../../components/layout/StepProgress'
 
 // ─── Debounce helper ──────────────────────────────────────────
 
@@ -77,6 +78,9 @@ export default function IncomeExpensesPage() {
   return (
     <AppShell>
       <div className="max-w-7xl mx-auto px-6 py-8">
+
+        {/* Step progress */}
+        <StepProgress currentStep={1} />
 
         {/* ── Header ────────────────────────────────────────── */}
         <div className="flex items-start justify-between mb-8">
