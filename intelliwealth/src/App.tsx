@@ -8,6 +8,7 @@ import DashboardPage from './pages/dashboard/DashboardPage'
 import IncomeExpensesPage from './pages/dashboard/IncomeExpensesPage'
 import BalanceSheetPage from './pages/dashboard/BalanceSheetPage'
 import GoalsPage from './pages/dashboard/GoalsPage'
+import FIREPage from './pages/dashboard/FIREPage'
 
 export default function App() {
   const initialize = useAuthStore((s) => s.initialize)
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/income-expenses" element={<IncomeExpensesPage />} />
           <Route path="/assets"          element={<BalanceSheetPage />} />
           <Route path="/goals"           element={<GoalsPage />} />
+          <Route path="/fire"            element={<FIREPage />} />
         </Route>
 
         {/* Catch-all */}

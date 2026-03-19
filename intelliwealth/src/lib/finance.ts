@@ -195,6 +195,18 @@ export interface IncomeSummary {
   monthlySurplus: number
 }
 
+// ─── Corpus formatting (FIRE page) ───────────────────────────
+
+/** ₹2.5 Cr / ₹50 L — for large corpus numbers */
+export function formatCorpus(amount: number): string {
+  const abs = Math.abs(amount)
+  const sign = amount < 0 ? '-' : ''
+  if (abs >= 1e7) {
+    return `${sign}₹${(abs / 1e7).toFixed(1)} Cr`
+  }
+  return `${sign}₹${(abs / 1e5).toFixed(1)} L`
+}
+
 // ─── Lakhs formatting (Balance Sheet) ────────────────────────
 
 /** ₹20.00 L — for card headers and row values */
