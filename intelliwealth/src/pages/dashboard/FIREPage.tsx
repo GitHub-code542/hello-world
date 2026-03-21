@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useFinanceStore } from '../../store/financeStore'
@@ -68,7 +68,7 @@ export default function FIREPage() {
   const fiCorpus = calcFICorpus(annualExpenses, DEFAULT_SWR)
   const timeToFI = calcTimeToFI(currentCorpus, annualSavings, fiCorpus, roi)
 
-  const mcResult = useCallback(() => runMonteCarlo({
+  const mc = useMemo(() => runMonteCarlo({
     currentCorpus,
     annualSavings,
     targetCorpus: fiCorpus,
@@ -81,8 +81,6 @@ export default function FIREPage() {
     crashImpact,
     iterations: 1000,
   }), [currentCorpus, annualSavings, fiCorpus, roi, inflation, gapYears, incomeLoss, medicalExp, otherExp, crashImpact])
-
-  const mc = mcResult()
 
   // ── Save plan ──────────────────────────────────────────────
   const handleSave = async () => {
