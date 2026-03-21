@@ -206,6 +206,7 @@ create table fire_settings (
   expected_return_rate    numeric(5, 2) not null default 12.00,            -- % p.a., India equity default
   safe_withdrawal_rate    numeric(5, 2) not null default 3.50,             -- % p.a. (conservative for India)
   corpus_target_override  numeric(16, 2),                                  -- manual override if set
+  fi_target_corpus        numeric(16, 2),                                  -- computed FI corpus saved by app
   notes                   text,
   created_at              timestamptz not null default now(),
   updated_at              timestamptz not null default now(),
