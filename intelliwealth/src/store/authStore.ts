@@ -2,6 +2,9 @@ import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { useXpStore } from './xpStore'
+import { useFinanceStore } from './financeStore'
+import { useBalanceStore } from './balanceStore'
+import { useGoalsStore } from './goalsStore'
 
 interface AuthState {
   session: Session | null
@@ -33,6 +36,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         useXpStore.getState().loadXP(session.user.id)
       } else {
         useXpStore.getState().reset()
+        useFinanceStore.getState().reset()
+        useBalanceStore.getState().reset()
+        useGoalsStore.getState().reset()
       }
     })
 
@@ -58,5 +64,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) throw error
     set({ session: null, user: null })
     useXpStore.getState().reset()
+    useFinanceStore.getState().reset()
+    useBalanceStore.getState().reset()
+    useGoalsStore.getState().reset()
   },
 }))

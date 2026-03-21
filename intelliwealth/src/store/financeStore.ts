@@ -21,12 +21,14 @@ export interface FinanceState {
   loading: boolean
   saving: boolean
   lastSaved: Date | null
+  hasFetched: boolean
 
   fetchAll: (userId: string) => Promise<void>
   saveAll: (userId: string) => Promise<void>
   setIncomeValue: (key: string, value: number) => void
   setExpenseValue: (key: string, value: number) => void
   setExpAnnualRise: (value: number) => void
+  reset: () => void
 }
 
 // ─── Defaults ─────────────────────────────────────────────────
@@ -46,6 +48,16 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   loading: false,
   saving: false,
   lastSaved: null,
+  hasFetched: false,
+
+  reset: () => set({
+    incomeValues: defaultIncome(),
+    expenseValues: defaultExpense(),
+    incomeIds: defaultIds(INCOME_FIELDS.map((f) => f.key)),
+    expenseIds: defaultIds(EXPENSE_FIELDS.map((f) => f.key)),
+    hasFetched: false,
+    lastSaved: null,
+  }),
 
   setIncomeValue: (key, value) =>
     set((s) => ({ incomeValues: { ...s.incomeValues, [key]: value } })),
@@ -58,6 +70,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
   // ── fetch ──────────────────────────────────────────────────
 
   fetchAll: async (userId) => {
+    if (get().hasFetched) return
     set({ loading: true })
     try {
       const [{ data: incomeRaw }, { data: expenseRaw }] = await Promise.all([
@@ -90,7 +103,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
         }
       }
 
-      set({ incomeValues, incomeIds, expenseValues, expenseIds })
+      set({ incomeValues, incomeIds, expenseValues, expenseIds, hasFetched: true })
     } finally {
       set({ loading: false })
     }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useGoalsStore } from '../../store/goalsStore'
@@ -65,9 +65,8 @@ export default function GoalsPage() {
   const navigate = useNavigate()
   const { goals, fetchAll, addGoal, updateGoal, deleteGoal } = useGoalsStore()
 
-  const hasFetched = useRef(false)
   useEffect(() => {
-    if (user && !hasFetched.current) { hasFetched.current = true; fetchAll(user.id) }
+    if (user) fetchAll(user.id)
   }, [user, fetchAll])
 
   const [tab, setTab]                   = useState<PresetTab>('quick')

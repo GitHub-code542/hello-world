@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useFinanceStore } from '../../store/financeStore'
@@ -36,10 +36,8 @@ export default function FIREPage() {
   const { incomeValues, expenseValues, fetchAll: fetchFinance } = useFinanceStore()
   const { assets, liabilities, fetchAll: fetchBalance }        = useBalanceStore()
 
-  const hasFetched = useRef(false)
   useEffect(() => {
-    if (user && !hasFetched.current) {
-      hasFetched.current = true
+    if (user) {
       fetchFinance(user.id)
       fetchBalance(user.id)
     }

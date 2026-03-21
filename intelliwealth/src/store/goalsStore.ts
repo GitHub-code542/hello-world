@@ -14,7 +14,9 @@ export interface GoalInput {
 interface GoalsState {
   goals: Goal[]
   loading: boolean
+  hasFetched: boolean
   fetchAll: (userId: string) => Promise<void>
+  reset: () => void
   addGoal: (userId: string, data: GoalInput) => Promise<Goal | null>
   updateGoal: (id: string, data: Partial<GoalInput>) => Promise<void>
   deleteGoal: (id: string) => Promise<void>
@@ -23,8 +25,12 @@ interface GoalsState {
 export const useGoalsStore = create<GoalsState>((set, get) => ({
   goals: [],
   loading: false,
+  hasFetched: false,
+
+  reset: () => set({ goals: [], hasFetched: false }),
 
   fetchAll: async (userId) => {
+    if (get().hasFetched) return
     set({ loading: true })
     try {
       const { data } = await supabase
@@ -33,7 +39,7 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
         .eq('user_id', userId)
         .order('sort_order')
         .order('target_date')
-      set({ goals: (data ?? []) as Goal[] })
+      set({ goals: (data ?? []) as Goal[], hasFetched: true })
     } finally {
       set({ loading: false })
     }

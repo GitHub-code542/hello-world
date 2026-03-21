@@ -35,13 +35,8 @@ export default function IncomeExpensesPage() {
     setIncomeValue, setExpenseValue, setExpAnnualRise,
   } = useFinanceStore()
 
-  const hasFetched = useRef(false)
-
   useEffect(() => {
-    if (user && !hasFetched.current) {
-      hasFetched.current = true
-      fetchAll(user.id)
-    }
+    if (user) fetchAll(user.id)
   }, [user, fetchAll])
 
   // Auto-save 1.2 s after last change

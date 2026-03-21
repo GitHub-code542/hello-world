@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useBalanceStore, type NewAsset, type NewLiability } from '../../store/balanceStore'
@@ -32,12 +32,8 @@ export default function BalanceSheetPage() {
   const navigate = useNavigate()
   const { assets, liabilities, loading, fetchAll, deleteAsset, deleteLiability } = useBalanceStore()
 
-  const hasFetched = useRef(false)
   useEffect(() => {
-    if (user && !hasFetched.current) {
-      hasFetched.current = true
-      fetchAll(user.id)
-    }
+    if (user) fetchAll(user.id)
   }, [user, fetchAll])
 
   const [modal, setModal] = useState<ModalState>(null)

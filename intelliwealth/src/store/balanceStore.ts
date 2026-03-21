@@ -26,8 +26,10 @@ interface BalanceState {
   assets: Asset[]
   liabilities: Liability[]
   loading: boolean
+  hasFetched: boolean
 
   fetchAll: (userId: string) => Promise<void>
+  reset: () => void
   addAsset: (userId: string, data: NewAsset) => Promise<void>
   updateAsset: (id: string, data: Partial<NewAsset>) => Promise<void>
   deleteAsset: (id: string) => Promise<void>
@@ -38,12 +40,16 @@ interface BalanceState {
 
 // ─── Store ────────────────────────────────────────────────────
 
-export const useBalanceStore = create<BalanceState>((set) => ({
+export const useBalanceStore = create<BalanceState>((set, get) => ({
   assets: [],
   liabilities: [],
   loading: false,
+  hasFetched: false,
+
+  reset: () => set({ assets: [], liabilities: [], hasFetched: false }),
 
   fetchAll: async (userId) => {
+    if (get().hasFetched) return
     set({ loading: true })
     try {
       const [{ data: assetRows }, { data: liabilityRows }] = await Promise.all([
@@ -53,6 +59,7 @@ export const useBalanceStore = create<BalanceState>((set) => ({
       set({
         assets: (assetRows ?? []) as Asset[],
         liabilities: (liabilityRows ?? []) as Liability[],
+        hasFetched: true,
       })
     } finally {
       set({ loading: false })
