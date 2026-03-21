@@ -27,6 +27,8 @@ export interface Profile {
   avatar_url: string | null
   currency: string
   date_of_birth: string | null
+  xp: number
+  earned_events: string[]
   created_at: string
   updated_at: string
 }

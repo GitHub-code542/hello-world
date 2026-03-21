@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { supabase } from '../lib/supabase'
 
 // ─── Constants ────────────────────────────────────────────────
 
@@ -37,30 +37,46 @@ interface XPState {
   xp: number
   earnedEvents: string[]
   toast: XPToast | null
+  loadXP: (userId: string) => Promise<void>
   addXP: (amount: number, eventKey: string, label: string) => void
   clearToast: () => void
+  reset: () => void
 }
 
-// ─── Store (persisted to localStorage) ───────────────────────
+// ─── Store (persisted to Supabase profiles, user-scoped) ──────
 
-export const useXpStore = create<XPState>()(
-  persist(
-    (set, get) => ({
-      xp: 0,
-      earnedEvents: [],
-      toast: null,
+export const useXpStore = create<XPState>((set, get) => ({
+  xp: 0,
+  earnedEvents: [],
+  toast: null,
 
-      addXP: (amount, eventKey, label) => {
-        if (get().earnedEvents.includes(eventKey)) return
-        set((s) => ({
-          xp: s.xp + amount,
-          earnedEvents: [...s.earnedEvents, eventKey],
-          toast: { amount, label, id: Date.now() },
-        }))
-      },
+  loadXP: async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('xp, earned_events')
+      .eq('id', userId)
+      .single()
+    if (data) {
+      set({ xp: data.xp ?? 0, earnedEvents: data.earned_events ?? [] })
+    }
+  },
 
-      clearToast: () => set({ toast: null }),
-    }),
-    { name: 'iw-xp' },
-  ),
-)
+  addXP: (amount, eventKey, label) => {
+    if (get().earnedEvents.includes(eventKey)) return
+    const nextXP = get().xp + amount
+    const nextEvents = [...get().earnedEvents, eventKey]
+    set({ xp: nextXP, earnedEvents: nextEvents, toast: { amount, label, id: Date.now() } })
+    // Sync to Supabase — RLS ensures only the authenticated user's row is updated
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return
+      supabase
+        .from('profiles')
+        .update({ xp: nextXP, earned_events: nextEvents })
+        .eq('id', data.user.id)
+    })
+  },
+
+  clearToast: () => set({ toast: null }),
+
+  reset: () => set({ xp: 0, earnedEvents: [], toast: null }),
+}))

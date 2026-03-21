@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { useXpStore } from './xpStore'
 
 interface AuthState {
   session: Session | null
@@ -21,11 +22,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   initialize: async () => {
     // Hydrate from existing session
     const { data } = await supabase.auth.getSession()
-    set({ session: data.session, user: data.session?.user ?? null, loading: false })
+    const initialUser = data.session?.user ?? null
+    set({ session: data.session, user: initialUser, loading: false })
+    if (initialUser) useXpStore.getState().loadXP(initialUser.id)
 
     // Subscribe to auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       set({ session, user: session?.user ?? null })
+      if (session?.user) {
+        useXpStore.getState().loadXP(session.user.id)
+      } else {
+        useXpStore.getState().reset()
+      }
     })
 
     return () => listener.subscription.unsubscribe()
@@ -49,5 +57,6 @@ export const useAuthStore = create<AuthState>((set) => ({
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     set({ session: null, user: null })
+    useXpStore.getState().reset()
   },
 }))

@@ -48,6 +48,8 @@ create table profiles (
   avatar_url      text,
   currency        text        not null default 'INR',
   date_of_birth   date,
+  xp              integer     not null default 0,
+  earned_events   text[]      not null default '{}',
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
