@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import ProtectedRoute, { AuthRoute } from './components/auth/ProtectedRoute'
 import LoginPage from './pages/auth/LoginPage'
@@ -21,7 +21,7 @@ export default function App() {
   }, [initialize])
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Public root — redirect based on auth state */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -44,6 +44,6 @@ export default function App() {
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
