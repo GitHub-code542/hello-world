@@ -20,6 +20,7 @@ interface GoalsState {
   addGoal: (userId: string, data: GoalInput) => Promise<Goal | null>
   updateGoal: (id: string, data: Partial<GoalInput>) => Promise<void>
   deleteGoal: (id: string) => Promise<void>
+  reorderGoals: (sourceIndex: number, destIndex: number) => Promise<void>
 }
 
 export const useGoalsStore = create<GoalsState>((set, get) => ({
@@ -91,5 +92,19 @@ export const useGoalsStore = create<GoalsState>((set, get) => ({
   deleteGoal: async (id) => {
     await supabase.from('goals').delete().eq('id', id)
     set((s) => ({ goals: s.goals.filter((g) => g.id !== id) }))
+  },
+
+  reorderGoals: async (sourceIndex, destIndex) => {
+    const reordered = Array.from(get().goals)
+    const [moved] = reordered.splice(sourceIndex, 1)
+    reordered.splice(destIndex, 0, moved)
+    // Optimistic update
+    set({ goals: reordered })
+    // Persist new sort_order for every goal
+    await Promise.all(
+      reordered.map((goal, index) =>
+        supabase.from('goals').update({ sort_order: index } as never).eq('id', goal.id)
+      )
+    )
   },
 }))

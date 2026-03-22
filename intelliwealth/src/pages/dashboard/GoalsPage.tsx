@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { useAuthStore } from '../../store/authStore'
 import { useGoalsStore } from '../../store/goalsStore'
 import type { Goal, GoalCategory } from '../../types/database'
@@ -63,7 +64,7 @@ function getAgeMarkers(currentAge: number): number[] {
 export default function GoalsPage() {
   const user = useAuthStore((s) => s.user)
   const navigate = useNavigate()
-  const { goals, fetchAll, addGoal, updateGoal, deleteGoal } = useGoalsStore()
+  const { goals, fetchAll, addGoal, updateGoal, deleteGoal, reorderGoals } = useGoalsStore()
 
   useEffect(() => {
     if (user) fetchAll(user.id)
@@ -149,6 +150,12 @@ export default function GoalsPage() {
     if (!selectedId) return
     await deleteGoal(selectedId)
     setSelectedId(null)
+  }
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return
+    if (result.destination.index === result.source.index) return
+    reorderGoals(result.source.index, result.destination.index)
   }
 
   const ageMarkers = getAgeMarkers(DEFAULT_AGE)
@@ -330,6 +337,81 @@ export default function GoalsPage() {
                 </div>
               </div>
             </div>
+
+            {/* Sortable Goals List */}
+            {goals.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-0.5">Your Goals</p>
+                    <h3 className="text-base font-bold text-gray-900">Drag to reorder priority</h3>
+                  </div>
+                  <span className="text-xs text-gray-400">{goals.length} goal{goals.length !== 1 ? 's' : ''}</span>
+                </div>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable droppableId="goals-list">
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className="divide-y divide-gray-50"
+                      >
+                        {goals.map((goal, index) => (
+                          <Draggable key={goal.id} draggableId={goal.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={`flex items-center gap-3 px-5 py-3 transition-colors ${
+                                  snapshot.isDragging ? 'bg-blue-50 shadow-md rounded-xl' : 'hover:bg-gray-50'
+                                } ${goal.id === selectedId ? 'bg-blue-50/60' : ''}`}
+                              >
+                                {/* Drag handle */}
+                                <div
+                                  {...provided.dragHandleProps}
+                                  className="text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing flex-shrink-0"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                                    <circle cx="5.5" cy="4" r="1.2"/><circle cx="5.5" cy="8" r="1.2"/><circle cx="5.5" cy="12" r="1.2"/>
+                                    <circle cx="10.5" cy="4" r="1.2"/><circle cx="10.5" cy="8" r="1.2"/><circle cx="10.5" cy="12" r="1.2"/>
+                                  </svg>
+                                </div>
+                                {/* Rank */}
+                                <span className="w-5 text-center text-xs font-bold text-gray-300 flex-shrink-0">
+                                  {index + 1}
+                                </span>
+                                {/* Icon */}
+                                <span className="text-xl flex-shrink-0">{goal.icon ?? '🎯'}</span>
+                                {/* Details */}
+                                <button
+                                  onClick={() => setSelectedId(goal.id === selectedId ? null : goal.id)}
+                                  className="flex-1 text-left min-w-0"
+                                >
+                                  <p className="text-sm font-semibold text-gray-900 truncate">{goal.name}</p>
+                                  <p className="text-xs text-gray-400">
+                                    Year {getTargetYear(goal)} · ₹{getBudgetL(goal).toFixed(0)}L
+                                  </p>
+                                </button>
+                                {/* Delete */}
+                                <button
+                                  onClick={() => { deleteGoal(goal.id); if (goal.id === selectedId) setSelectedId(null) }}
+                                  className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 flex-shrink-0 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              </div>
+            )}
 
             {/* Goal Editor */}
             {selectedGoal && (
