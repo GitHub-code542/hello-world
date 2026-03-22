@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAuthStore } from '../../store/authStore'
 import { useFinanceStore } from '../../store/financeStore'
 import { useBalanceStore } from '../../store/balanceStore'
@@ -223,20 +224,35 @@ export default function DashboardPage() {
                   <Link to="/assets" className="mt-2 text-sm text-blue-600 hover:underline font-medium">Add your first asset →</Link>
                 </div>
               ) : (
-                <>
-                  {/* Stacked bar */}
-                  <div className="h-4 rounded-full overflow-hidden flex mb-4">
-                    {alloc.map((a) => (
-                      <div
-                        key={a.label}
-                        style={{ width: `${a.pct}%`, background: a.color }}
-                        title={`${a.label}: ${a.pct.toFixed(1)}%`}
-                      />
-                    ))}
+                <div className="flex gap-6 items-center">
+                  {/* Pie chart */}
+                  <div className="w-44 h-44 flex-shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={alloc}
+                          dataKey="value"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={38}
+                          outerRadius={68}
+                          strokeWidth={2}
+                          stroke="#fff"
+                        >
+                          {alloc.map((a) => (
+                            <Cell key={a.label} fill={a.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(val) => [formatCorpus(Number(val)), 'Value']}
+                          contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
 
                   {/* Legend rows */}
-                  <div className="space-y-2.5">
+                  <div className="flex-1 space-y-2.5">
                     {alloc.map((a) => (
                       <div key={a.label} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -250,7 +266,7 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
-                </>
+                </div>
               )}
             </div>
 
