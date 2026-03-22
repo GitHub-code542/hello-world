@@ -16,6 +16,23 @@ import type { Asset, Liability, AssetType, LiabilityType } from '../../types/dat
 import AppShell from '../../components/layout/AppShell'
 import StepProgress from '../../components/layout/StepProgress'
 
+// ─── Presets ──────────────────────────────────────────────────
+
+const ASSET_PRESETS = [
+  { label: 'Mutual Fund', name: 'Mutual Fund',            type: 'mutual_fund'   as AssetType },
+  { label: 'FD',          name: 'Fixed Deposit',          type: 'fixed_deposit' as AssetType },
+  { label: 'House',       name: 'House',                  type: 'real_estate'   as AssetType },
+  { label: 'PF',          name: 'Employee Provident Fund',type: 'epf'           as AssetType },
+  { label: 'Gold',        name: 'Gold',                   type: 'gold'          as AssetType },
+]
+
+const LIABILITY_PRESETS = [
+  { label: 'House Loan',      name: 'Home Loan',       type: 'home_loan'      as LiabilityType },
+  { label: 'Personal Loan',   name: 'Personal Loan',   type: 'personal_loan'  as LiabilityType },
+  { label: 'Education Loan',  name: 'Education Loan',  type: 'education_loan' as LiabilityType },
+  { label: 'Car Loan',        name: 'Car Loan',        type: 'car_loan'       as LiabilityType },
+]
+
 // ─── Modal state type ─────────────────────────────────────────
 
 type ModalState =
@@ -454,6 +471,25 @@ function RecordModal({
             </svg>
           </button>
         </div>
+
+        {/* Preset chips — shown only when adding */}
+        {!isEdit && (
+          <div className="mb-4">
+            <p className="text-xs font-medium text-gray-500 mb-2">Quick select</p>
+            <div className="flex flex-wrap gap-2">
+              {(isAsset ? ASSET_PRESETS : LIABILITY_PRESETS).map((p) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => { setName(p.name); setType(p.type) }}
+                  className="px-3 py-1.5 text-xs font-medium rounded-full border border-gray-200 bg-gray-50 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors"
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           {/* Name */}

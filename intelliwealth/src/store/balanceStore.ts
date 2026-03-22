@@ -67,7 +67,7 @@ export const useBalanceStore = create<BalanceState>((set, get) => ({
   },
 
   addAsset: async (userId, data) => {
-    const { data: row } = await supabase
+    const { data: row, error } = await supabase
       .from('assets')
       .insert({
         user_id: userId,
@@ -78,6 +78,7 @@ export const useBalanceStore = create<BalanceState>((set, get) => ({
       } as never)
       .select('*')
       .single()
+    if (error) throw error
     if (row) {
       set((s) => ({ assets: [...s.assets, row as Asset] }))
       useXpStore.getState().addXP(100, `asset:${(row as Asset).id}`, 'Asset Added')
@@ -106,7 +107,7 @@ export const useBalanceStore = create<BalanceState>((set, get) => ({
   },
 
   addLiability: async (userId, data) => {
-    const { data: row } = await supabase
+    const { data: row, error } = await supabase
       .from('liabilities')
       .insert({
         user_id: userId,
@@ -119,6 +120,7 @@ export const useBalanceStore = create<BalanceState>((set, get) => ({
       } as never)
       .select('*')
       .single()
+    if (error) throw error
     if (row) {
       set((s) => ({ liabilities: [...s.liabilities, row as Liability] }))
       useXpStore.getState().addXP(100, `liability:${(row as Liability).id}`, 'Balance Sheet Updated')
