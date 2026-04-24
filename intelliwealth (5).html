@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IntelliWealth - Financial Goal Planning</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1b2a;
+  --navy2:#132033;
+  --blue:#2563eb;
+  --blue-l:#3b82f6;
+  --blue-xl:#eff6ff;
+  --teal:#0ea5e9;
+  --green:#10b981;
+  --green-l:#d1fae5;
+  --orange:#f59e0b;
+  --orange-l:#fef3c7;
+  --red:#ef4444;
+  --red-l:#fee2e2;
+  --purple:#8b5cf6;
+  --purple-l:#ede9fe;
+  --bg:#f1f5f9;
+  --card:#fff;
+  --border:#e2e8f0;
+  --text:#0f172a;
+  --muted:#64748b;
+  --muted2:#94a3b8;
+  --sw:240px;
+  --r:12px;
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:14px;line-height:1.5}
+
+/* ─── SIDEBAR ─── */
+aside{
+  width:var(--sw);position:fixed;top:0;left:0;bottom:0;z-index:200;
+  background:var(--navy);display:flex;flex-direction:column;
+}
+.brand{padding:22px 20px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.07)}
+.brand-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--teal));
+  display:grid;place-items:center}
+.brand-icon .mi{color:#fff;font-size:18px}
+.brand-name{font-family:'Instrument Serif',serif;font-size:17px;color:#fff;letter-spacing:-.2px}
+.brand-badge{font-size:9px;color:var(--orange);font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+
+nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:rgba(255,255,255,.3);padding:12px 10px 4px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;
+  color:rgba(255,255,255,.55);cursor:pointer;transition:all .16s;margin-bottom:1px;
+  border:none;background:none;width:100%;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:13.5px;font-weight:500;text-align:left;
+}
+.nav-item .mi{font-size:18px;width:20px;flex-shrink:0}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+.nav-item.active{background:var(--blue);color:#fff}
+
+.sidebar-bottom{padding:14px 10px;border-top:1px solid rgba(255,255,255,.07)}
+.data-controls{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.ctrl-btn{
+  flex:1;padding:7px 8px;border-radius:7px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.65);cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:500;
+  transition:all .15s;display:flex;align-items:center;gap:5px;justify-content:center
+}
+.ctrl-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.ctrl-btn.danger{border-color:rgba(239,68,68,.3);color:rgba(239,68,68,.7)}
+.ctrl-btn.danger:hover{background:rgba(239,68,68,.15);color:var(--red)}
+.user-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:rgba(255,255,255,.06);border-radius:9px;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue-l),var(--teal));
+  display:grid;place-items:center;font-weight:700;color:#fff;font-size:12px;flex-shrink:0}
+.user-name{color:#fff;font-size:13px;font-weight:500}
+.user-lvl{color:rgba(255,255,255,.4);font-size:11px}
+
+/* ─── MAIN ─── */
+main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+.top-bar{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.top-title{font-family:'Instrument Serif',serif;font-size:19px;font-weight:400}
+.top-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.top-actions{display:flex;align-items:center;gap:10px}
+.icon-btn{
+  width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);
+  background:#fff;cursor:pointer;display:grid;place-items:center;transition:all .15s;
+}
+.icon-btn:hover{border-color:var(--blue);color:var(--blue)}
+.icon-btn .mi{font-size:18px;color:var(--muted)}
+.pill{
+  display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:20px;
+  font-size:12px;font-weight:600;background:var(--green-l);color:var(--green);
+}
+.pill .mi{font-size:14px}
+
+/* ─── VIEWS ─── */
+.view{display:none;padding:24px 28px;animation:fadeIn .2s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ─── STEPPER ─── */
+.stepper{display:flex;align-items:center;gap:0;margin-bottom:24px}
+.step{
+  display:flex;align-items:center;gap:8px;padding:8px 16px 8px 12px;
+  border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;
+  color:var(--muted2);transition:all .15s;
+}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--border);
+  display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0;color:var(--muted)}
+.step.active .step-num{background:var(--blue);color:#fff}
+.step.active{color:var(--text)}
+.step.done .step-num{background:var(--green);color:#fff}
+.step-line{height:1px;width:20px;background:var(--border);flex-shrink:0}
+
+/* ─── GRID ─── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+
+/* ─── CARD ─── */
+.card{
+  background:var(--card);border-radius:var(--r);border:1px solid var(--border);
+  padding:20px 22px;box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.card-title{font-size:11.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.7px;color:var(--muted);margin-bottom:14px;
+  display:flex;align-items:center;gap:6px}
+.card-title .mi{font-size:16px}
+
+/* ─── KPI ─── */
+.kpi{display:flex;flex-direction:column}
+.kpi-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;margin-bottom:12px}
+.kpi-icon .mi{font-size:20px}
+.kpi-val{font-family:'Instrument Serif',serif;font-size:28px;letter-spacing:-.5px;margin-bottom:3px}
+.kpi-label{font-size:12.5px;color:var(--muted);font-weight:500}
+.kpi-delta{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;margin-top:8px}
+.kpi-delta .mi{font-size:14px}
+.up{color:var(--green)} .down{color:var(--red)} .neutral{color:var(--orange)}
+
+/* ─── PROGRESS ─── */
+.prog-track{background:var(--border);border-radius:99px;height:6px;overflow:hidden;margin-top:8px}
+.prog-fill{height:100%;border-radius:99px;transition:width .7s ease}
+.fill-blue{background:linear-gradient(90deg,var(--blue),var(--teal))}
+.fill-green{background:linear-gradient(90deg,#059669,var(--green))}
+.fill-orange{background:linear-gradient(90deg,#d97706,var(--orange))}
+
+/* ─── TAG ─── */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;
+  border-radius:20px;font-size:11.5px;font-weight:600}
+.tag-green{background:var(--green-l);color:#059669}
+.tag-blue{background:var(--blue-xl);color:var(--blue)}
+.tag-orange{background:var(--orange-l);color:#92400e}
+.tag-red{background:var(--red-l);color:var(--red)}
+.tag-purple{background:var(--purple-l);color:var(--purple)}
+
+/* ─── GOAL CARD ─── */
+.goal-card{
+  background:var(--card);border-radius:var(--r);border:1px solid var(--border);
+  padding:18px 20px;cursor:pointer;transition:all .18s;
+}
+.goal-card:hover{border-color:var(--blue);box-shadow:0 4px 16px rgba(37,99,235,.1)}
+.goal-icon{font-size:24px;margin-bottom:10px}
+.goal-name{font-weight:700;font-size:14.5px;margin-bottom:2px}
+.goal-sub{font-size:12px;color:var(--muted);margin-bottom:12px}
+.goal-amounts{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.goal-curr{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400}
+.goal-target{font-size:12px;color:var(--muted)}
+
+/* ─── ADD GOAL CARD ─── */
+.add-goal-card{
+  background:var(--card);border-radius:var(--r);border:2px dashed var(--border);
+  padding:18px 20px;cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;
+  color:var(--muted);min-height:140px;
+}
+.add-goal-card:hover{border-color:var(--blue);color:var(--blue)}
+.add-goal-card .mi{font-size:28px}
+.add-goal-card span{font-weight:600;font-size:13px}
+
+/* ─── INSIGHT BOX ─── */
+.insight-box{
+  background:linear-gradient(135deg,#eff6ff,#f0fdf4);
+  border:1px solid #bfdbfe;border-radius:var(--r);padding:16px 18px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.insight-box .mi{font-size:20px;color:var(--blue);flex-shrink:0;margin-top:1px}
+.insight-text{font-size:13px;line-height:1.6;color:var(--text)}
+.insight-text strong{color:var(--blue)}
+
+/* ─── MILESTONE ─── */
+.milestone-row{display:flex;gap:12px;margin-bottom:8px}
+.milestone-dot{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:grid;place-items:center;font-size:15px;
+}
+.milestone-info{flex:1}
+.milestone-name{font-weight:600;font-size:13.5px}
+.milestone-sub{font-size:11.5px;color:var(--muted);margin-top:1px}
+.milestone-time{
+  background:var(--blue-xl);color:var(--blue);font-size:10.5px;font-weight:700;
+  padding:2px 7px;border-radius:20px;flex-shrink:0;align-self:center;
+}
+
+/* ─── TABLE ─── */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11.5px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13.5px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8faff}
+.td-icon{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;
+  font-size:15px;background:var(--bg)}
+
+/* ─── FORM ─── */
+.form-group{margin-bottom:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.2px}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;color:var(--text);
+  background:#fff;outline:none;transition:border-color .15s;
+}
+input:focus,select:focus{border-color:var(--blue)}
+.inp-prefix{position:relative}
+.inp-prefix span{position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:13px;pointer-events:none}
+.inp-prefix input{padding-left:24px}
+.inp-suffix{position:relative}
+.inp-suffix span{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:12px;pointer-events:none}
+.inp-suffix input{padding-right:34px}
+.range-row{display:flex;align-items:center;gap:12px}
+.range-row input[type=range]{flex:1;accent-color:var(--blue)}
+.range-val{font-weight:700;color:var(--blue);min-width:40px;text-align:right}
+
+/* ─── BUTTONS ─── */
+.btn{
+  padding:9px 20px;border-radius:9px;border:none;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:600;
+  transition:all .15s;display:inline-flex;align-items:center;gap:6px;
+}
+.btn .mi{font-size:16px}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#1d4ed8}
+.btn-ghost{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#059669}
+.btn-danger{background:var(--red);color:#fff}
+.btn-sm{padding:6px 13px;font-size:12px}
+.btn-icon{padding:8px;border-radius:8px}
+
+/* ─── SECTION HEADER ─── */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sh h2{font-family:'Instrument Serif',serif;font-size:18px;font-weight:400}
+.sh-actions{display:flex;gap:8px}
+
+/* ─── FIRE SLIDER CARD ─── */
+.fire-metric{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;
+}
+.fire-metric-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;
+  display:flex;align-items:center;gap:5px}
+.fire-metric-label .mi{font-size:15px}
+.fire-metric-val{font-family:'Instrument Serif',serif;font-size:22px;margin-bottom:8px}
+.fire-metric-sub{font-size:11.5px;color:var(--muted)}
+
+/* ─── BIG STAT ─── */
+.big-stat{
+  background:linear-gradient(135deg,var(--navy),var(--navy2));
+  border-radius:var(--r);padding:22px 24px;color:#fff;
+}
+.big-stat-label{font-size:12px;font-weight:600;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.big-stat-val{font-family:'Instrument Serif',serif;font-size:36px;letter-spacing:-.5px;margin-bottom:4px}
+.big-stat-sub{font-size:12.5px;color:rgba(255,255,255,.5)}
+
+/* ─── DONUT CHART (CSS) ─── */
+.donut-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center}
+.donut-center{position:absolute;text-align:center}
+.donut-center-val{font-family:'Instrument Serif',serif;font-size:20px;font-weight:400}
+.donut-center-sub{font-size:10.5px;color:var(--muted);font-weight:600}
+
+/* ─── INCOME / EXPENSE SLIDER ROWS ─── */
+.ie3-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;align-items:start}
+.ie-panel{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:22px 20px}
+.ie-panel-hd{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.ie-panel-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+.ie-panel-icon .mi{font-size:20px}
+.ie-panel-title{font-weight:700;font-size:15px}
+
+.ie-slider-row{margin-bottom:14px}
+.ie-slider-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.ie-slider-label{font-size:13px;font-weight:500;color:var(--text)}
+.ie-slider-val{font-size:13.5px;font-weight:700;color:var(--text)}
+input[type=range].ie-slider{
+  width:100%;height:4px;border-radius:99px;outline:none;border:none;
+  -webkit-appearance:none;appearance:none;
+  background:var(--border);cursor:pointer;
+}
+input[type=range].ie-slider.blue::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--blue);border:2.5px solid #fff;
+  box-shadow:0 0 0 1px var(--blue);cursor:pointer;
+}
+input[type=range].ie-slider.red::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--red);border:2.5px solid #fff;
+  box-shadow:0 0 0 1px var(--red);cursor:pointer;
+}
+input[type=range].ie-slider.blue{accent-color:var(--blue)}
+input[type=range].ie-slider.red{accent-color:var(--red)}
+
+/* ─── NET SAVINGS HERO CARD ─── */
+.net-savings-hero{
+  background:linear-gradient(160deg,#2563eb 0%,#3b82f6 60%,#2563eb 100%);
+  border-radius:var(--r);padding:28px 22px 22px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:#fff;min-height:220px;position:relative;overflow:hidden;
+}
+.net-savings-hero::before{
+  content:'';position:absolute;top:-30px;right:-30px;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.08);
+}
+.net-savings-hero::after{
+  content:'';position:absolute;bottom:-20px;left:-20px;
+  width:80px;height:80px;border-radius:50%;
+  background:rgba(255,255,255,.06);
+}
+.net-savings-lock{
+  width:56px;height:56px;border-radius:14px;
+  background:rgba(255,255,255,.18);backdrop-filter:blur(4px);
+  display:grid;place-items:center;margin-bottom:14px;
+}
+.net-savings-lock .mi{font-size:28px;color:#fff}
+.net-savings-label{font-size:11px;font-weight:700;letter-spacing:1.2px;
+  text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:8px}
+.net-savings-val{font-family:'Instrument Serif',serif;font-size:36px;letter-spacing:-.5px;
+  font-weight:400;margin-bottom:12px}
+.net-savings-rate-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.18);backdrop-filter:blur(4px);
+  border-radius:20px;padding:5px 14px;
+  font-size:12.5px;font-weight:600;color:#fff;
+}
+
+/* ─── INFLOW/OUTFLOW MINI CARDS ─── */
+.cf-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.cf-mini-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.cf-mini-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px}
+.cf-mini-val{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-.3px}
+.cf-mini-val.inflow{color:var(--text)}
+.cf-mini-val.outflow{color:var(--red)}
+
+/* ─── BALANCE SHEET ─── */
+.bs-panel{
+  background:var(--card);border-radius:var(--r);border:1px solid var(--border);
+  padding:0;overflow:hidden;
+}
+.bs-panel-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 22px 16px;border-bottom:1px solid var(--border);
+}
+.bs-panel-left{display:flex;align-items:center;gap:12px}
+.bs-panel-icon{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.bs-panel-name{font-weight:700;font-size:16px}
+.bs-panel-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.bs-panel-total-label{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);text-align:right;margin-bottom:3px}
+.bs-panel-total-val{font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;text-align:right}
+.bs-panel-total-val.asset-total{color:var(--text)}
+.bs-panel-total-val.liab-total{color:var(--red)}
+
+.bs-items{padding:14px 16px;min-height:80px;display:flex;flex-direction:column;gap:8px}
+.bs-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg);border-radius:10px;padding:12px 14px;
+}
+.bs-item-icon{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.bs-item-info{flex:1}
+.bs-item-name{font-weight:600;font-size:13.5px}
+.bs-item-sub{font-size:11.5px;color:var(--muted);margin-top:1px}
+.bs-item-val-wrap{display:flex;align-items:center;gap:4px}
+.bs-item-currency{font-size:13px;color:var(--muted);font-weight:500}
+.bs-item-input{
+  width:72px;text-align:center;padding:5px 7px;border:1.5px solid var(--border);
+  border-radius:7px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;
+  font-size:14px;color:var(--text);outline:none;background:#fff;
+  transition:border-color .15s;
+}
+.bs-item-input:focus{border-color:var(--blue)}
+.bs-item-input.liab-input{color:var(--red)}
+.bs-item-unit{font-size:13px;color:var(--muted);font-weight:500}
+.bs-item-del{
+  width:22px;height:22px;border-radius:50%;background:transparent;border:none;
+  cursor:pointer;color:var(--muted2);font-size:16px;display:grid;place-items:center;
+  transition:all .15s;flex-shrink:0;
+}
+.bs-item-del:hover{background:var(--red-l);color:var(--red)}
+
+.bs-add-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:14px;border:none;background:none;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:600;
+  color:var(--muted);border-top:1px solid var(--border);transition:all .15s;
+}
+.bs-add-btn:hover{color:var(--blue);background:#f8faff}
+
+.bs-empty-inline{
+  text-align:center;padding:20px;color:var(--muted2);font-size:13px;
+}
+
+/* ─── NET WORTH HERO (Balance Sheet) ─── */
+.nw-hero{
+  background:linear-gradient(135deg,var(--blue),var(--blue-l));
+  border-radius:var(--r);padding:24px 32px;color:#fff;text-align:center;
+  max-width:340px;margin:0 auto 24px;
+}
+.nw-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:rgba(255,255,255,.7);margin-bottom:8px}
+.nw-val{font-family:'Instrument Serif',serif;font-size:40px;letter-spacing:-.5px;margin-bottom:6px}
+.nw-sub{font-size:12px;color:rgba(255,255,255,.6)}
+
+/* ─── LIFE GOALS ─── */
+.goals-layout{display:grid;grid-template-columns:280px 1fr;gap:18px;align-items:start}
+.goals-lib-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 18px}
+.goals-lib-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.goals-lib-title{font-size:17px;font-weight:700;margin-bottom:8px}
+.goals-lib-tip{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.goals-filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.filter-pill{padding:5px 13px;border-radius:20px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s}
+.filter-pill.active,.filter-pill:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+.gl-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--bg);border-radius:10px;margin-bottom:8px;cursor:grab;border:1.5px solid transparent;transition:all .18s}
+.gl-item:hover{border-color:var(--blue-l);background:#fff}
+.gl-item-icon{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:18px;flex-shrink:0;background:#fff;border:1px solid var(--border)}
+.gl-item-info{flex:1;min-width:0}
+.gl-item-name{font-weight:700;font-size:13px}
+.gl-item-meta{font-size:11.5px;color:var(--muted);margin-top:1px}
+.gl-drag-badge{font-size:10.5px;font-weight:700;color:var(--muted2);flex-shrink:0}
+.goals-right{display:flex;flex-direction:column;gap:14px}
+.goals-stats-row{display:grid;grid-template-columns:auto auto 1fr;gap:0;padding:4px 0 8px}
+.goals-stat{padding:0 32px 0 0}
+.goals-stat-label{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.goals-stat-val{font-size:26px;font-weight:800;letter-spacing:-.5px}
+.goals-stat-next{text-align:right;padding:0}
+.goals-stat-next .goals-stat-val{font-size:18px;font-weight:700;line-height:1.3}
+.goals-chart-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;position:relative;overflow:visible}
+#goalsCanvas{width:100%;display:block;border-radius:6px}
+.goal-pin-tooltip{position:absolute;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:160px;z-index:10}
+.goal-pin-tooltip .pin-icon{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-size:15px;background:var(--blue-xl);flex-shrink:0}
+.goal-pin-close{position:absolute;top:-8px;right:-8px;width:20px;height:20px;border-radius:50%;background:var(--red);border:2px solid #fff;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;cursor:pointer;pointer-events:all;z-index:11;line-height:1}
+.pin-name{font-weight:700;font-size:12.5px;line-height:1.2}
+.pin-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.goal-editor-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px}
+.goal-editor-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.goal-editor-htitle{font-size:18px;font-weight:700;margin-bottom:0}
+.goal-editor-hint{font-size:12px;color:var(--muted);text-align:right}
+.ge-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.ge-actions{display:flex;gap:10px;margin-top:16px;align-items:center}
+.btn-delete-text{background:none;border:none;color:var(--red);font-weight:700;font-size:13.5px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;padding:8px 4px}
+.btn-delete-text:hover{text-decoration:underline}
+
+/* ─── FIRE ─── */
+.fire-hero{display:flex;gap:20px;margin-bottom:24px;flex-wrap:wrap}
+.fire-hero-card{
+  flex:1;min-width:180px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px 22px;text-align:center;
+}
+.fire-hero-icon{font-size:28px;margin-bottom:8px}
+.fire-hero-val{font-family:'Instrument Serif',serif;font-size:30px;letter-spacing:-.5px;margin-bottom:4px}
+.fire-hero-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.fire-hero-sub{font-size:11.5px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:4px;justify-content:center}
+
+.shock-section{margin-bottom:20px}
+.shock-label{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.shock-label .mi{font-size:16px;color:var(--muted)}
+.shock-desc{font-size:11.5px;color:var(--muted2);margin-top:-4px;margin-bottom:8px}
+
+/* ─── MODAL ─── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:300;place-items:center}
+.overlay.open{display:grid}
+.modal{
+  background:#fff;border-radius:16px;padding:28px;width:480px;max-width:94vw;
+  box-shadow:0 24px 60px rgba(0,0,0,.2);animation:slideUp .22s ease;
+}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-title{font-family:'Instrument Serif',serif;font-size:20px}
+.modal-close{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);
+  background:#fff;cursor:pointer;display:grid;place-items:center}
+.modal-close .mi{font-size:18px;color:var(--muted)}
+.modal-ft{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+
+/* ─── PRIVACY MODE ─── */
+body.privacy .blur-val{filter:blur(6px);user-select:none}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  :root{--sw:0px}
+  aside{transform:translateX(-240px);width:240px;transition:transform .25s}
+  aside.open{transform:none;box-shadow:4px 0 20px rgba(0,0,0,.2)}
+  main{margin-left:0}
+  .mobile-menu{display:flex!important}
+  .g4{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr}
+}
+.mobile-menu{display:none}
+
+/* ─── AUTH SCREEN ─── */
+#authScreen{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:#eef0f8;
+  align-items:center;justify-content:center;flex-direction:column;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+#authScreen.show{display:flex}
+.auth-brand{text-align:center;margin-bottom:32px}
+.auth-brand-name{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:28px;font-weight:800;
+  color:#4f46e5;letter-spacing:-.5px;margin-bottom:4px;
+}
+.auth-brand-sub{font-size:14px;color:#64748b;font-weight:400}
+.auth-card{
+  background:#fff;border-radius:20px;padding:36px 40px;
+  width:100%;max-width:440px;
+  box-shadow:0 8px 40px rgba(79,70,229,.08),0 1px 3px rgba(0,0,0,.06);
+}
+.auth-title{font-size:22px;font-weight:700;color:#0f172a;margin-bottom:4px}
+.auth-sub{font-size:14px;color:#64748b;margin-bottom:28px}
+.auth-tabs{display:flex;border-bottom:1.5px solid #e2e8f0;margin-bottom:28px;gap:0}
+.auth-tab{
+  flex:1;text-align:center;padding:10px 0;font-size:14px;font-weight:600;
+  color:#94a3b8;cursor:pointer;border-bottom:2.5px solid transparent;
+  margin-bottom:-1.5px;transition:all .18s;
+}
+.auth-tab.active{color:#4f46e5;border-bottom-color:#4f46e5}
+.auth-form{display:none;flex-direction:column;gap:18px}
+.auth-form.show{display:flex}
+.auth-field label{
+  display:block;font-size:13.5px;font-weight:600;color:#0f172a;margin-bottom:7px;
+}
+.auth-field input{
+  width:100%;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:#0f172a;
+  outline:none;transition:border-color .15s;background:#fff;
+}
+.auth-field input:focus{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+.auth-field input::placeholder{color:#cbd5e1}
+.auth-btn{
+  width:100%;padding:14px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,#4f46e5,#6366f1);
+  color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all .18s;margin-top:4px;
+  box-shadow:0 4px 16px rgba(79,70,229,.3);
+}
+.auth-btn:hover{background:linear-gradient(135deg,#4338ca,#4f46e5);transform:translateY(-1px)}
+.auth-btn:active{transform:translateY(0)}
+.auth-footer{text-align:center;font-size:13.5px;color:#64748b;margin-top:6px}
+.auth-footer a{color:#4f46e5;font-weight:700;cursor:pointer;text-decoration:none}
+.auth-footer a:hover{text-decoration:underline}
+.auth-error{
+  background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;
+  padding:10px 14px;font-size:13px;color:#dc2626;font-weight:500;display:none;
+}
+.auth-error.show{display:block}
+.auth-divider{display:flex;align-items:center;gap:12px;color:#cbd5e1;font-size:13px}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.auth-google-btn{
+  width:100%;padding:12px;border:1.5px solid #e2e8f0;border-radius:10px;
+  background:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;
+  color:#0f172a;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all .15s;
+}
+.auth-google-btn:hover{border-color:#4f46e5;background:#f8f7ff}
+.auth-profile-extra{display:flex;flex-direction:column;gap:18px}
+.auth-field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+</style>
+</head>
+<body>
+
+<!-- ═══════ AUTH SCREEN ═══════ -->
+<div id="authScreen" class="show">
+  <div class="auth-brand">
+    <div class="auth-brand-name">IntelliWealth</div>
+    <div class="auth-brand-sub">Personal Finance for India</div>
+  </div>
+  <div class="auth-card">
+    <!-- Sign In form (default) -->
+    <div id="signinPane">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to your IntelliWealth account</div>
+      <div class="auth-error" id="signinError">Invalid email or password. Please try again.</div>
+      <div class="auth-form show" style="gap:18px">
+        <div class="auth-field">
+          <label>Email</label>
+          <input type="email" id="siEmail" placeholder="you@example.com" autocomplete="email"/>
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <input type="password" id="siPassword" placeholder="••••••••" autocomplete="current-password"
+            onkeydown="if(event.key==='Enter') doSignIn()"/>
+        </div>
+        <button class="auth-btn" onclick="doSignIn()">Sign in</button>
+        <div class="auth-divider">or</div>
+        <button class="auth-google-btn" onclick="doGoogleAuth()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+      <div class="auth-footer" style="margin-top:20px">
+        Don't have an account? <a onclick="showSignUp()">Create one</a>
+      </div>
+    </div>
+
+    <!-- Sign Up form -->
+    <div id="signupPane" style="display:none">
+      <div class="auth-title">Create account</div>
+      <div class="auth-sub">Start your financial planning journey</div>
+      <div class="auth-error" id="signupError">Please fill all fields correctly.</div>
+      <div class="auth-form show" style="gap:18px">
+        <div class="auth-field-row">
+          <div class="auth-field">
+            <label>First Name</label>
+            <input type="text" id="suFirst" placeholder="Gurpal"/>
+          </div>
+          <div class="auth-field">
+            <label>Last Name</label>
+            <input type="text" id="suLast" placeholder="Singh"/>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label>Email</label>
+          <input type="email" id="suEmail" placeholder="you@example.com"/>
+        </div>
+        <div class="auth-field-row">
+          <div class="auth-field">
+            <label>Age</label>
+            <input type="number" id="suAge" placeholder="32" min="18" max="80"/>
+          </div>
+          <div class="auth-field">
+            <label>Monthly Income (₹)</label>
+            <input type="number" id="suIncome" placeholder="2,30,000"/>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <input type="password" id="suPassword" placeholder="Min. 6 characters"
+            onkeydown="if(event.key==='Enter') doSignUp()"/>
+        </div>
+        <button class="auth-btn" onclick="doSignUp()">Create Account</button>
+        <div class="auth-divider">or</div>
+        <button class="auth-google-btn" onclick="doGoogleAuth()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+      <div class="auth-footer" style="margin-top:20px">
+        Already have an account? <a onclick="showSignIn()">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ SIDEBAR ═══════ -->
+<aside id="sidebar">
+  <div class="brand">
+    <div class="brand-icon"><span class="material-icons-round mi">account_balance_wallet</span></div>
+    <div>
+      <div class="brand-name">IntelliWealth</div>
+      <div class="brand-badge">Premium Vault</div>
+    </div>
+  </div>
+  <nav>
+    <button class="nav-item active" onclick="navigate('dashboard')">
+      <span class="material-icons-round mi">dashboard</span> Dashboard
+    </button>
+    <div class="nav-label">Plan</div>
+    <button class="nav-item" onclick="navigate('income')">
+      <span class="material-icons-round mi">payments</span> Income &amp; Expenses
+    </button>
+    <button class="nav-item" onclick="navigate('balance')">
+      <span class="material-icons-round mi">account_balance</span> Balance Sheet
+    </button>
+    <button class="nav-item" onclick="navigate('goals')">
+      <span class="material-icons-round mi">flag</span> Life Goals
+    </button>
+    <div class="nav-label">Analyze</div>
+    <button class="nav-item" onclick="navigate('fire')">
+      <span class="material-icons-round mi">trending_up</span> FIRE Projections
+    </button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="nav-label" style="margin-bottom:8px">Data Controls</div>
+    <div class="data-controls">
+      <button class="ctrl-btn" onclick="exportData()"><span class="material-icons-round mi" style="font-size:13px">upload</span> Export</button>
+      <button class="ctrl-btn" onclick="importData()"><span class="material-icons-round mi" style="font-size:13px">download</span> Import</button>
+    </div>
+    <button class="ctrl-btn danger" style="width:100%;margin-bottom:10px" onclick="clearData()">
+      <span class="material-icons-round mi" style="font-size:13px">delete</span> Clear Data
+    </button>
+    <div class="user-chip" onclick="doSignOut()" title="Sign out">
+      <div class="avatar" id="sidebarAvatar">U</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarUserName">User</div>
+        <div class="user-lvl" id="sidebarUserLevel">Level 5</div>
+      </div>
+      <span class="material-icons-round mi" style="font-size:16px;color:rgba(255,255,255,.35);margin-left:auto">logout</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════ MAIN ═══════ -->
+<main>
+  <div class="top-bar">
+    <div>
+      <div class="top-title" id="pageTitle">Dashboard</div>
+      <div class="top-sub" id="pageSub">Overview of your financial health</div>
+    </div>
+    <div class="top-actions">
+      <button class="mobile-menu icon-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <span class="material-icons-round mi">menu</span>
+      </button>
+      <button class="icon-btn" onclick="togglePrivacy()" id="privacyBtn" title="Privacy Mode">
+        <span class="material-icons-round mi" id="privacyIcon">visibility</span>
+      </button>
+      <div class="pill"><span class="material-icons-round mi">check_circle</span> Auto-saved</div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="view active" id="view-dashboard">
+    <!-- KPI row -->
+    <div class="g3" style="margin-bottom:18px">
+      <div class="card kpi">
+        <div class="kpi-icon" style="background:#eff6ff"><span class="material-icons-round mi" style="color:var(--blue)">savings</span></div>
+        <div class="kpi-val blur-val" id="kpi-totalSaved">₹ 42.5 L</div>
+        <div class="kpi-label">Total Saved for Goals</div>
+        <div class="kpi-delta up"><span class="material-icons-round mi">trending_up</span> <span class="blur-val">+₹ 1.2 L this month</span></div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-icon" style="background:#f0fdf4"><span class="material-icons-round mi" style="color:var(--green)">payments</span></div>
+        <div class="kpi-val blur-val" id="kpi-monthlyContrib">₹ 85,000</div>
+        <div class="kpi-label">Monthly Contributions</div>
+        <div class="kpi-delta up"><span class="material-icons-round mi">check_circle</span> On Track · Target ₹ 80k</div>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-icon" style="background:#fef3c7"><span class="material-icons-round mi" style="color:var(--orange)">track_changes</span></div>
+        <div class="kpi-val" id="kpi-activeGoals">4</div>
+        <div class="kpi-label">Active Goals</div>
+        <div class="kpi-delta neutral" id="goalEmojis">🏠 🌴 🎓</div>
+      </div>
+    </div>
+
+    <!-- Goals + Insight -->
+    <div class="g2" style="margin-bottom:18px">
+      <div>
+        <div class="sh"><h2>Your Targets</h2>
+          <div class="sh-actions">
+            <button class="btn btn-ghost btn-sm" onclick="sortGoals()">Sort by Priority</button>
+          </div>
+        </div>
+        <div id="dashGoalList">
+          <!-- populated by JS -->
+        </div>
+        <div class="add-goal-card" onclick="navigate('goals')" style="min-height:90px;margin-top:10px">
+          <span class="material-icons-round mi">add</span>
+          <span>Create New Goal</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="insight-box">
+          <span class="material-icons-round mi">lightbulb</span>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:4px">✨ Allocation Insight</div>
+            <div class="insight-text">Your <strong>Retirement Fund</strong> is currently underperforming. Consider reallocating surplus from <strong>Business Income</strong> to this goal to optimize growth.</div>
+            <button class="btn btn-ghost btn-sm" style="margin-top:10px">Review Allocation</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="material-icons-round mi">event</span> Upcoming Milestones</div>
+          <div class="milestone-row">
+            <div class="milestone-dot" style="background:#fef3c7">🎁</div>
+            <div class="milestone-info">
+              <div class="milestone-name">Bonus Deposit</div>
+              <div class="milestone-sub">Expected: Mar 15, 2026</div>
+            </div>
+            <div class="milestone-time">Next Month</div>
+          </div>
+          <div class="milestone-row" style="margin-bottom:0">
+            <div class="milestone-dot" style="background:#ede9fe">📊</div>
+            <div class="milestone-info">
+              <div class="milestone-name">Review Portfolio</div>
+              <div class="milestone-sub">Projected: Jun 10, 2026</div>
+            </div>
+            <div class="milestone-time">In 3 Months</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INCOME & EXPENSES ══ -->
+  <div class="view" id="view-income">
+    <!-- Stepper + Next button -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+      <div class="stepper" style="margin-bottom:0">
+        <div class="step active"><div class="step-num">1</div> Income</div>
+        <div class="step-line"></div>
+        <div class="step" onclick="navigate('balance')"><div class="step-num">2</div> Balance</div>
+        <div class="step-line"></div>
+        <div class="step" onclick="navigate('goals')"><div class="step-num">3</div> Goals</div>
+        <div class="step-line"></div>
+        <div class="step" onclick="navigate('fire')"><div class="step-num">4</div> Analysis</div>
+      </div>
+      <button class="btn btn-primary" onclick="navigate('balance')">Next <span class="material-icons-round mi">arrow_forward</span></button>
+    </div>
+
+    <!-- 3-column layout -->
+    <div class="ie3-grid">
+      <!-- COL 1: Income -->
+      <div class="ie-panel">
+        <div class="ie-panel-hd">
+          <div class="ie-panel-icon" style="background:#d1fae5">
+            <span class="material-icons-round mi" style="color:var(--green)">trending_up</span>
+          </div>
+          <div class="ie-panel-title">Income Sources</div>
+        </div>
+        <div id="incomeRows"></div>
+      </div>
+
+      <!-- COL 2: Net Savings Hero + Inflow/Outflow -->
+      <div>
+        <div class="net-savings-hero">
+          <div class="net-savings-lock">
+            <span class="material-icons-round mi">lock</span>
+          </div>
+          <div class="net-savings-label">Net Annual Savings</div>
+          <div class="net-savings-val blur-val" id="netSavings">₹17,00,025</div>
+          <div class="net-savings-rate-pill">
+            <span class="material-icons-round mi" style="font-size:14px">savings</span>
+            <span id="savingsRate">42.3%</span> Savings Rate
+          </div>
+        </div>
+        <div class="cf-mini-grid">
+          <div class="cf-mini-card">
+            <div class="cf-mini-label">Total Inflow</div>
+            <div class="cf-mini-val inflow blur-val" id="cfInflow">40,18,000</div>
+          </div>
+          <div class="cf-mini-card">
+            <div class="cf-mini-label">Total Outflow</div>
+            <div class="cf-mini-val outflow blur-val" id="cfOutflow">23,17,975</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COL 3: Expenses -->
+      <div class="ie-panel">
+        <div class="ie-panel-hd">
+          <div class="ie-panel-icon" style="background:#fee2e2">
+            <span class="material-icons-round mi" style="color:var(--red)">trending_down</span>
+          </div>
+          <div class="ie-panel-title">Expenses</div>
+        </div>
+        <div id="expenseRows"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BALANCE SHEET ══ -->
+  <div class="view" id="view-balance">
+    <!-- Stepper + Back/Next -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+      <div class="stepper" style="margin-bottom:0">
+        <div class="step done" onclick="navigate('income')"><div class="step-num">✓</div> Income</div>
+        <div class="step-line"></div>
+        <div class="step active"><div class="step-num">2</div> Balance</div>
+        <div class="step-line"></div>
+        <div class="step" onclick="navigate('goals')"><div class="step-num">3</div> Goals</div>
+        <div class="step-line"></div>
+        <div class="step" onclick="navigate('fire')"><div class="step-num">4</div> Analysis</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="navigate('income')">Back</button>
+        <button class="btn btn-primary" onclick="navigate('goals')">Next <span class="material-icons-round mi">arrow_forward</span></button>
+      </div>
+    </div>
+
+    <!-- Net Worth Hero -->
+    <div class="nw-hero">
+      <div class="nw-label">Net Worth</div>
+      <div class="nw-val blur-val" id="netWorth">₹0.00 L</div>
+      <div class="nw-sub">Updated just now</div>
+    </div>
+
+    <!-- Assets + Liabilities -->
+    <div class="g2">
+      <!-- ASSETS -->
+      <div class="bs-panel">
+        <div class="bs-panel-hd">
+          <div class="bs-panel-left">
+            <div class="bs-panel-icon" style="background:#fef3c7">💰</div>
+            <div>
+              <div class="bs-panel-name">Assets</div>
+              <div class="bs-panel-sub">What you own</div>
+            </div>
+          </div>
+          <div>
+            <div class="bs-panel-total-label">Total Value</div>
+            <div class="bs-panel-total-val asset-total blur-val" id="totalAssetsTag">₹0.00 L</div>
+          </div>
+        </div>
+        <div class="bs-items" id="assetList">
+          <div class="bs-empty-inline">No assets added yet</div>
+        </div>
+        <button class="bs-add-btn" onclick="openModal('assetModal')">+ Add Asset</button>
+      </div>
+
+      <!-- LIABILITIES -->
+      <div class="bs-panel">
+        <div class="bs-panel-hd">
+          <div class="bs-panel-left">
+            <div class="bs-panel-icon" style="background:#fee2e2">💳</div>
+            <div>
+              <div class="bs-panel-name">Liabilities</div>
+              <div class="bs-panel-sub">What you owe</div>
+            </div>
+          </div>
+          <div>
+            <div class="bs-panel-total-label">Total Debt</div>
+            <div class="bs-panel-total-val liab-total blur-val" id="totalLiabTag">₹0.00 L</div>
+          </div>
+        </div>
+        <div class="bs-items" id="liabList">
+          <div class="bs-empty-inline">No liabilities added yet</div>
+        </div>
+        <button class="bs-add-btn" onclick="openModal('liabModal')">+ Add Liability</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LIFE GOALS ══ -->
+  <div class="view" id="view-goals">
+    <!-- Stepper + Back/Analysis -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div class="stepper" style="margin-bottom:0">
+        <div class="step done" onclick="navigate('income')"><div class="step-num">✓</div> Income</div>
+        <div class="step-line"></div>
+        <div class="step done" onclick="navigate('balance')"><div class="step-num">✓</div> Balance</div>
+        <div class="step-line"></div>
+        <div class="step active"><div class="step-num">3</div> Goals</div>
+        <div class="step-line"></div>
+        <div class="step" onclick="navigate('fire')"><div class="step-num">4</div> Analysis</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" onclick="navigate('balance')">Back</button>
+        <button class="btn btn-primary" onclick="navigate('fire')">Analysis <span class="material-icons-round mi">arrow_forward</span></button>
+      </div>
+    </div>
+
+    <div class="goals-layout">
+      <!-- LEFT: Goal Library -->
+      <div class="goals-lib-panel">
+        <div class="goals-lib-eyebrow">Goal Library</div>
+        <div class="goals-lib-title">Drag &amp; Drop Milestones</div>
+        <div class="goals-lib-tip">💡 Tip: Drag goals into the timeline to place them at your desired age</div>
+        <div class="goals-filter-row">
+          <div class="filter-pill active" onclick="filterGoals('all',this)">Quick Add</div>
+          <div class="filter-pill" onclick="filterGoals('long',this)">Long Term</div>
+          <div class="filter-pill" onclick="filterGoals('family',this)">Family</div>
+        </div>
+        <div id="goalLibrary"></div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="goals-right">
+        <!-- Stats row -->
+        <div class="goals-stats-row">
+          <div class="goals-stat">
+            <div class="goals-stat-label">Total Goals</div>
+            <div class="goals-stat-val" id="tlTotalGoals">0</div>
+          </div>
+          <div class="goals-stat">
+            <div class="goals-stat-label">Total Budget</div>
+            <div class="goals-stat-val blur-val" id="tlTotalBudget">₹0L</div>
+          </div>
+          <div class="goals-stat goals-stat-next">
+            <div class="goals-stat-label">Next Milestone</div>
+            <div class="goals-stat-val" id="tlNextMile">--</div>
+          </div>
+        </div>
+
+        <!-- Chart panel — drag target -->
+        <div class="goals-chart-panel"
+          ondragover="event.preventDefault();this.style.background='#f0f7ff'"
+          ondragleave="this.style.background=''"
+          ondrop="onDropChart(event,this)">
+          <canvas id="goalsCanvas" height="280"></canvas>
+          <!-- Pin tooltips injected here by JS -->
+        </div>
+
+        <!-- Goal Editor panel -->
+        <div class="goal-editor-panel" id="goalEditorPanel">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+            <div>
+              <div class="goal-editor-eyebrow">Goal Editor</div>
+              <div class="goal-editor-htitle" id="geTitle">Add a milestone</div>
+            </div>
+            <div class="goal-editor-hint" id="geHint">Select a goal to edit or drag a new one</div>
+          </div>
+          <div id="goalEditorContent">
+            <div style="color:var(--muted);font-size:13px;padding:8px 0">Drag a goal from the library onto the chart to begin.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FIRE PROJECTIONS ══ -->
+  <div class="view" id="view-fire">
+    <div class="stepper" style="margin-bottom:24px">
+      <div class="step done" onclick="navigate('income')"><div class="step-num">✓</div> Income</div>
+      <div class="step-line"></div>
+      <div class="step done" onclick="navigate('balance')"><div class="step-num">✓</div> Balance</div>
+      <div class="step-line"></div>
+      <div class="step done" onclick="navigate('goals')"><div class="step-num">✓</div> Goals</div>
+      <div class="step-line"></div>
+      <div class="step active"><div class="step-num">4</div> Analysis</div>
+    </div>
+
+    <!-- Hero metrics -->
+    <div class="fire-hero">
+      <div class="fire-hero-card">
+        <div class="fire-hero-icon">🏦</div>
+        <div class="fire-hero-val blur-val" id="fireCorpus">₹ 2.5 Cr</div>
+        <div class="fire-hero-label">FI Target Corpus</div>
+      </div>
+      <div class="fire-hero-card">
+        <div class="fire-hero-icon">⏱️</div>
+        <div class="fire-hero-val" id="fireYears">12 Yrs</div>
+        <div class="fire-hero-label">Time to FI</div>
+      </div>
+      <div class="fire-hero-card">
+        <div class="fire-hero-icon">🎯</div>
+        <div class="fire-hero-val" id="fireProb">94%</div>
+        <div class="fire-hero-label">Success Probability</div>
+        <div class="fire-hero-sub"><span class="material-icons-round mi" style="font-size:14px;color:var(--blue)">verified_user</span> Based on Monte Carlo sim</div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <!-- LEFT: SHOCKS -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="card-title"><span class="material-icons-round mi">work_history</span> Income Shocks</div>
+          <div class="shock-section">
+            <div class="shock-label"><span class="material-icons-round mi">event_busy</span> Gap Years (Sabbatical)</div>
+            <div class="shock-desc">Years with 0 income but full expenses</div>
+            <div class="range-row">
+              <input type="range" id="gapYears" min="0" max="10" value="0" oninput="updateFire()"/>
+              <div class="range-val"><span id="gapYearsVal">0</span> Yrs</div>
+            </div>
+          </div>
+          <div class="shock-section">
+            <div class="shock-label"><span class="material-icons-round mi">trending_down</span> Income Loss during Gap</div>
+            <div class="range-row">
+              <input type="range" id="incomeLoss" min="0" max="100" value="100" oninput="updateFire()"/>
+              <div class="range-val"><span id="incomeLossVal">100</span>%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="material-icons-round mi">medical_services</span> One-off Expenses</div>
+          <div class="form-group">
+            <label>Major Medical Event (₹ L)</label>
+            <div class="inp-prefix">
+              <span>₹</span>
+              <input type="number" id="medicalExpense" value="0" min="0" oninput="updateFire()"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Other Big Expense (₹ L)</label>
+            <div class="inp-prefix">
+              <span>₹</span>
+              <input type="number" id="otherExpense" value="0" min="0" oninput="updateFire()"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: MARKET REALITY -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="card-title"><span class="material-icons-round mi">query_stats</span> Market Reality</div>
+          <div class="form-group">
+            <label>Expected ROI (%)</label>
+            <div class="range-row">
+              <input type="range" id="roiSlider" min="6" max="20" value="12" oninput="updateFire()"/>
+              <div class="range-val"><span id="roiVal">12</span>%</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Annual Inflation (%)</label>
+            <div class="range-row">
+              <input type="range" id="inflationSlider" min="2" max="12" value="6" oninput="updateFire()"/>
+              <div class="range-val"><span id="inflationVal">6</span>%</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Market Crash Impact (%)</label>
+            <div class="range-row">
+              <input type="range" id="crashSlider" min="0" max="50" value="0" oninput="updateFire()"/>
+              <div class="range-val"><span id="crashVal">0</span>%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monte Carlo visual -->
+        <div class="card">
+          <div class="card-title"><span class="material-icons-round mi">bar_chart</span> Projection Paths</div>
+          <canvas id="fireChart" height="160" style="width:100%"></canvas>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-green" onclick="savePlan()"><span class="material-icons-round mi">save</span> Save Plan</button>
+          <button class="btn btn-ghost" onclick="navigate('goals')"><span class="material-icons-round mi">arrow_back</span> Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════ MODALS ═══════ -->
+
+<!-- Asset Modal -->
+<div class="overlay" id="assetModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Add Asset</div>
+      <button class="modal-close" onclick="closeModal('assetModal')"><span class="material-icons-round mi">close</span></button>
+    </div>
+    <div class="form-group">
+      <label>Asset Name</label>
+      <input type="text" id="assetName" placeholder="e.g. Mutual Fund Portfolio"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="assetCategory">
+          <option>Other Assets</option><option>Equity / Stocks</option><option>Mutual Funds</option>
+          <option>Fixed Deposits</option><option>Real Estate</option><option>Gold</option>
+          <option>PPF / EPF</option><option>Crypto</option><option>Cash / Savings</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Value (₹ Lakhs)</label>
+        <div class="inp-suffix">
+          <input type="number" id="assetValue" placeholder="10.00" step="0.01"/>
+          <span>L</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('assetModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addAsset()">Add Asset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Liability Modal -->
+<div class="overlay" id="liabModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Add Liability</div>
+      <button class="modal-close" onclick="closeModal('liabModal')"><span class="material-icons-round mi">close</span></button>
+    </div>
+    <div class="form-group">
+      <label>Liability Name</label>
+      <input type="text" id="liabName" placeholder="e.g. Home Loan"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="liabCategory">
+          <option>Other Debt</option><option>Home Loan</option><option>Car Loan</option>
+          <option>Personal Loan</option><option>Education Loan</option><option>Credit Card</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Amount (₹ Lakhs)</label>
+        <div class="inp-suffix">
+          <input type="number" id="liabValue" placeholder="10.00" step="0.01"/>
+          <span>L</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('liabModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="addLiability()">Add Liability</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Goal Modal -->
+<div class="overlay" id="customGoalModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">Add Custom Goal</div>
+      <button class="modal-close" onclick="closeModal('customGoalModal')"><span class="material-icons-round mi">close</span></button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Goal Name</label>
+        <input type="text" id="cgName" placeholder="My Goal"/>
+      </div>
+      <div class="form-group">
+        <label>Icon (emoji)</label>
+        <input type="text" id="cgIcon" placeholder="🌟" maxlength="2" style="font-size:20px;text-align:center"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Target Year</label>
+        <input type="number" id="cgYear" placeholder="2030" min="2025" max="2060"/>
+      </div>
+      <div class="form-group">
+        <label>Budget (₹ Lakhs)</label>
+        <input type="number" id="cgBudget" placeholder="50" min="0"/>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="closeModal('customGoalModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCustomGoal()">Add to Library</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const DEFAULT_STATE = {
+  income: {
+    salary: 230000,
+    bonus: 850000,
+    rental: 12000,
+    business: 8000,
+    investment: 14000,
+    other: 0,
+    annualRise: 7
+  },
+  expenses: {
+    rent: 38000,
+    school: 13000,
+    household: 65000,
+    emi: 24000,
+    vacation: 400000,
+    discretionary: 200000,
+    lifeIns: 26000,
+    healthIns: 4500,
+    maintenance: 7500
+  },
+  assets: [
+    {name:'Mutual Funds', category:'Other Assets', value:1000000},
+    {name:'House',        category:'Other Assets', value:1000000},
+  ],
+  liabilities: [
+    {name:'Car Loan',       category:'Other Debt', value:1000000},
+    {name:'Education Loan', category:'Other Debt', value:1000000},
+  ],
+  timelineGoals: [],
+  goalLibrary: [
+    { id:'g1', icon:'🏠', name:'House Purchase', year:2032, budget:60, type:'house' },
+    { id:'g2', icon:'🎓', name:'Education', year:2039, budget:35, type:'education' },
+    { id:'g3', icon:'🪑', name:'Retirement', year:2054, budget:90, type:'retirement' },
+    { id:'g4', icon:'✈️', name:'Travel & Vacation', year:2034, budget:18, type:'travel' }
+  ],
+  fire: { roi:12, inflation:6, crashImpact:0, gapYears:0, incomeLoss:100, medical:0, other:0 },
+  privacy: false,
+  xp: 5200,
+  currentAge: 32
+};
+
+let state = loadState();
+
+function loadState(){
+  try {
+    const s = localStorage.getItem('intelliwealth_state');
+    const loaded = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_STATE));
+    // Seed defaults if empty
+    if(!loaded.assets || loaded.assets.length===0)
+      loaded.assets = JSON.parse(JSON.stringify(DEFAULT_STATE.assets));
+    if(!loaded.liabilities || loaded.liabilities.length===0)
+      loaded.liabilities = JSON.parse(JSON.stringify(DEFAULT_STATE.liabilities));
+    return loaded;
+  } catch(e){ return JSON.parse(JSON.stringify(DEFAULT_STATE)); }
+}
+function saveState(){
+  localStorage.setItem('intelliwealth_state', JSON.stringify(state));
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+const PAGE_META = {
+  dashboard:{ title:'Dashboard', sub:'Overview of your financial health' },
+  income:{ title:'Income & Expenses', sub:'Master your cash flow to build a solid foundation.' },
+  balance:{ title:'Balance Sheet', sub:'Track your assets and liabilities with precision' },
+  goals:{ title:'Life Milestones', sub:'Shape your life plan with meaningful milestones.' },
+  fire:{ title:'FIRE Analysis', sub:'Stress-test your plan against real-world scenarios.' }
+};
+
+function navigate(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  const btn = document.querySelector(`.nav-item[onclick="navigate('${view}')"]`);
+  if(btn) btn.classList.add('active');
+  const meta = PAGE_META[view];
+  document.getElementById('pageTitle').textContent = meta.title;
+  document.getElementById('pageSub').textContent = meta.sub;
+  document.getElementById('sidebar').classList.remove('open');
+  renderView(view);
+}
+
+function renderView(view){
+  if(view==='dashboard') renderDashboard();
+  if(view==='income') renderIncome();
+  if(view==='balance') renderBalance();
+  if(view==='goals') renderGoals();
+  if(view==='fire') renderFire();
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+function fmtINR(n, compact=false){
+  if(n===undefined||n===null) n=0;
+  const abs = Math.abs(n);
+  if(compact){
+    if(abs>=10000000) return '₹ '+(n/10000000).toFixed(1)+' Cr';
+    if(abs>=100000)   return '₹ '+(n/100000).toFixed(1)+' L';
+    if(abs>=1000)     return '₹ '+(n/1000).toFixed(0)+' K';
+    return '₹ '+n.toLocaleString('en-IN');
+  }
+  return '₹ '+Math.abs(n).toLocaleString('en-IN');
+}
+
+function calcIncome(){
+  const i = state.income;
+  const monthly = i.salary + i.rental + i.business + i.investment + i.other;
+  const annual = monthly*12 + i.bonus;
+  return annual;
+}
+
+function calcExpenses(){
+  const e = state.expenses;
+  const monthly = (e.rent+e.school+e.household+e.emi)*12;
+  const annual = monthly + e.vacation + e.discretionary + e.lifeIns + e.healthIns + e.maintenance;
+  return annual;
+}
+
+function calcNetSavings(){ return calcIncome() - calcExpenses(); }
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
+function renderDashboard(){
+  // compute from saved goals
+  const tl = state.timelineGoals;
+  const totalSaved = tl.reduce((a,g)=>a+g.budget*100000,0)*0.5625; // demo: 56% saved
+  document.getElementById('kpi-totalSaved').textContent = fmtINR(totalSaved, true);
+
+  const netSav = calcNetSavings();
+  document.getElementById('kpi-monthlyContrib').textContent = fmtINR(Math.round(netSav/12), false);
+  document.getElementById('kpi-activeGoals').textContent = tl.length || state.goalLibrary.length;
+
+  // Dashboard goal list
+  const goals = tl.length ? tl : state.goalLibrary.slice(0,2).map(g=>({...g, currentAmount: g.budget*0.5625}));
+  const list = document.getElementById('dashGoalList');
+  list.innerHTML = goals.slice(0,3).map(g=>{
+    const pct = Math.min(100, Math.round((g.currentAmount||0)/(g.budget*100000)*100)) || Math.floor(Math.random()*40+30);
+    const color = pct>=60?'fill-green':pct>=30?'fill-blue':'fill-orange';
+    return `
+    <div class="goal-card" style="margin-bottom:12px" onclick="navigate('goals')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:20px;margin-bottom:4px">${g.icon}</div>
+          <div class="goal-name">${g.name}</div>
+          <div class="goal-sub">${g.year} · ${2060-g.year} Years left</div>
+        </div>
+        <div class="tag tag-green"><span class="material-icons-round mi" style="font-size:12px">trending_up</span> On Track</div>
+      </div>
+      <div class="goal-amounts">
+        <div class="goal-curr">${fmtINR(g.budget*100000*0.5625,true)}</div>
+        <div class="goal-target">of ${fmtINR(g.budget*100000,true)}</div>
+      </div>
+      <div class="prog-track"><div class="prog-fill ${color}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// INCOME & EXPENSES
+// ═══════════════════════════════════════════════════════
+
+// Slider config: [key, label, min, max, step]
+const INCOME_SLIDERS = [
+  ['salary',     'Monthly Salary',     0, 1000000, 1000],
+  ['bonus',      'Annual Bonus',       0, 5000000, 10000],
+  ['rental',     'Rental Income (Mo)', 0, 200000,  1000],
+  ['business',   'Business Income',   0, 500000,  1000],
+  ['investment', 'Investment Income', 0, 200000,  1000],
+  ['other',      'Other Income',      0, 200000,  1000],
+  ['annualRise', 'Exp. Annual Rise',  0, 30,      1],
+];
+const EXPENSE_SLIDERS = [
+  ['rent',          'House Rent',         0, 200000,  500],
+  ['school',        'School Fees',        0, 100000,  500],
+  ['household',     'Household',          0, 300000,  500],
+  ['emi',           'EMIs',               0, 200000,  500],
+  ['vacation',      'Vacation (Yr)',      0, 2000000, 1000],
+  ['discretionary', 'Discretionary (Yr)',0, 1000000, 1000],
+  ['lifeIns',       'Life Ins (Yr)',      0, 200000,  500],
+  ['healthIns',     'Health Ins (Yr)',    0, 100000,  500],
+  ['maintenance',   'Maintenance (Yr)',   0, 100000,  500],
+];
+
+function renderIncome(){
+  renderSliderRows('incomeRows', INCOME_SLIDERS, state.income, 'income', 'blue');
+  renderSliderRows('expenseRows', EXPENSE_SLIDERS, state.expenses, 'expenses', 'red');
+  updateIncomeSummary();
+}
+
+function renderSliderRows(containerId, sliders, data, stateKey, color){
+  const el = document.getElementById(containerId);
+  el.innerHTML = sliders.map(([key, label, min, max, step])=>{
+    const val = data[key] !== undefined ? data[key] : 0;
+    const isPercent = key === 'annualRise';
+    const displayVal = isPercent ? val+'%' : '₹'+val.toLocaleString('en-IN');
+    return `
+    <div class="ie-slider-row">
+      <div class="ie-slider-top">
+        <span class="ie-slider-label">${label}</span>
+        <span class="ie-slider-val" id="sv-${stateKey}-${key}">${displayVal}</span>
+      </div>
+      <input type="range" class="ie-slider ${color}"
+        min="${min}" max="${max}" step="${step}" value="${val}"
+        oninput="onSlider('${stateKey}','${key}',+this.value,${isPercent},'sv-${stateKey}-${key}')"/>
+    </div>`;
+  }).join('');
+}
+
+function onSlider(stateKey, key, val, isPercent, labelId){
+  state[stateKey][key] = val;
+  const displayVal = isPercent ? val+'%' : '₹'+val.toLocaleString('en-IN');
+  document.getElementById(labelId).textContent = displayVal;
+  saveState();
+  updateIncomeSummary();
+}
+
+function updateIncomeSummary(){
+  const inc = calcIncome();
+  const exp = calcExpenses();
+  const net = inc - exp;
+  document.getElementById('netSavings').textContent = '₹'+Math.abs(net).toLocaleString('en-IN');
+  const rate = inc>0 ? (net/inc*100).toFixed(1) : 0;
+  document.getElementById('savingsRate').textContent = rate+'%';
+  // strip ₹ prefix for mini cards — show raw Indian number format
+  document.getElementById('cfInflow').textContent = inc.toLocaleString('en-IN');
+  document.getElementById('cfOutflow').textContent = exp.toLocaleString('en-IN');
+}
+
+// ═══════════════════════════════════════════════════════
+// BALANCE SHEET
+// ═══════════════════════════════════════════════════════
+const ASSET_ICONS = {
+  'Equity / Stocks':'📈','Mutual Funds':'💼','Fixed Deposits':'🏦',
+  'Real Estate':'🏘️','Gold':'🪙','PPF / EPF':'🏛️','Crypto':'₿',
+  'Cash / Savings':'💵','Other Assets':'💰','Other':'💰'
+};
+const LIAB_ICONS = {
+  'Home Loan':'🏠','Car Loan':'💳','Personal Loan':'💳',
+  'Education Loan':'💳','Credit Card':'💳','Other Debt':'💳','Other':'💳'
+};
+
+function renderBalance(){
+  renderAssets(); renderLiabilities(); updateNetWorth();
+}
+
+function toLakhs(v){ return (v/100000).toFixed(2); }
+function fromLakhs(v){ return Math.round(v*100000); }
+
+function renderAssets(){
+  const el = document.getElementById('assetList');
+  if(!state.assets.length){
+    el.innerHTML=`<div class="bs-empty-inline">No assets added yet</div>`;
+    return;
+  }
+  el.innerHTML = state.assets.map((a,i)=>`
+  <div class="bs-item">
+    <div class="bs-item-icon" style="background:#fef9e7">${ASSET_ICONS[a.category]||'💰'}</div>
+    <div class="bs-item-info">
+      <div class="bs-item-name">${a.name}</div>
+      <div class="bs-item-sub">${a.category}</div>
+    </div>
+    <div class="bs-item-val-wrap">
+      <span class="bs-item-currency">₹</span>
+      <input class="bs-item-input blur-val" type="number" value="${toLakhs(a.value)}" step="0.01"
+        onchange="updateAssetVal(${i}, +this.value)"/>
+      <span class="bs-item-unit">L</span>
+    </div>
+    <button class="bs-item-del" onclick="removeAsset(${i})">×</button>
+  </div>`).join('');
+}
+
+function renderLiabilities(){
+  const el = document.getElementById('liabList');
+  if(!state.liabilities.length){
+    el.innerHTML=`<div class="bs-empty-inline">No liabilities added yet</div>`;
+    return;
+  }
+  el.innerHTML = state.liabilities.map((l,i)=>`
+  <div class="bs-item">
+    <div class="bs-item-icon" style="background:#fee2e2;font-size:16px">💳</div>
+    <div class="bs-item-info">
+      <div class="bs-item-name">${l.name}</div>
+      <div class="bs-item-sub">${l.category}</div>
+    </div>
+    <div class="bs-item-val-wrap">
+      <span class="bs-item-currency" style="color:var(--red)">₹</span>
+      <input class="bs-item-input liab-input blur-val" type="number" value="${toLakhs(l.value)}" step="0.01"
+        onchange="updateLiabVal(${i}, +this.value)"/>
+      <span class="bs-item-unit" style="color:var(--red)">L</span>
+    </div>
+    <button class="bs-item-del" onclick="removeLiability(${i})">×</button>
+  </div>`).join('');
+}
+
+function updateAssetVal(i, lakhs){ state.assets[i].value=fromLakhs(lakhs); saveState(); updateNetWorth(); }
+function updateLiabVal(i, lakhs){ state.liabilities[i].value=fromLakhs(lakhs); saveState(); updateNetWorth(); }
+
+function updateNetWorth(){
+  const assets = state.assets.reduce((a,x)=>a+x.value,0);
+  const liabs = state.liabilities.reduce((a,x)=>a+x.value,0);
+  const nw = assets-liabs;
+  document.getElementById('netWorth').textContent = '₹'+toLakhs(nw)+' L';
+  document.getElementById('totalAssetsTag').textContent = '₹'+toLakhs(assets)+' L';
+  document.getElementById('totalLiabTag').textContent = '₹'+toLakhs(liabs)+' L';
+}
+
+function addAsset(){
+  const name=document.getElementById('assetName').value.trim();
+  const cat=document.getElementById('assetCategory').value;
+  const lakhs=+document.getElementById('assetValue').value;
+  if(!name||!lakhs) return;
+  state.assets.push({name,category:cat,value:fromLakhs(lakhs)});
+  saveState(); renderBalance();
+  document.getElementById('assetName').value='';
+  document.getElementById('assetValue').value='';
+  closeModal('assetModal');
+}
+
+function addLiability(){
+  const name=document.getElementById('liabName').value.trim();
+  const cat=document.getElementById('liabCategory').value;
+  const lakhs=+document.getElementById('liabValue').value;
+  if(!name||!lakhs) return;
+  state.liabilities.push({name,category:cat,value:fromLakhs(lakhs)});
+  saveState(); renderBalance();
+  document.getElementById('liabName').value='';
+  document.getElementById('liabValue').value='';
+  closeModal('liabModal');
+}
+
+function removeAsset(i){ state.assets.splice(i,1); saveState(); renderBalance(); }
+function removeLiability(i){ state.liabilities.splice(i,1); saveState(); renderBalance(); }
+
+// ═══════════════════════════════════════════════════════
+// LIFE GOALS / CANVAS CHART
+// ═══════════════════════════════════════════════════════
+let dragGoal = null;
+let activeGoalId = null;
+
+function renderGoals(){
+  renderGoalLibrary();
+  drawGoalsChart();
+  updateTlStats();
+  renderGoalPins();
+}
+
+function filterGoals(type, el){
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderGoalLibrary(type);
+}
+
+function renderGoalLibrary(filter='all'){
+  const el=document.getElementById('goalLibrary');
+  let list = state.goalLibrary;
+  if(filter==='long') list=list.filter(g=>g.budget>=50);
+  if(filter==='family') list=list.filter(g=>['education','house'].includes(g.type));
+  el.innerHTML = list.map(g=>{
+    const gJson = JSON.stringify(g).replace(/"/g,'&quot;');
+    return `<div class="gl-item" draggable="true"
+      ondragstart="dragGoal=JSON.parse(JSON.stringify(${gJson}));event.dataTransfer.effectAllowed='copy'">
+      <div class="gl-item-icon">${g.icon}</div>
+      <div class="gl-item-info">
+        <div class="gl-item-name">${g.name}</div>
+        <div class="gl-item-meta">Year ${g.year} · ₹${g.budget}L</div>
+      </div>
+      <div class="gl-drag-badge">Drag</div>
+    </div>`;
+  }).join('');
+}
+
+// ── CANVAS CHART ──────────────────────────────────────
+function drawGoalsChart(){
+  const canvas=document.getElementById('goalsCanvas');
+  if(!canvas) return;
+  const W=canvas.parentElement.clientWidth-24;
+  canvas.width=W; canvas.height=280;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,280);
+
+  const PAD={top:30,right:40,bottom:50,left:40};
+  const CW=W-PAD.left-PAD.right;
+  const CH=280-PAD.top-PAD.bottom;
+
+  const START_AGE=state.currentAge||32;
+  const END_AGE=100;
+  const AGES=[32,40,50,60,70,80,90,100];
+
+  // Grid lines (vertical dotted)
+  ctx.strokeStyle='#e2e8f0'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  AGES.forEach(age=>{
+    const x=PAD.left+CW*((age-START_AGE)/(END_AGE-START_AGE));
+    ctx.beginPath(); ctx.moveTo(x,PAD.top); ctx.lineTo(x,PAD.top+CH); ctx.stroke();
+  });
+  // Horizontal grid lines
+  for(let i=0;i<=4;i++){
+    const y=PAD.top+CH*(i/4);
+    ctx.beginPath(); ctx.moveTo(PAD.left,y); ctx.lineTo(PAD.left+CW,y); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Age bubble labels
+  AGES.forEach(age=>{
+    const x=PAD.left+CW*((age-START_AGE)/(END_AGE-START_AGE));
+    const y=PAD.top+CH+18;
+    ctx.beginPath();
+    ctx.arc(x,y,14,0,Math.PI*2);
+    ctx.fillStyle='#fff'; ctx.fill();
+    ctx.strokeStyle='#e2e8f0'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#64748b'; ctx.font='bold 11px Plus Jakarta Sans';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(age,x,y);
+  });
+
+  // Savings curve
+  const netSav=Math.max(calcNetSavings(),0);
+  const roi=(state.fire?.roi||12)/100;
+  const pts=[];
+  for(let age=START_AGE;age<=END_AGE;age+=2){
+    const t=age-START_AGE;
+    const corpus = netSav*((Math.pow(1+roi,t)-1)/roi);
+    const x=PAD.left+CW*((age-START_AGE)/(END_AGE-START_AGE));
+    const maxC=netSav*((Math.pow(1+roi,END_AGE-START_AGE)-1)/roi);
+    const y=PAD.top+CH-CH*(Math.min(corpus,maxC*1.1)/Math.max(maxC,1));
+    pts.push({x,y,age,corpus});
+  }
+
+  // Fill under curve
+  if(pts.length>1){
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x,PAD.top+CH);
+    pts.forEach(p=>ctx.lineTo(p.x,p.y));
+    ctx.lineTo(pts[pts.length-1].x,PAD.top+CH);
+    ctx.closePath();
+    const grad=ctx.createLinearGradient(0,PAD.top,0,PAD.top+CH);
+    grad.addColorStop(0,'rgba(37,99,235,0.12)');
+    grad.addColorStop(1,'rgba(37,99,235,0)');
+    ctx.fillStyle=grad; ctx.fill();
+  }
+
+  // Curve line (green like screenshot)
+  ctx.beginPath();
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle='#22c55e'; ctx.lineWidth=2.5;
+  ctx.setLineDash([]); ctx.stroke();
+
+  // Goal markers on curve
+  const currentYear=new Date().getFullYear();
+  state.timelineGoals.forEach(g=>{
+    const age=START_AGE+(g.year-currentYear);
+    if(age<START_AGE||age>END_AGE) return;
+    const x=PAD.left+CW*((age-START_AGE)/(END_AGE-START_AGE));
+    // find y on curve
+    const t=age-START_AGE;
+    const corpus=netSav*((Math.pow(1+roi,t)-1)/Math.max(roi,0.001));
+    const maxC=netSav*((Math.pow(1+roi,END_AGE-START_AGE)-1)/Math.max(roi,0.001));
+    const y=PAD.top+CH-CH*(Math.min(corpus,maxC*1.1)/Math.max(maxC,1));
+    // Emoji on the curve
+    ctx.font='20px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(g.icon,x,y-12);
+    // store for tooltip positioning
+    g._cx=x; g._cy=y;
+  });
+
+  // Store pts for later
+  canvas._pts=pts; canvas._pad=PAD; canvas._cw=CW; canvas._ch=CH;
+}
+
+// ── PINS / TOOLTIPS ───────────────────────────────────
+function renderGoalPins(){
+  const panel=document.querySelector('.goals-chart-panel');
+  if(!panel) return;
+  panel.querySelectorAll('.goal-pin-tooltip').forEach(x=>x.remove());
+
+  state.timelineGoals.forEach(g=>{
+    if(g._cx===undefined) return;
+    const tip=document.createElement('div');
+    tip.className='goal-pin-tooltip';
+    tip.id='pin-'+g.id;
+    tip.innerHTML=`
+      <div class="pin-icon">${g.icon}</div>
+      <div>
+        <div class="pin-name">${g.name}</div>
+        <div class="pin-meta">Year ${g.year} · ₹${g.budget}L</div>
+      </div>
+      <div class="goal-pin-close" onclick="removeTimelineGoal('${g.id}')">×</div>`;
+    tip.style.left=(g._cx-80)+'px';
+    tip.style.top=(g._cy-70)+'px';
+    tip.addEventListener('click', ()=>openGoalEditor(g.id));
+    panel.appendChild(tip);
+  });
+}
+
+// ── DROP ON CHART ─────────────────────────────────────
+function onDropChart(e, panel){
+  e.preventDefault();
+  panel.style.background='';
+  if(!dragGoal) return;
+  const rect=panel.getBoundingClientRect();
+  const canvas=document.getElementById('goalsCanvas');
+  const PAD=canvas._pad||{left:40,right:40,top:30,bottom:50};
+  const CW=canvas._cw||(canvas.width-80);
+  const relX=e.clientX-rect.left-PAD.left;
+  const fracX=Math.max(0,Math.min(1,relX/CW));
+  const START_AGE=state.currentAge||32;
+  const END_AGE=100;
+  const dropAge=Math.round(START_AGE+fracX*(END_AGE-START_AGE));
+  const currentYear=new Date().getFullYear();
+  const dropYear=currentYear+(dropAge-START_AGE);
+
+  const newGoal={...dragGoal, id:dragGoal.id+Date.now(), year:dropYear};
+  state.timelineGoals.push(newGoal);
+  dragGoal=null;
+  saveState();
+  drawGoalsChart();
+  renderGoalPins();
+  updateTlStats();
+  openGoalEditor(newGoal.id);
+}
+
+function removeTimelineGoal(id){
+  state.timelineGoals=state.timelineGoals.filter(g=>g.id!==id);
+  if(activeGoalId===id){ activeGoalId=null; resetGoalEditor(); }
+  saveState(); drawGoalsChart(); renderGoalPins(); updateTlStats();
+}
+
+function updateTlStats(){
+  const goals=state.timelineGoals;
+  document.getElementById('tlTotalGoals').textContent=goals.length;
+  const total=goals.reduce((a,g)=>a+g.budget*100000,0);
+  document.getElementById('tlTotalBudget').textContent='₹'+(total/100000).toFixed(0)+'L';
+  if(goals.length){
+    const next=[...goals].sort((a,b)=>a.year-b.year)[0];
+    document.getElementById('tlNextMile').textContent='Year '+next.year+' · '+next.name;
+  } else {
+    document.getElementById('tlNextMile').textContent='--';
+  }
+}
+
+// ── GOAL EDITOR ───────────────────────────────────────
+function openGoalEditor(id){
+  activeGoalId=id;
+  const g=state.timelineGoals.find(x=>x.id===id);
+  if(!g) return;
+  document.getElementById('geTitle').textContent='Edit milestone';
+  document.getElementById('geHint').textContent='Update details and save your milestone.';
+
+  // Determine field layout by goal type
+  const isTravelType = g.type==='travel';
+  const isEducation  = g.type==='education';
+
+  let extraFields='';
+  if(isTravelType){
+    extraFields=`
+    <div class="form-group">
+      <label>Annual Budget for Travel (Lakhs)</label>
+      <input type="number" id="geB" value="${g.budget}" min="0" oninput="liveUpdateGoal('${id}','budget',+this.value)"/>
+    </div>
+    <div class="form-group">
+      <label>Start Year</label>
+      <input type="number" id="geY" value="${g.year}" min="2025" max="2070" oninput="liveUpdateGoal('${id}','year',+this.value)"/>
+    </div>
+    <div class="form-group">
+      <label>End Year</label>
+      <input type="number" id="geEnd" value="${g.endYear||g.year+16}" min="2025" max="2080" oninput="liveUpdateGoal('${id}','endYear',+this.value)"/>
+    </div>`;
+  } else if(isEducation){
+    extraFields=`
+    <div class="form-group">
+      <label>College Admission Year</label>
+      <input type="number" id="geY" value="${g.year}" min="2025" max="2070" oninput="liveUpdateGoal('${id}','year',+this.value)"/>
+    </div>
+    <div class="form-group">
+      <label>Fee Budget as of today (Lakhs)</label>
+      <input type="number" id="geB" value="${g.budget}" min="0" oninput="liveUpdateGoal('${id}','budget',+this.value)"/>
+    </div>`;
+  } else {
+    extraFields=`
+    <div class="form-group">
+      <label>Target Year</label>
+      <input type="number" id="geY" value="${g.year}" min="2025" max="2070" oninput="liveUpdateGoal('${id}','year',+this.value)"/>
+    </div>
+    <div class="form-group">
+      <label>Budget as of today (Lakhs)</label>
+      <input type="number" id="geB" value="${g.budget}" min="0" oninput="liveUpdateGoal('${id}','budget',+this.value)"/>
+    </div>`;
+  }
+
+  document.getElementById('goalEditorContent').innerHTML=`
+  <div class="ge-form-grid">
+    <div class="form-group">
+      <label>Goal name</label>
+      <input type="text" id="geN" value="${g.name}" oninput="liveUpdateGoal('${id}','name',this.value)"/>
+    </div>
+    <div class="form-group">
+      <label>Icon</label>
+      <input type="text" id="geI" value="${g.icon}" maxlength="2"
+        style="font-size:20px;text-align:center"
+        oninput="liveUpdateGoal('${id}','icon',this.value)"/>
+    </div>
+    ${extraFields}
+  </div>
+  <div class="ge-actions">
+    <button class="btn btn-primary" onclick="saveGoalEdits('${id}')">Save Goal</button>
+    <button class="btn btn-ghost" onclick="resetGoalEditor()">Cancel</button>
+    <button class="btn-delete-text" onclick="removeTimelineGoal('${id}')">Delete</button>
+  </div>`;
+}
+
+function liveUpdateGoal(id,field,val){
+  const g=state.timelineGoals.find(x=>x.id===id);
+  if(!g) return;
+  g[field]=val;
+  // Update pin label live
+  const pin=document.getElementById('pin-'+id);
+  if(pin){
+    pin.querySelector('.pin-name').textContent=g.name;
+    pin.querySelector('.pin-meta').textContent='Year '+g.year+' · ₹'+g.budget+'L';
+  }
+  updateTlStats();
+}
+
+function saveGoalEdits(id){
+  saveState();
+  drawGoalsChart();
+  renderGoalPins();
+  updateTlStats();
+  resetGoalEditor();
+}
+
+function resetGoalEditor(){
+  activeGoalId=null;
+  document.getElementById('geTitle').textContent='Add a milestone';
+  document.getElementById('geHint').textContent='Select a goal to edit or drag a new one';
+  document.getElementById('goalEditorContent').innerHTML=`<div style="color:var(--muted);font-size:13px;padding:8px 0">Drag a goal from the library onto the chart to begin.</div>`;
+}
+
+function addCustomGoal(){
+  const name=document.getElementById('cgName').value.trim();
+  const icon=document.getElementById('cgIcon').value||'🌟';
+  const year=+document.getElementById('cgYear').value||2030;
+  const budget=+document.getElementById('cgBudget').value||10;
+  if(!name) return;
+  state.goalLibrary.push({id:'custom-'+Date.now(), icon, name, year, budget, type:'custom'});
+  saveState(); renderGoalLibrary();
+  closeModal('customGoalModal');
+}
+
+// ═══════════════════════════════════════════════════════
+// FIRE PROJECTIONS
+// ═══════════════════════════════════════════════════════
+function renderFire(){
+  syncFireSliders();
+  updateFire();
+}
+
+function syncFireSliders(){
+  const f=state.fire;
+  setSlider('roiSlider','roiVal', f.roi);
+  setSlider('inflationSlider','inflationVal', f.inflation);
+  setSlider('crashSlider','crashVal', f.crashImpact);
+  setSlider('gapYears','gapYearsVal', f.gapYears);
+  setSlider('incomeLoss','incomeLossVal', f.incomeLoss);
+  document.getElementById('medicalExpense').value=f.medical;
+  document.getElementById('otherExpense').value=f.other;
+}
+
+function setSlider(sliderId, valId, val){
+  document.getElementById(sliderId).value=val;
+  document.getElementById(valId).textContent=val;
+}
+
+function updateFire(){
+  const roi=+document.getElementById('roiSlider').value;
+  const inf=+document.getElementById('inflationSlider').value;
+  const crash=+document.getElementById('crashSlider').value;
+  const gap=+document.getElementById('gapYears').value;
+  const loss=+document.getElementById('incomeLoss').value;
+  const med=+document.getElementById('medicalExpense').value;
+  const oth=+document.getElementById('otherExpense').value;
+
+  document.getElementById('roiVal').textContent=roi;
+  document.getElementById('inflationVal').textContent=inf;
+  document.getElementById('crashVal').textContent=crash;
+  document.getElementById('gapYearsVal').textContent=gap;
+  document.getElementById('incomeLossVal').textContent=loss;
+
+  state.fire={roi,inflation:inf,crashImpact:crash,gapYears:gap,incomeLoss:loss,medical:med,other:oth};
+  saveState();
+
+  // FIRE calculations
+  const annualExpenses = calcExpenses();
+  const realROI = (roi - inf) / 100;
+  const fiCorpus = annualExpenses / 0.04; // 4% rule
+  const extraExpenses = (med + oth) * 100000;
+  const totalCorpus = fiCorpus + extraExpenses;
+
+  const annualSavings = Math.max(0, calcNetSavings() - (gap>0 ? annualExpenses*(gap/30) : 0));
+  let years = 0;
+  if(annualSavings > 0 && realROI >= 0){
+    years = Math.log(1 + totalCorpus*realROI/annualSavings) / Math.log(1+realROI);
+    years = Math.round(years);
+  } else { years = 30; }
+  years = Math.max(1, Math.min(50, years));
+
+  // success probability (Monte Carlo simplified)
+  const prob = Math.max(20, Math.min(99, 99 - crash*0.8 - gap*2 - (inf>8?10:0)));
+
+  document.getElementById('fireCorpus').textContent = fmtINR(totalCorpus, true);
+  document.getElementById('fireYears').textContent = years + ' Yrs';
+  document.getElementById('fireProb').textContent = prob + '%';
+
+  drawFireChart(annualSavings, realROI, years, totalCorpus);
+}
+
+function drawFireChart(savings, realROI, targetYrs, corpus){
+  const canvas=document.getElementById('fireChart');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth||340; const H=canvas.offsetHeight||160;
+  canvas.width=W; canvas.height=H;
+  ctx.clearRect(0,0,W,H);
+
+  const T=Math.min(targetYrs+5,40);
+  const maxVal=corpus*1.4;
+
+  // Grid
+  ctx.strokeStyle='#e2e8f0'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=H-20-(H-40)*(i/4);
+    ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(W-10,y); ctx.stroke();
+    ctx.fillStyle='#94a3b8'; ctx.font='10px Plus Jakarta Sans';
+    ctx.fillText(fmtINR(maxVal*(i/4),true),2,y+4);
+  }
+
+  // Paths: optimistic, base, pessimistic
+  const paths=[
+    { mult:1.15, color:'rgba(16,185,129,0.2)', stroke:'rgba(16,185,129,0.7)' },
+    { mult:1.0,  color:'rgba(37,99,235,0.15)', stroke:'#2563eb' },
+    { mult:0.85, color:'rgba(239,68,68,0.1)',  stroke:'rgba(239,68,68,0.5)' }
+  ];
+  paths.forEach(p=>{
+    let v=0;
+    const pts=[];
+    for(let t=0;t<=T;t++){
+      v=v*(1+realROI*p.mult)+savings*p.mult;
+      const x=40+(W-50)*(t/T);
+      const y=H-20-(H-40)*(Math.min(v,maxVal*1.1)/maxVal);
+      pts.push([x,y]);
+    }
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0],H-20);
+    pts.forEach(pt=>ctx.lineTo(pt[0],pt[1]));
+    ctx.lineTo(pts[pts.length-1][0],H-20);
+    ctx.closePath();
+    ctx.fillStyle=p.color; ctx.fill();
+    ctx.beginPath();
+    pts.forEach((pt,i)=>i===0?ctx.moveTo(pt[0],pt[1]):ctx.lineTo(pt[0],pt[1]));
+    ctx.strokeStyle=p.stroke; ctx.lineWidth=2; ctx.stroke();
+  });
+
+  // Target line
+  const ty=H-20-(H-40)*(corpus/maxVal);
+  ctx.beginPath(); ctx.setLineDash([4,4]);
+  ctx.moveTo(40,ty); ctx.lineTo(W-10,ty);
+  ctx.strokeStyle='#f59e0b'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='#92400e'; ctx.font='bold 10px Plus Jakarta Sans';
+  ctx.fillText('FI Target',W-65,ty-4);
+
+  // X axis labels
+  ctx.fillStyle='#94a3b8'; ctx.font='10px Plus Jakarta Sans';
+  for(let t=0;t<=T;t+=5){
+    const x=40+(W-50)*(t/T);
+    ctx.fillText('Y'+t,x-8,H-4);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════════════════════
+// PRIVACY
+// ═══════════════════════════════════════════════════════
+function togglePrivacy(){
+  state.privacy = !state.privacy;
+  document.body.classList.toggle('privacy', state.privacy);
+  document.getElementById('privacyIcon').textContent = state.privacy ? 'visibility_off' : 'visibility';
+  saveState();
+}
+
+// ═══════════════════════════════════════════════════════
+// SORT GOALS
+// ═══════════════════════════════════════════════════════
+function sortGoals(){
+  state.timelineGoals.sort((a,b)=>a.year-b.year);
+  saveState(); renderDashboard();
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT / IMPORT / CLEAR
+// ═══════════════════════════════════════════════════════
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='intelliwealth-backup.json';
+  a.click();
+}
+
+function importData(){
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='.json';
+  inp.onchange=e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        state=JSON.parse(ev.target.result);
+        saveState();
+        renderView(document.querySelector('.view.active').id.replace('view-',''));
+        alert('Data imported successfully!');
+      } catch(err){ alert('Invalid file format.'); }
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
+}
+
+function clearData(){
+  if(!confirm('Clear all data? This cannot be undone.')) return;
+  state=JSON.parse(JSON.stringify(DEFAULT_STATE));
+  saveState();
+  navigate('dashboard');
+}
+
+function savePlan(){
+  saveState();
+  const btn = event.target.closest('.btn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="material-icons-round mi">check</span> Saved!';
+  btn.style.background = 'var(--green)';
+  setTimeout(()=>{ btn.innerHTML=orig; btn.style.background=''; }, 2000);
+}
+
+// ═══════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════
+function getUsers(){ try{ return JSON.parse(localStorage.getItem('iw_users')||'[]'); }catch(e){return [];} }
+function saveUsers(u){ localStorage.setItem('iw_users',JSON.stringify(u)); }
+function getSession(){ try{ return JSON.parse(localStorage.getItem('iw_session')||'null'); }catch(e){return null;} }
+function saveSession(u){ localStorage.setItem('iw_session',JSON.stringify(u)); }
+function clearSession(){ localStorage.removeItem('iw_session'); }
+
+function showSignUp(){
+  document.getElementById('signinPane').style.display='none';
+  document.getElementById('signupPane').style.display='block';
+}
+function showSignIn(){
+  document.getElementById('signupPane').style.display='none';
+  document.getElementById('signinPane').style.display='block';
+}
+
+function doSignIn(){
+  const email=document.getElementById('siEmail').value.trim().toLowerCase();
+  const pass=document.getElementById('siPassword').value;
+  const errEl=document.getElementById('signinError');
+  errEl.classList.remove('show');
+  if(!email||!pass){ errEl.classList.add('show'); return; }
+  const users=getUsers();
+  const user=users.find(u=>u.email===email && u.password===pass);
+  if(!user){ errEl.classList.add('show'); return; }
+  saveSession(user);
+  enterApp(user);
+}
+
+function doSignUp(){
+  const first=document.getElementById('suFirst').value.trim();
+  const last=document.getElementById('suLast').value.trim();
+  const email=document.getElementById('suEmail').value.trim().toLowerCase();
+  const age=+document.getElementById('suAge').value;
+  const income=+document.getElementById('suIncome').value;
+  const pass=document.getElementById('suPassword').value;
+  const errEl=document.getElementById('signupError');
+  errEl.classList.remove('show');
+  if(!first||!email||!pass||pass.length<6){ errEl.textContent='Please fill all fields (password min. 6 chars).'; errEl.classList.add('show'); return; }
+  const users=getUsers();
+  if(users.find(u=>u.email===email)){ errEl.textContent='An account with this email already exists.'; errEl.classList.add('show'); return; }
+  const user={id:'u-'+Date.now(), first, last, email, password:pass, age:age||32, income:income||230000, level:1, xp:0};
+  users.push(user);
+  saveUsers(users);
+  saveSession(user);
+  // Pre-fill income from signup
+  if(income) state.income.salary=income;
+  if(age) state.currentAge=age;
+  saveState();
+  enterApp(user);
+}
+
+function doGoogleAuth(){
+  // Demo: simulate Google sign-in with a mock user
+  const mockUser={id:'google-'+Date.now(), first:'Demo', last:'User', email:'demo@gmail.com', password:'', age:32, income:230000, level:3, xp:3200};
+  const users=getUsers();
+  if(!users.find(u=>u.email===mockUser.email)) users.push(mockUser);
+  saveUsers(users);
+  saveSession(mockUser);
+  enterApp(mockUser);
+}
+
+function enterApp(user){
+  // Update sidebar user info
+  document.getElementById('sidebarUserName').textContent = user.first+(user.last?' '+user.last:'');
+  document.getElementById('sidebarUserLevel').textContent = 'Level '+(user.level||1);
+  document.getElementById('sidebarAvatar').textContent = user.first[0].toUpperCase();
+  document.getElementById('authScreen').classList.remove('show');
+  renderDashboard();
+}
+
+function doSignOut(){
+  clearSession();
+  document.getElementById('authScreen').classList.add('show');
+  showSignIn();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init(){
+  if(state.privacy) document.body.classList.add('privacy');
+  // Check for existing session
+  const session=getSession();
+  if(session){
+    enterApp(session);
+  }
+  // else auth screen already visible
+  window.addEventListener('resize', ()=>{
+    if(document.getElementById('view-fire').classList.contains('active')) updateFire();
+    if(document.getElementById('view-goals').classList.contains('active')){ drawGoalsChart(); renderGoalPins(); }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
